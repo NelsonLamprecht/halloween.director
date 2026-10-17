@@ -1,5 +1,6 @@
-﻿using Meadow;
-using Meadow.Foundation.Relays;
+using System;
+
+using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Peripherals.Relays;
@@ -11,11 +12,10 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers.RelayController
     // <summary>
     // The commands all inverted since we are working with relays that keep the valves closed.
     // </summary>
-    public class RelayController : BaseController, IOnOrOffController
+    public class RelayController : BaseController, IOnOrOffController, IDisposable
     {
         private readonly IMeadowDevice device;
-        private Relay relay;
-        private bool initialized = false;
+        private RelayOutput relay;
 
         public RelayController(Logger logger, IMeadowDevice device) : base(logger)
         {
@@ -24,28 +24,34 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers.RelayController
 
         public void Initialize(IPin devicePin)
         {
-            if (initialized)
+            if (relay != null)
             {
                 return;
             }
-            var outputPort = device.CreateDigitalOutputPort(devicePin, true, OutputType.OpenDrain);
-            relay = new Relay(outputPort, RelayType.NormallyOpen);
 
-            // so port is closed as quickly as possible when board boots up
-            TurnOff();
-            initialized = true;
+            // open is on: the relays keep the valves closed. The output starts off so
+            // the valve is closed as quickly as possible when the board boots up.
+            relay = new RelayOutput(device, devicePin, RelayState.Open);
         }
 
         public void TurnOff()
         {
-            relay.State = RelayState.Closed;
+            Relay.TurnOff();
             Logger.Debug("Relay Is Closed.");
         }
 
         public void TurnOn()
         {
-            relay.State = RelayState.Open;
+            Relay.TurnOn();
             Logger.Debug("Relay Is Open.");
         }
+
+        public void Dispose()
+        {
+            // closes the valve before releasing the pin
+            relay?.Dispose();
+        }
+
+        private RelayOutput Relay => relay ?? throw new InvalidOperationException($"{GetType().Name} is not initialized.");
     }
 }
