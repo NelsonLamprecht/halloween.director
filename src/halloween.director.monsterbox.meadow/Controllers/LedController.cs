@@ -12,7 +12,7 @@ using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
-    internal class LedController : BaseController, IDisposable
+    internal class LedController : BaseController, IOnOrOffController, IDisposable
     {
         private readonly IMeadowDevice device;
 

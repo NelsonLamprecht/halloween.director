@@ -1,4 +1,4 @@
-﻿namespace Halloween.Director.Scarecrow.Meadow.Controllers
+namespace Halloween.Director.Shared.Controllers
 {
     public interface IOnOrOffController
     {
