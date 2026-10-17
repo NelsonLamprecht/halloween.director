@@ -80,5 +80,23 @@ namespace Halloween.Director.Scarecrow.Meadow
             var ledDeviceController = Services.Get<ILEDDeviceController>();
             ledDeviceController.StartBlink(Color.Green);
         }
+
+        public override Task OnShutdown()
+        {
+            Logger.Info("=== Shutting down... ===");
+
+            // relay first, so the valve is closed before the pin is released
+            if (Services.ContainsRegisteredType<RelayController>())
+            {
+                Services.Get<RelayController>().Dispose();
+            }
+
+            if (Services.ContainsRegisteredType<ILEDDeviceController>() && Services.Get<ILEDDeviceController>() is IDisposable led)
+            {
+                led.Dispose();
+            }
+
+            return base.OnShutdown();
+        }
     }
 }
