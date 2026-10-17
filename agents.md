@@ -44,6 +44,7 @@ WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.Automatically
 - **`WatchdogService`**: `Start()` arms it (`DefaultTimeoutSeconds` 15) and starts an independent thread that pets it every `DefaultPetIntervalSeconds` (10), so a slow request handler can't trip it.
 - **`HeartbeatService`**: logs `<time> <ip> (up d.hh:mm:ss)` every `DefaultIntervalSeconds` (30), like the Meadow.Core.Samples `Config_Files` heartbeat. `TestRestartAfterBeats` throws on purpose to test restarts; never set it on a prop.
 - **`MapleService`** + `MapleServiceOptions`: both props listen on Maple's default port `5417` (they run on separate devices) and advertise every 2s. `RequestProcessMode.Parallel`; handlers must keep `IsReusable => false` because Maple keeps per-request state (`QueryString`) on the handler instance. Choose Serial vs Parallel by whether your commands can tolerate concurrency.
+  **Route methods must return `IActionResult` synchronously, never `Task<IActionResult>`.** Maple 2.5.0 only awaits `IActionResult` handlers: for an async one it replies with an empty `200` immediately (so 400/409/500 never reach the client) and swallows exceptions. To wait on async work (the monsterbox `/shake`), block with `.GetAwaiter().GetResult()`; the thread-pool thread and Meadow's lack of a synchronization context make that safe.
 
 ## Logging
 
