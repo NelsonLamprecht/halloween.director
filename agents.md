@@ -122,3 +122,12 @@ dotnet build -f net10.0-android -p:AndroidSdkDirectory=/root/android-sdk -p:Java
 ## Versioning
 
 `src/Directory.Build.props` is the one place for the version (`VersionPrefix`) and the per-build `BuildStamp` (UTC `yyMMdd.HHmm`) and `BuildNumber` (minutes since 2025, the Android versionCode) and the git hash (`+dirty` when uncommitted); it feeds the firmware's `InformationalVersion` (logged at boot by `MeadowBase.ApplyStartupSettings` through `BuildInfo`) and the remote's `ApplicationDisplayVersion`/`ApplicationVersion` (shown in the page titles via `AppVersion`, which reads the same informational version). Don't set versions in the individual csproj files.
+
+## Finding props from the remote
+
+Two ways, both on the remote's Options tab:
+
+- **Broadcast scan:** each prop advertises `<DeviceName>::<ip>` by UDP to 255.255.255.255:17756 every 2 seconds (Maple's own advertisement); the remote listens for 5 seconds. It runs when the tab opens. Some tablets (a Lenovo on ZUI) drop broadcast packets.
+- **Subnet scan:** the remote tries a TCP connection to port 5417 on every address of its own /24 subnet, then asks each one that answers for `GET /info`. No broadcast involved.
+
+`GET /info` is served by every prop from the shared library (`InfoRequestHandler`; Maple picks the handler up because it scans all loaded assemblies): `{"name":"Monsterbox-v1","type":"monsterbox","version":"1.0.0 (build 261017.1742 a3f9c1)"}`. The type is the second argument of `MeadowBase.ApplyStartupSettings`; a new prop passes its own. Don't add per-app copies of this route.

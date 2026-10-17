@@ -101,7 +101,52 @@ namespace Halloween.Director.Remote.ViewModel
             return _manualDeviceAddresses.Contains(server.IpAddress);
         }
 
-        public Command ScanForServersCommand => new Command(async () => await GetServers());
+        // Two ways to find props: listen for their UDP advertisement, or probe the subnet over TCP.
+        public Command ScanBroadcastCommand => new Command(async () => await GetServers());
+
+        public Command ScanSubnetCommand => new Command(async () => await GetServersBySubnet());
+
+        // Asks every address on this device's subnet for the Maple port, then GET /info for who answered. Works
+        // on tablets that drop the UDP broadcast. Adds to HostList without clearing it.
+        public async Task GetServersBySubnet()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+            IsBusy = true;
+
+            try
+            {
+                var addresses = await SubnetProbe.FindOpenAsync(ServerPort);
+                Debug.WriteLine($"Subnet probe: {addresses.Count} address(es) answered on port {ServerPort}: {string.Join(", ", addresses)}");
+
+                var found = await Task.WhenAll(addresses.Select(async address =>
+                {
+                    var info = await DeviceInfoClient.FetchAsync(address, ServerPort);
+                    return new ServerModel { Name = $"{info?.Name ?? "Meadow device"} ({address})", IpAddress = address };
+                }));
+
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    foreach (var server in found)
+                    {
+                        if (!HostList.Any(h => string.Equals(h.IpAddress, server.IpAddress, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            HostList.Add(server);
+                        }
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
+            finally
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => IsBusy = false);
+            }
+        }
 
         public async Task GetServers()
         {

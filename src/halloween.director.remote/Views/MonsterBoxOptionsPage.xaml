@@ -103,14 +103,23 @@
                                 Command="{Binding AddManualScarecrowDeviceCommand}"
                             />
                         </Grid>
-                        <!--The scan also runs whenever this tab appears; this repeats it
-                            (the props broadcast every 2s and the scan listens for 5s).-->
-                        <Button
-                            Grid.Row="5"
-                            Text="Scan for devices"
-                            Style="{StaticResource FxButtonStyle}"
-                            Command="{Binding ScanForServersCommand}"
-                        />
+                        <!--The broadcast scan also runs whenever this tab appears (the props broadcast every 2s and
+                            it listens for 5s). The subnet scan asks every address on this network instead, for
+                            tablets that drop the broadcast.-->
+                        <Grid Grid.Row="5" ColumnDefinitions="*,*" ColumnSpacing="6">
+                            <Button
+                                Grid.Column="0"
+                                Text="Scan (broadcast)"
+                                Style="{StaticResource FxButtonStyle}"
+                                Command="{Binding ScanBroadcastCommand}"
+                            />
+                            <Button
+                                Grid.Column="1"
+                                Text="Scan (subnet)"
+                                Style="{StaticResource FxButtonStyle}"
+                                Command="{Binding ScanSubnetCommand}"
+                            />
+                        </Grid>
                     </Grid>
                 </Border>
                 <Border

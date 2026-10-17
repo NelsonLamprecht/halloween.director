@@ -24,7 +24,7 @@ namespace Halloween.Director.Scarecrow.Meadow
         {
             Logger.Info("=== Initializing hardware... ===");
 
-            ApplyStartupSettings(DefaultDeviceName);
+            ApplyStartupSettings(DefaultDeviceName, "scarecrow");
 
             var diagnosticsService = Services.Create<DiagnosticsService>();
             diagnosticsService.OutputMeadowOSInfo();

@@ -123,10 +123,16 @@ namespace Halloween.Director.Shared
 
         // Applies app.config.yaml's App settings: App.StartupDetails (default true) turns the
         // startup banners and detail lines on or off, and App.DeviceName names the device (the
-        // name Maple advertises), falling back to defaultDeviceName if the setting is missing.
-        protected void ApplyStartupSettings(string defaultDeviceName)
+        // name Maple advertises), falling back to defaultDeviceName if the setting is missing. deviceType (such as
+        // "monsterbox") and the version are what GET /info reports.
+        protected void ApplyStartupSettings(string defaultDeviceName, string deviceType)
         {
-            Logger.Info($"{GetType().Assembly.GetName().Name} {BuildInfo.Describe(GetType().Assembly)}");
+            var version = BuildInfo.Describe(GetType().Assembly);
+            Logger.Info($"{GetType().Assembly.GetName().Name} {version}");
+
+            // what GET /info reports
+            DeviceInfo.Type = deviceType;
+            DeviceInfo.Version = version;
 
             if (Settings.TryGetValue("App.StartupDetails", out var startupDetails) && bool.TryParse(startupDetails, out var enabled))
             {

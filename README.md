@@ -40,7 +40,7 @@ The build produces a plain APK (`AndroidPackageFormat` is `apk` for Android in t
 
 Uninstall: `adb uninstall com.nlamprecht.halloween.director.remote`.
 
-The tablet must be on the same WiFi network as the props.
+The tablet must be on the same WiFi network as the props. On the remote's Options tab, **Scan (broadcast)** listens for the props' UDP advertisement (it also runs when the tab opens); **Scan (subnet)** asks every address on the tablet's network for the prop's `GET /info`, for tablets that drop the broadcast. Typing an address always works.
 
 ## Version and build number
 
