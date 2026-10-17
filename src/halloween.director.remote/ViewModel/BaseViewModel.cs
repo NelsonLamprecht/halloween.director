@@ -25,12 +25,10 @@ namespace Halloween.Director.Remote.ViewModel
 
         public MapleClient client { get; private set; }
 
-        int _serverPort;
-        public int ServerPort
-        {
-            get => _serverPort;
-            set { _serverPort = value; OnPropertyChanged(nameof(ServerPort)); }
-        }
+        // each prop's Maple server listens on its own port (see the MaplePort in each
+        // firmware's MeadowApp), so both can run on one network
+        protected const int MonsterBoxPort = 5417;
+        protected const int ScarecrowPort = 5418;
 
         bool _isBusy;
         public bool IsBusy
@@ -47,8 +45,6 @@ namespace Halloween.Director.Remote.ViewModel
 
             //HostList.Add(new ServerModel() { Name="Meadow (192.168.1.73)", IpAddress="192.168.1.73" });
             //HostList.Add(new ServerModel() { Name = "Meadow (192.168.1.74)", IpAddress = "192.168.1.74" });
-
-            ServerPort = 5417;
 
             // MapleClient.ListenTimeout has a protected setter as of Maple.Client 0.96.0,
             // so the timeout must be supplied via the constructor instead of an initializer.

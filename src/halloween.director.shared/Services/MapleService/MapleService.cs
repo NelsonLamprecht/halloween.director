@@ -7,20 +7,26 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-using Halloween.Director.Shared.Services;
-
-namespace Halloween.Director.Monsterbox.Meadow.Services.MapleService
+namespace Halloween.Director.Shared.Services.MapleService
 {
-    internal class MapleService : BaseService
+    /// <summary>
+    /// Runs the Maple HTTP server on the network adapter's current IP and advertises it.
+    /// Maple finds the request handlers by scanning the loaded assemblies, so the app's
+    /// own <c>RequestHandlerBase</c> classes are picked up even though the server is
+    /// created here.
+    /// </summary>
+    public class MapleService : BaseService
     {
         private readonly IMeadowDevice device;
         private readonly INetworkAdapter networkAdapter;
+        private readonly MapleServiceOptions options;
         private MapleServer mapleServer;
 
-        public MapleService(Logger logger, IMeadowDevice device, INetworkAdapter networkAdapter) : base(logger)
+        public MapleService(Logger logger, IMeadowDevice device, INetworkAdapter networkAdapter, MapleServiceOptions options) : base(logger)
         {
             this.device = device;
             this.networkAdapter = networkAdapter;
+            this.options = options;
         }
 
         // the address the running server is bound to, or null if it isn't running
@@ -35,13 +41,11 @@ namespace Halloween.Director.Monsterbox.Meadow.Services.MapleService
             var address = networkAdapter.IpAddress;
             mapleServer = new MapleServer(
                 address,
-                port: 5417,
+                port: options.Port,
                 advertise: true,
-                // Parallel so a /sound isn't queued behind a /shake that holds its
-                // request open until the shake finishes; see AGENTS.md for why this is safe
-                processMode: RequestProcessMode.Parallel)
+                processMode: options.ProcessMode)
             {
-                AdvertiseIntervalMs = 5000, // every 5 seconds
+                AdvertiseIntervalMs = options.AdvertiseIntervalMs,
                 DeviceName = device.Information.DeviceName
             };
 

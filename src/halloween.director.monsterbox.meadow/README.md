@@ -14,7 +14,7 @@ Architecture, patterns and the reasons behind them are in [AGENTS.md](agents.md)
 
 ## HTTP API
 
-The Maple server listens on port `5417` and advertises itself over UDP. Requests are `POST`.
+The Maple server listens on port `5417` and advertises itself over UDP (the scarecrow uses `5418`, so both can run on one network). Requests are `POST`.
 
 | Endpoint | Parameters | Responses |
 | --- | --- | --- |

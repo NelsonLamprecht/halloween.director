@@ -15,7 +15,7 @@ protected ServiceCollection Services { get; } = Resolver.Services;
 
 1. **`Initialize()`** — construct and register every controller/service via `Services.Create<T>()`, then do the hardware-specific `Initialize(...)` calls (e.g. `relayController.Initialize(Device.Pins.D05)`) that actually open ports.
 2. **`Run()`** — start the diagnostics dump, arm the watchdog (`Enable`/`Pet`), kick off `RelayController.Run()`, and set the onboard LED to a "running" blink state.
-3. **`NetworkConnected` handler** — anything needing a live IP address (the Maple HTTP server) starts here, not in `Initialize()`. Calls `NetworkService.NetworkIsConnected(sender)` then `MapleService.Run()`.
+3. **`NetworkConnected` handler** — anything needing a live IP address (the Maple HTTP server) starts here, not in `Initialize()`. Calls `NetworkService.NetworkIsConnected(sender)` then `MapleService.Run()` (the shared `Halloween.Director.Shared` service; it only restarts when the IP changed, like the monsterbox). Scarecrow listens on port `5418` and the monsterbox on `5417`, set via `MapleServiceOptions`.
 
 WiFi connection is **not** hand-rolled — `meadow.config.yaml`'s `Coprocessor.AutomaticallyStartNetwork`/`AutomaticallyReconnect` (plus the fuller `Network:`/NTP/DNS block also present in this repo's config — copy this file's shape for new projects, it's more complete than `meadow_monsterbox`'s) and a gitignored `wifi.config.yaml` (credentials) handle it.
 

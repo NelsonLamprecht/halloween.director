@@ -91,8 +91,8 @@ namespace Halloween.Director.Remote.ViewModel
         public MonsterBoxControllerViewModel() : base()
         {
             IsBusy = false;
-            SendMonsterBoxCommand = new Command(async (obj) => await SendMeadowCommand(MonsterBoxDevice?.IpAddress, obj as string));
-            SendScarecrowCommand = new Command(async (obj) => await SendMeadowCommand(ScareCrowDevice?.IpAddress, obj as string));
+            SendMonsterBoxCommand = new Command(async (obj) => await SendMeadowCommand(MonsterBoxDevice?.IpAddress, MonsterBoxPort, obj as string));
+            SendScarecrowCommand = new Command(async (obj) => await SendMeadowCommand(ScareCrowDevice?.IpAddress, ScarecrowPort, obj as string));
 
             AddManualMonsterBoxDeviceCommand = new Command(() =>
             {
@@ -121,7 +121,7 @@ namespace Halloween.Director.Remote.ViewModel
                 || string.Equals(server.IpAddress, ScareCrowDevice?.IpAddress, StringComparison.OrdinalIgnoreCase);
         }
 
-        async Task SendMeadowCommand(string? hostAddress, string? command)
+        async Task SendMeadowCommand(string? hostAddress, int port, string? command)
         {
             if (IsBusy || string.IsNullOrEmpty(hostAddress) || string.IsNullOrEmpty(command))
             {
@@ -146,7 +146,7 @@ namespace Halloween.Director.Remote.ViewModel
                                 ["ed"] = EndDelay.ToString(),
                             };
                             var complexCommand = RequestUriUtil.GetUriWithQueryString(command, query).ToLower();
-                            response = await PostHttpDataWithCommand(hostAddress,complexCommand);
+                            response = await PostHttpDataWithCommand(hostAddress, port, complexCommand);
                             break;
                         }
                     case MonsterBoxCommands.Werewolf:
@@ -167,7 +167,7 @@ namespace Halloween.Director.Remote.ViewModel
                             if (query != null)
                             {
                                 var complexCommand = RequestUriUtil.GetUriWithQueryString("sound", query).ToLower();
-                                response = await PostHttpDataWithCommand(hostAddress,complexCommand);
+                                response = await PostHttpDataWithCommand(hostAddress, port, complexCommand);
                             }
                             else
                             {
@@ -177,7 +177,7 @@ namespace Halloween.Director.Remote.ViewModel
                         }
                     default:
                         {
-                            response = await PostHttpDataWithCommand(hostAddress,command);
+                            response = await PostHttpDataWithCommand(hostAddress, port, command);
                             break;
                         }
                 }
@@ -290,11 +290,11 @@ namespace Halloween.Director.Remote.ViewModel
             }
         }
 
-        private async Task<bool> PostHttpDataWithCommand(string hostAddress, string command)
+        private async Task<bool> PostHttpDataWithCommand(string hostAddress, int port, string command)
         {
             bool response;
 
-            response = await client.PostAsync(hostAddress, ServerPort, command, string.Empty);
+            response = await client.PostAsync(hostAddress, port, command, string.Empty);
 
             return response;
         }
