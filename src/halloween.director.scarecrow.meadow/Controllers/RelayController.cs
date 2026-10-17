@@ -37,13 +37,13 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
         public void TurnOff()
         {
             Relay.TurnOff();
-            Logger.Debug("Relay Is Closed.");
+            Logger.Info("Relay Is Closed.");
         }
 
         public void TurnOn()
         {
             Relay.TurnOn();
-            Logger.Debug("Relay Is Open.");
+            Logger.Info("Relay Is Open.");
         }
 
         public void Dispose()

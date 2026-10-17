@@ -52,7 +52,7 @@ namespace Halloween.Director.Scarecrow.Meadow
         {
             try
             {
-                Logger.Debug($"+Run");
+                Logger.Info("Running...");
 
                 var diagnostics = Services.Get<DiagnosticsService>();
                 diagnostics.OutputDeviceInfo();
