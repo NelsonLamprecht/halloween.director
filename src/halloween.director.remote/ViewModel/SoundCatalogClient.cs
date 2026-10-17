@@ -21,7 +21,7 @@ namespace Halloween.Director.Remote.ViewModel
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(3);
 
         /// <summary>
-        /// The sounds shown until (or if) the monsterbox answers: the list this app shipped with, which
+        /// The sounds shown only if the monsterbox can't be reached: the list this app shipped with, which
         /// matches the monsterbox's default Sounds section (tools\Copy-SoundsToCard.ps1 prints the lines to paste here when the list changes).
         /// </summary>
         public static IReadOnlyList<SoundEntry> Defaults { get; } = new[]

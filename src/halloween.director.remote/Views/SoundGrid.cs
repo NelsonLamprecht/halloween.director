@@ -51,7 +51,24 @@ namespace Halloween.Director.Remote.Views
             Rebuild();
         }
 
-        private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e) => Rebuild();
+        private bool _rebuildQueued;
+
+        // ApplySounds adds the sounds one at a time; queue a single rebuild for the whole batch instead of
+        // one per Add (which rebuilt every button each time and made the pane slow to appear).
+        private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            if (_rebuildQueued)
+            {
+                return;
+            }
+
+            _rebuildQueued = true;
+            Dispatcher.Dispatch(() =>
+            {
+                _rebuildQueued = false;
+                Rebuild();
+            });
+        }
 
         // call on the main thread (the view model raises collection changes there)
         internal void Rebuild()

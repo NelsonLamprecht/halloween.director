@@ -61,7 +61,7 @@ namespace Halloween.Director.Remote.ViewModel
         }
 
         // Sound buttons, built from the monsterbox's GET /sounds (the SoundCatalog in its
-        // app.config.yaml). Until it answers, or if it can't be reached, the built-in list is shown.
+        // app.config.yaml). Empty until it answers; if it can't be reached, the built-in list is shown.
         public ObservableCollection<SoundItem> FxSounds { get; } = new ObservableCollection<SoundItem>();
 
         public ObservableCollection<SoundItem> CreatureSounds { get; } = new ObservableCollection<SoundItem>();
@@ -107,8 +107,6 @@ namespace Halloween.Director.Remote.ViewModel
             IsBusy = false;
             SendMonsterBoxCommand = new Command(async (obj) => await SendMeadowCommand(MonsterBoxDevice?.IpAddress, obj as string));
             SendScarecrowCommand = new Command(async (obj) => await SendMeadowCommand(ScareCrowDevice?.IpAddress, obj as string));
-
-            ApplySounds(SoundCatalogClient.Defaults);
 
             AddManualMonsterBoxDeviceCommand = new Command(() =>
             {
@@ -219,10 +217,17 @@ namespace Halloween.Director.Remote.ViewModel
                 return;
             }
 
+            var watch = Stopwatch.StartNew();
             var sounds = await SoundCatalogClient.FetchAsync(hostAddress, ServerPort);
+            Debug.WriteLine($"GET /sounds from {hostAddress} took {watch.ElapsedMilliseconds} ms ({(sounds == null ? "no list" : sounds.Count + " sounds")}).");
             if (sounds == null)
             {
-                Debug.WriteLine($"No sound list from {hostAddress}; keeping the current buttons.");
+                // Couldn't get the list: show the built-in one so the panel isn't empty (unless a real list is already showing).
+                if (FxSounds.Count + CreatureSounds.Count == 0)
+                {
+                    await MainThread.InvokeOnMainThreadAsync(() => ApplySounds(SoundCatalogClient.Defaults));
+                }
+
                 return;
             }
 
