@@ -6,9 +6,9 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Foundation.Web.Maple.Routing;
 using Meadow.Logging;
 
-using Halloween.Director.Scarecrow.Meadow.Controllers.RelayController;
+using ScarecrowRelayController = Halloween.Director.Scarecrow.Meadow.Controllers.RelayController.RelayController;
 
-namespace Halloween.Director.Scarecrow.Meadow
+namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     public class ControllerRequestHandler : RequestHandlerBase
     {
@@ -25,11 +25,11 @@ namespace Halloween.Director.Scarecrow.Meadow
             }
         }
 
-        private RelayController RelayController
+        private ScarecrowRelayController RelayController
         {
             get
             {
-                return Resolver.Services.Get<RelayController>();
+                return Resolver.Services.Get<ScarecrowRelayController>();
             }
         }
 

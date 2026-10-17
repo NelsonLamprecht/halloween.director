@@ -39,7 +39,7 @@ Every controller/service constructor declares its dependencies; `Services.Create
 
 **Ordering matters**: `RelayController` is created before `NetworkService`/`MapleService`; the WiFi adapter is `Add`ed before anything that takes `INetworkAdapter` in its constructor is `Create`d.
 
-**The one sanctioned exception**: `Services/MapleService/ControllerRequestHandler.cs` (`: RequestHandlerBase`) is instantiated by the Maple framework itself, outside this DI container, so it correctly reaches into the global registry directly (`Resolver.Services.Get<RelayController>()`). Don't "fix" this to use constructor injection — it structurally can't receive one.
+**The one sanctioned exception**: `Controllers/ControllerRequestHandler.cs` (`: RequestHandlerBase`) is instantiated by the Maple framework itself, outside this DI container, so it correctly reaches into the global registry directly (`Resolver.Services.Get<RelayController>()`). Don't "fix" this to use constructor injection — it structurally can't receive one.
 
 ## The `IMeadowDevice` vs. concrete device-type split
 
