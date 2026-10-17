@@ -32,14 +32,14 @@ namespace Halloween.Director.Shared.Controllers
                 return;
             }
 
-            Logger.TraceSection($"{GetType().Name}.Initialize", () =>
+            Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
                 led = new OnboardRgbLed(Logger, device);
                 led.SetColor(Color.Red);
 
                 initialized = true;
 
-                Logger.Trace($"Onboard LED available: {led.IsAvailable}. Red until the app is ready.");
+                Logger.StartupDetail($"Onboard LED available: {led.IsAvailable}. Red until the app is ready.");
             });
 
             Logger.Info($"{GetType().Name} is initialized.");

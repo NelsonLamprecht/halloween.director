@@ -33,14 +33,14 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return;
             }
 
-            Logger.TraceSection($"{GetType().Name}.Initialize", () =>
+            Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
                 // closed is on: the pneumatics keep their valves closed
                 left = new RelayOutput(device, leftPin, RelayState.Closed);
                 right = new RelayOutput(device, rightPin, RelayState.Closed);
                 initialized = true;
 
-                Logger.Trace($"Left relay on {leftPin.Name}, right relay on {rightPin.Name}; both start off.");
+                Logger.StartupDetail($"Left relay on {leftPin.Name}, right relay on {rightPin.Name}; both start off.");
             });
 
             Logger.Info($"{GetType().Name} is initialized.");

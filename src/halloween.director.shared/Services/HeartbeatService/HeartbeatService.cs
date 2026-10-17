@@ -38,7 +38,7 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
 
         public override Task Run()
         {
-            Logger.TraceSection("HeartbeatService.Run", () =>
+            Logger.StartupSection("HeartbeatService.Run", () =>
             {
                 if (cancellationTokenSource == null)
                 {
@@ -47,7 +47,7 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
                     _ = Task.Run(() => BeatAsync(token));
                 }
 
-                Logger.Trace($"Logging a heartbeat every {Interval.TotalSeconds}s.");
+                Logger.StartupDetail($"Logging a heartbeat every {Interval.TotalSeconds}s.");
             });
 
             return base.Run();

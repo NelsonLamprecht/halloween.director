@@ -10,18 +10,24 @@ namespace Halloween.Director.Shared
 
         protected ServiceCollection Services { get; } = Resolver.Services;
 
-        public MeadowBase()
+        public MeadowBase() { }
+
+        // Applies app.config.yaml's App settings: App.StartupDetails (default true) turns the
+        // startup banners and detail lines on or off, and App.DeviceName names the device (the
+        // name Maple advertises), falling back to defaultDeviceName if the setting is missing.
+        protected void ApplyStartupSettings(string defaultDeviceName)
         {
-#if DEBUG
-            // Debug builds log at Trace so the TraceSection startup banners show. Release
-            // builds keep the level from app.config.yaml (Logging.LogLevel.Default).
-            Logger.LogLevel = LogLevel.Trace;
-#endif
+            if (Settings.TryGetValue("App.StartupDetails", out var startupDetails) && bool.TryParse(startupDetails, out var enabled))
+            {
+                LoggerExtensions.StartupDetails = enabled;
+            }
+
+            ApplyDeviceName(defaultDeviceName);
         }
 
         // Names the device from app.config.yaml's App.DeviceName (the name Maple advertises),
         // falling back to defaultName if the setting is missing.
-        protected void ApplyDeviceName(string defaultName)
+        private void ApplyDeviceName(string defaultName)
         {
             if (Settings.TryGetValue("App.DeviceName", out var configuredDeviceName) && !string.IsNullOrWhiteSpace(configuredDeviceName))
             {

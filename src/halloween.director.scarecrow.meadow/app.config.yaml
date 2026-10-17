@@ -10,4 +10,7 @@ Logging:
 # Custom app settings. These flatten to dot-notated keys in App.Settings,
 # e.g. this resolves to Settings["App.DeviceName"].
 App:
+    # Startup banners and extra detail lines in the log. true while developing; set to false
+    # for the production build to log only the essentials.
+    StartupDetails: true
     DeviceName: Scarecrow-v1

@@ -71,7 +71,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return;
             }
 
-            Logger.TraceSection($"{GetType().Name}.Initialize", () =>
+            Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
                 if (device is F7FeatherV1 f7Device)
                 {
@@ -86,7 +86,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
                 initialized = true;
 
-                Logger.Trace($"MP3 player on {SerialPortName}, volume 30.");
+                Logger.StartupDetail($"MP3 player on {SerialPortName}, volume 30.");
             });
 
             Logger.Info($"{GetType().Name} is initialized.");

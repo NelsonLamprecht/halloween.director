@@ -30,12 +30,12 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
                 return;
             }
 
-            Logger.TraceSection($"{GetType().Name}.Initialize", () =>
+            Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
                 // open is on: the relays keep the valves closed. The output starts off so
                 // the valve is closed as quickly as possible when the board boots up.
                 relay = new RelayOutput(device, devicePin, RelayState.Open);
-                Logger.Trace($"Relay on {devicePin.Name}; starts off (valve closed).");
+                Logger.StartupDetail($"Relay on {devicePin.Name}; starts off (valve closed).");
             });
 
             Logger.Info($"{GetType().Name} is initialized.");
