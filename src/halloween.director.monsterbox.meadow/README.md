@@ -39,21 +39,22 @@ The MP3 module (YX5300) plays its SD card **by copy order**: the Nth file copied
 
 ```yaml
 Sounds:
-    Werewolf: 1
-    Raven: 13
+    Werewolf: 0
+    Raven: 7
+    Creature 1: 8
 ```
 
-Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). `GET /sounds` returns the list as JSON (`[{"number":1,"name":"Werewolf"},...]`) so the remote can build its buttons from it (it shows its built-in list until a monsterbox answers, and keeps it if one can't be reached; names starting with `Creature` go in the CREATURES section, everything else under FX). File number 0 (the first file on the card) is not used today.
+Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). Number the sounds `0, 1, 2, ...` with no gaps, FX first and the creatures last. `GET /sounds` returns the list as JSON (`[{"number":0,"name":"Werewolf"},...]`) so the remote can build its buttons from it (it shows its built-in list until a monsterbox answers, and keeps it if one can't be reached; names starting with `Creature` go in the CREATURES section, everything else under FX). If you change a number, also update the remote's built-in list (`SoundCatalogClient.Defaults`).
 
-**Naming the files on the card:** `NNN_Name.mp3`, where `NNN` is the file number from the config, zero-padded to three digits, and `Name` is the sound name with spaces as underscores: `001_Werewolf.mp3`, `012_Metal_Hit.mp3`, `013_Raven.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied.
+**Naming the files on the card:** `NNN_Name.mp3`, where `NNN` is the file number from the config, zero-padded to three digits, and `Name` is the sound name with spaces as underscores: `000_Werewolf.mp3`, `006_Metal_Hit.mp3`, `007_Raven.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied.
 
 **Preparing a card** with `tools\Copy-SoundsToCard.ps1` (Windows PowerShell or PowerShell 7):
 
-1. Put the originals in one folder, named after the sound (`Raven.mp3`, `door_creek.mp3`; case, spaces, `_` and `-` are ignored) or already `013_anything.mp3`.
+1. Put the originals in one folder, named after the sound (`Raven.mp3`, `door_creek.mp3`; case, spaces, `_` and `-` are ignored) or already `007_anything.mp3`.
 2. Quick-format the card as **FAT32**. The card must be empty: deleting files does not reliably reset the order.
 3. Run it (add `-WhatIf` first to preview):
    ```powershell
-   .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -FillerFile C:\Halloween\Sounds\silence.mp3
+   .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\
    ```
-   `-FillerFile` (a short silent mp3) is copied into any file number missing from the config, which today is number 0. Add a sound by adding a `Name: number` line (the next free number) and re-running it on a freshly formatted card.
+   If the numbers ever have a gap, pass `-FillerFile` (a short silent mp3) and it is copied into each missing number. To add a sound, add a `Name: number` line using the next free number and re-run it on a freshly formatted card.
 4. Eject the card in Windows before pulling it.

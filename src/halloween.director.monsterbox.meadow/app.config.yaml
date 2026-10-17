@@ -17,21 +17,24 @@ App:
 
 # The sounds on the MP3 module's SD card: "Name: file number". The module can't report file
 # names, so GET /sounds returns this list and the remote builds its buttons from it. The file
-# number is what /sound?filenumber= sends (number 13 = the 14th file copied to the card; see
-# tools\Copy-SoundsToCard.ps1). The line format matters: Meadow's config parser only reads
-# plain "key: value" lines, so no lists, no { } and no ':' in a name.
-# File number 0 (the first file on the card) is not used by the remote today.
+# number is what /sound?filenumber= sends: number N is the (N + 1)th file copied to the card
+# (see tools\Copy-SoundsToCard.ps1). Keep the numbers 0, 1, 2, ... with no gaps: FX first, then
+# the creatures. Changing a number means re-copying the card, and the remote's built-in fallback
+# list (SoundCatalogClient.Defaults) should be kept in step.
+# The line format matters: Meadow's config parser only reads plain "key: value" lines, so no
+# lists, no { } and no ':' in a name. The order of the lines here doesn't matter: /sounds and
+# the card script both sort by number.
 Sounds:
-    Werewolf: 1
-    Laugh: 2
-    Chains: 3
-    Heartbeat: 4
-    Dragon Growl: 5
-    Door creek: 6
-    Creature 1: 7
-    Creature 2: 8
-    Creature 3: 9
-    Creature 4: 10
-    Creature 5: 11
-    Metal Hit: 12
-    Raven: 13
+    Werewolf: 0
+    Laugh: 1
+    Chains: 2
+    Heartbeat: 3
+    Dragon Growl: 4
+    Door creek: 5
+    Metal Hit: 6
+    Raven: 7
+    Creature 1: 8
+    Creature 2: 9
+    Creature 3: 10
+    Creature 4: 11
+    Creature 5: 12

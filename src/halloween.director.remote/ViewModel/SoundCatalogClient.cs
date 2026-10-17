@@ -26,19 +26,19 @@ namespace Halloween.Director.Remote.ViewModel
         /// </summary>
         public static IReadOnlyList<SoundEntry> Defaults { get; } = new[]
         {
-            new SoundEntry(1, "Werewolf"),
-            new SoundEntry(2, "Laugh"),
-            new SoundEntry(3, "Chains"),
-            new SoundEntry(4, "Heartbeat"),
-            new SoundEntry(5, "Dragon Growl"),
-            new SoundEntry(6, "Door creek"),
-            new SoundEntry(7, "Creature 1"),
-            new SoundEntry(8, "Creature 2"),
-            new SoundEntry(9, "Creature 3"),
-            new SoundEntry(10, "Creature 4"),
-            new SoundEntry(11, "Creature 5"),
-            new SoundEntry(12, "Metal Hit"),
-            new SoundEntry(13, "Raven"),
+            new SoundEntry(0, "Werewolf"),
+            new SoundEntry(1, "Laugh"),
+            new SoundEntry(2, "Chains"),
+            new SoundEntry(3, "Heartbeat"),
+            new SoundEntry(4, "Dragon Growl"),
+            new SoundEntry(5, "Door creek"),
+            new SoundEntry(6, "Metal Hit"),
+            new SoundEntry(7, "Raven"),
+            new SoundEntry(8, "Creature 1"),
+            new SoundEntry(9, "Creature 2"),
+            new SoundEntry(10, "Creature 3"),
+            new SoundEntry(11, "Creature 4"),
+            new SoundEntry(12, "Creature 5"),
         };
 
         /// <summary>Names starting with this go in the CREATURES section; everything else is FX.</summary>

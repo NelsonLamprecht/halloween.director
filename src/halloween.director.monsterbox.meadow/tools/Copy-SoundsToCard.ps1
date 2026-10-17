@@ -7,19 +7,20 @@ The YX5300 plays a card by physical order: the file copied Nth is track N. The r
 "file number" and the firmware plays track (file number + 1), so the Nth file copied must be the
 sound with file number N - 1. This script reads the Sounds section of ..\app.config.yaml (the same
 list GET /sounds returns), finds each sound in the source folder by name, and copies them to the
-card in file-number order as NNN_Name.mp3 (for example 013_Raven.mp3), so the name on the card
+card in file-number order as NNN_Name.mp3 (for example 007_Raven.mp3), so the name on the card
 matches the number in the config.
 
 Rules it enforces:
   * The card must be empty (and freshly quick-formatted FAT32). Deleting files from a card does not
     reliably reset the order, so an empty, freshly formatted card is the only safe starting point.
-  * File numbers must have no gaps. File number 0 is not used by the remote today, so give
-    -FillerFile (for example a short silent mp3) and it is copied wherever a number is missing.
+  * File numbers should run 0, 1, 2, ... with no gaps. If one is missing the card order would
+    shift, so either give -FillerFile (for example a short silent mp3), which is copied wherever a
+    number is missing, or fix the numbers.
   * Every sound in the config must be found in the source folder before anything is copied.
 
 How a source file is matched to a sound: its name (without extension) equals the sound's name
 ignoring case, spaces, underscores and dashes ("Door creek" matches door_creek.mp3), or it already
-starts with the 3-digit number and an underscore (013_anything.mp3).
+starts with the 3-digit number and an underscore (007_anything.mp3).
 
 .PARAMETER SourceFolder
 Folder holding the original .mp3 / .wav files.
@@ -31,16 +32,16 @@ The card's root, for example E:\
 Path to app.config.yaml. Defaults to the one in the monsterbox project.
 
 .PARAMETER FillerFile
-A file copied for any file number missing from the config (for example number 0).
+A file copied for any file number missing from the config (only needed if the numbers have a gap).
 
 .PARAMETER AllowNonEmptyDestination
 Skip the empty-card check. The order is only guaranteed on an empty card.
 
 .EXAMPLE
-.\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -FillerFile C:\Halloween\Sounds\silence.mp3 -WhatIf
+.\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -WhatIf
 
 .EXAMPLE
-.\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -FillerFile C:\Halloween\Sounds\silence.mp3
+.\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
@@ -116,7 +117,7 @@ for ($number = 0; $number -le $highest; $number++) {
 
     if ($null -eq $sound) {
         if ([string]::IsNullOrEmpty($FillerFile)) {
-            $problems += "File number $number is not in the config, and the card order needs a file there. Pass -FillerFile (for example a short silent mp3)."
+            $problems += "File number $number is not in the config, and the card order needs a file there. Fix the numbers, or pass -FillerFile (for example a short silent mp3)."
             continue
         }
         if (-not (Test-Path -LiteralPath $FillerFile -PathType Leaf)) { throw "Filler file not found: $FillerFile" }
