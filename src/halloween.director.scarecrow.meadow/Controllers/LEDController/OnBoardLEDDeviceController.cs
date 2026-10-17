@@ -2,68 +2,32 @@
 
 using Meadow;
 using Meadow.Devices;
-using Meadow.Foundation;
-using Meadow.Foundation.Leds;
+using Meadow.Logging;
+
+using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Scarecrow.Meadow.Controllers.LEDController
 {
-    public class OnBoardLEDDeviceController : ILEDDeviceController
+    public class OnBoardLEDDeviceController : ILEDDeviceController, IDisposable
     {
-        private readonly IMeadowDevice device;
-        private readonly RgbPwmLed rgbLed = null;
+        private readonly OnboardRgbLed led;
 
-        public OnBoardLEDDeviceController(IMeadowDevice device)
+        public OnBoardLEDDeviceController(Logger logger, IMeadowDevice device)
         {
-            this.device = device;
-
-            // TODO: handle other devices
-            if (this.device is F7FeatherV1 f7DeviceV1)
-            {
-                rgbLed = new RgbPwmLed(
-                    redPwmPin: f7DeviceV1.Pins.OnboardLedRed,
-                    greenPwmPin: f7DeviceV1.Pins.OnboardLedGreen,
-                    bluePwmPin: f7DeviceV1.Pins.OnboardLedBlue,
-                    commonType: global::Meadow.Peripherals.Leds.CommonType.CommonAnode);
-            }
-
-            rgbLed?.StartBlink(Color.White);
+            led = new OnboardRgbLed(logger, device);
+            led.StartBlink(Color.White);
         }
 
-        public void SetColor(Color color)
-        {
-            Stop();
-            rgbLed?.SetColor(color);
-        }
+        public void SetColor(Color color) => led.SetColor(color);
 
-        public void Stop()
-        {
-            rgbLed?.StopAnimation();
-        }
+        public void Stop() => led.Stop();
 
-        public void StartBlink(Color color)
-        {
-            Stop();
-            rgbLed?.StartBlink(color, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
-        }
+        public void StartBlink(Color color) => led.StartBlink(color);
 
-        public void TurnOn()
-        {
-            Stop();
-            if (rgbLed != null)
-            {
-                rgbLed.SetColor(rgbLed.Color);
-                rgbLed.IsOn = true;
-            }
-        }
+        public void TurnOn() => led.TurnOn();
 
-        public void TurnOff()
-        {
-            Stop();
-            if (rgbLed != null)
-            {
-                rgbLed.IsOn = false;
-            }
-        }
+        public void TurnOff() => led.TurnOff();
+
+        public void Dispose() => led.Dispose();
     }
 }
-

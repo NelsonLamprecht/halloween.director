@@ -4,8 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Meadow;
-using Meadow.Devices;
-using Meadow.Foundation.Leds;
 using Meadow.Logging;
 
 using Halloween.Director.Shared.Controllers;
@@ -16,10 +14,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
     {
         private readonly IMeadowDevice device;
 
-        RgbPwmLed onBoardRGBLed;
-
-        Task animationTask = null;
-        CancellationTokenSource cancellationTokenSource = null;
+        OnboardRgbLed led;
 
         bool initialized = false;
 
@@ -35,114 +30,42 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return;
             }
 
-            if (device is F7FeatherV1 f7Device)
-            {
-                onBoardRGBLed = new RgbPwmLed(
-                    redPwmPin: f7Device.Pins.OnboardLedRed,
-                    greenPwmPin: f7Device.Pins.OnboardLedGreen,
-                    bluePwmPin: f7Device.Pins.OnboardLedBlue);
-                onBoardRGBLed.SetColor(Color.Red);
-            }
+            led = new OnboardRgbLed(Logger, device);
+            led.SetColor(Color.Red);
 
             initialized = true;
 
             Logger.Info($"{GetType().Name} is initialized.");
         }
 
-        // onBoardRGBLed stays null if the device isn't an F7FeatherV1, so every
+        // OnboardRgbLed does nothing on a device without the onboard LED, so every
         // public method is a no-op in that case rather than a NullReferenceException
-        void Stop()
-        {
-            cancellationTokenSource?.Cancel();
-
-            // our own animation task (pulse / running colors) must also be done writing
-            try
-            {
-                animationTask?.Wait(500);
-            }
-            catch (Exception)
-            {
-                // cancelled or faulted; either way it's finished
-            }
-            animationTask = null;
-
-            // StopAnimation() only completes once the animation thread has exited, so wait
-            // for it: otherwise a final brightness write from that thread can land after the
-            // caller's next SetColor. Meadow has no synchronization context and the animation
-            // runs on its own thread, so blocking here can't deadlock (it takes <= ~60ms).
-            try
-            {
-                onBoardRGBLed?.StopAnimation().GetAwaiter().GetResult();
-            }
-            catch (OperationCanceledException)
-            {
-                // the animation was cancelled before it began; nothing left to stop
-            }
-            catch (Exception ex)
-            {
-                Logger.Warn($"Stopping LED animation failed: {ex.Message}");
-            }
-        }
-
         public void SetColor(Color color)
         {
-            if (onBoardRGBLed == null)
-            {
-                return;
-            }
-
-            Stop();
-            onBoardRGBLed.SetColor(color);
+            led.SetColor(color);
         }
 
         public void TurnOn()
         {
-            if (onBoardRGBLed == null)
-            {
-                return;
-            }
-
-            Stop();
-            onBoardRGBLed.SetColor(GetRandomColor());
-            onBoardRGBLed.IsOn = true;
+            led.TurnOn(GetRandomColor());
         }
 
         public void TurnOff()
         {
-            if (onBoardRGBLed == null)
-            {
-                return;
-            }
-
-            Stop();
-            onBoardRGBLed.IsOn = false;
+            led.TurnOff();
         }
 
         public void StartBlink()
         {
-            if (onBoardRGBLed == null)
-            {
-                return;
-            }
-
-            Stop();
-            onBoardRGBLed.StartBlink(GetRandomColor());
+            led.StartBlink(GetRandomColor());
         }
 
         public void StartPulse()
         {
-            if (onBoardRGBLed == null)
-            {
-                return;
-            }
-
             // RgbPwmLed.StartPulse(Color, ...) showed white on the board, so the fade is
             // done here by scaling the brightness of a fixed-hue color with SetColor
-            Stop();
-            cancellationTokenSource = new CancellationTokenSource();
-            var token = cancellationTokenSource.Token;
             var hue = (float)(_random.NextDouble() * 360);
-            animationTask = Task.Run(() => PulseLoop(hue, token));
+            led.Animate(token => PulseLoop(hue, token));
         }
 
         async Task PulseLoop(float hue, CancellationToken cancellationToken)
@@ -157,7 +80,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                     // 0 -> 1 -> 0 over one cycle, starting dark
                     var wave = (float)(0.5 - 0.5 * Math.Cos(2 * Math.PI * phase));
                     var brightness = PulseLowBrightness + (1 - PulseLowBrightness) * wave;
-                    onBoardRGBLed.SetColor(Color.FromHsba(hue, 1, brightness));
+                    led.WriteColor(Color.FromHsba(hue, 1, brightness));
                     await Task.Delay(40, cancellationToken);
                 }
             }
@@ -176,7 +99,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         // ready once the last overlapping request has finished.
         public void BeginActivity()
         {
-            if (onBoardRGBLed == null)
+            if (!led.IsAvailable)
             {
                 return;
             }
@@ -262,17 +185,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
         public void StartRunningColors()
         {
-            if (onBoardRGBLed == null)
-            {
-                return;
-            }
-
-            // cancels any previous animation; the new token exists before the task
-            // starts, so an immediate Stop() can't miss it
-            Stop();
-            cancellationTokenSource = new CancellationTokenSource();
-            var token = cancellationTokenSource.Token;
-            animationTask = Task.Run(() => StartRunningColors(token));
+            led.Animate(StartRunningColors);
         }
 
         protected async Task StartRunningColors(CancellationToken cancellationToken)
@@ -281,7 +194,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    onBoardRGBLed.SetColor(GetRandomColor());
+                    led.WriteColor(GetRandomColor());
                     await Task.Delay(1000, cancellationToken);
                 }
             }
@@ -302,8 +215,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
         public void Dispose()
         {
-            cancellationTokenSource?.Cancel();
-            onBoardRGBLed?.Dispose();
+            led?.Dispose();
         }
     }
 }
