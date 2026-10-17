@@ -11,6 +11,7 @@ namespace Halloween.Director.Remote.Views
             InitializeComponent();
             ViewModel = viewModel;
             BindingContext = ViewModel;
+            Title = $"Halloween Director {AppVersion.Text}";
         }
     }
 }

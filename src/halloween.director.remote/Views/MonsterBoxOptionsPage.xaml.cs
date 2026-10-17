@@ -13,6 +13,7 @@ namespace Halloween.Director.Remote.Views
             InitializeComponent();
             ViewModel = viewModel;
             BindingContext = ViewModel;
+            Title = $"Options - {AppVersion.Text}";
         }
 
         // The device pickers are on this page, so this is where to look for advertising props.

@@ -118,3 +118,7 @@ sdkmanager --sdk_root=/root/android-sdk "platform-tools" "build-tools;36.0.0" "p
 cd src/halloween.director.remote
 dotnet build -f net10.0-android -p:AndroidSdkDirectory=/root/android-sdk -p:JavaSdkDirectory=/usr/lib/jvm/java-17-openjdk-amd64
 ```
+
+## Versioning
+
+`src/Directory.Build.props` is the one place for the version (`VersionPrefix`) and the per-build `BuildNumber`; it feeds the firmware's `InformationalVersion` (logged at boot by `MeadowBase.ApplyStartupSettings` through `BuildInfo`) and the remote's `ApplicationDisplayVersion`/`ApplicationVersion` (shown in the page titles via `AppVersion`). Don't set versions in the individual csproj files.

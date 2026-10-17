@@ -126,6 +126,8 @@ namespace Halloween.Director.Shared
         // name Maple advertises), falling back to defaultDeviceName if the setting is missing.
         protected void ApplyStartupSettings(string defaultDeviceName)
         {
+            Logger.Info($"{GetType().Assembly.GetName().Name} {BuildInfo.Describe(GetType().Assembly)}");
+
             if (Settings.TryGetValue("App.StartupDetails", out var startupDetails) && bool.TryParse(startupDetails, out var enabled))
             {
                 LoggerExtensions.StartupDetails = enabled;
