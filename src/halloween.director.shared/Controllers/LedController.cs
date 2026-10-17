@@ -82,6 +82,7 @@ namespace Halloween.Director.Shared.Controllers
         public void StartActivityBlink()
         {
             // a hard on/off blink in a fixed color: much easier to notice than a fade
+            Logger.StartupDetail("LED: blinking for activity.");
             Led.Animate(BlinkLoop);
         }
 
@@ -183,6 +184,7 @@ namespace Halloween.Director.Shared.Controllers
         private void ReturnToReady()
         {
             _blinking = false;
+            Logger.StartupDetail("LED: back to ready.");
             SetColor(ReadyColor);
         }
 

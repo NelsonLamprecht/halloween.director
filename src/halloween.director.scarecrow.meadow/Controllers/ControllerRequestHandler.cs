@@ -43,6 +43,8 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
         // the LED so it's visible the board got it.
         private IActionResult Switch(string name, Action action)
         {
+            Resolver.Log.Info($"Controller {name} request.");
+
             try
             {
                 action();

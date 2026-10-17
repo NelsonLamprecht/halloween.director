@@ -41,6 +41,8 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
             }
 
+            Resolver.Log.Info($"Sound request: file {fileNumber}.");
+
             try
             {
                 _mp3Controller.QueueFile(fileNumber);
@@ -89,6 +91,8 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
             }
 
+            Resolver.Log.Info($"Shake request: {config.BeginIterations}-{config.EndIterations} iterations, {config.BeginDelay}-{config.EndDelay}ms delay.");
+
             // blink for the whole shake and return to ready when it finishes, so the LED
             // shows the board received the command and when it can take another
             _ledController.BeginActivity();
@@ -96,6 +100,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             {
                 if (!await _cylindersController.TryShakeAsync(config))
                 {
+                    Resolver.Log.Warn("Shake request rejected: a shake is already running (409).");
                     return new StatusCodeResult(HttpStatusCode.Conflict);
                 }
             }
