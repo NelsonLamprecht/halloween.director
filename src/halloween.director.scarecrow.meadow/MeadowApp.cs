@@ -5,6 +5,7 @@ using Meadow;
 using Meadow.Hardware;
 
 using Halloween.Director.Scarecrow.Meadow.Controllers.LEDController;
+using Halloween.Director.Scarecrow.Meadow.Controllers.LiftController;
 using Halloween.Director.Scarecrow.Meadow.Controllers.RelayController;
 using Halloween.Director.Scarecrow.Meadow.Services.MapleService;
 using Halloween.Director.Shared;
@@ -33,6 +34,7 @@ namespace Halloween.Director.Scarecrow.Meadow
             Services.Create<DiagnosticsService>();
             var relayController = Services.Create<RelayController>();
             relayController.Initialize(Device.Pins.D05);
+            Services.Create<LiftController>();
 
             Services.Create<NetworkService>();
             Services.Create<MapleService>();

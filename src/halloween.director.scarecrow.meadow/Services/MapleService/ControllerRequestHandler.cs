@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Threading.Tasks;
 
 using Meadow;
@@ -6,7 +7,7 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Foundation.Web.Maple.Routing;
 using Meadow.Logging;
 
-using Halloween.Director.Scarecrow.Meadow.Controllers.RelayController;
+using Halloween.Director.Scarecrow.Meadow.Controllers.LiftController;
 
 namespace Halloween.Director.Scarecrow.Meadow
 {
@@ -25,43 +26,52 @@ namespace Halloween.Director.Scarecrow.Meadow
             }
         }
 
-        private RelayController RelayController
+        private LiftController LiftController
         {
             get
             {
-                return Resolver.Services.Get<RelayController>();
+                return Resolver.Services.Get<LiftController>();
             }
         }
 
-
+        // Responds once the lift is up: 200 OK when up, 409 Conflict immediately
+        // if the lift is still falling, 500 if raising failed.
         [HttpPost("/up")]
         public async Task<IActionResult> UpAsync()
         {
             Logger.Debug("Controller Up");
             try
             {
-                RelayController.TurnOn();
-                await Task.CompletedTask;
+                if (!await LiftController.TryRaiseAsync())
+                {
+                    return new StatusCodeResult(HttpStatusCode.Conflict);
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error(ex.ToString());
+                return new ServerErrorResult();
             }
             return new OkResult();
         }
 
+        // Responds once the lift is down: 200 OK when down, 409 Conflict immediately
+        // if the lift is still rising, 500 if lowering failed.
         [HttpPost("/down")]
         public async Task<IActionResult> DownAsync()
         {
             Logger.Debug("Controller Down");
             try
             {
-                RelayController.TurnOff();
-                await Task.CompletedTask;
+                if (!await LiftController.TryLowerAsync())
+                {
+                    return new StatusCodeResult(HttpStatusCode.Conflict);
+                }
             }
             catch (Exception ex)
             {
                 Logger.Error(ex.ToString());
+                return new ServerErrorResult();
             }
             return new OkResult();
         }

@@ -51,7 +51,7 @@ Controllers take `IMeadowDevice device` via constructor injection, which covers 
 
 ## Maple HTTP server: `Serial` vs `Parallel`
 
-`MapleService.Run()` here uses `RequestProcessMode.Parallel` — safe because `up`/`down` relay commands are simple, non-overlapping toggles with no shared mutable state to race on. `meadow_monsterbox` uses `RequestProcessMode.Serial` instead, because its `shake`/`sound` handlers involve timed sequences that must not overlap. **Choose the mode based on whether your command handlers have state or hardware that can't tolerate concurrent access** — don't copy one blindly.
+`MapleService.Run()` here uses `RequestProcessMode.Parallel`. `/up` and `/down` go through `Controllers/LiftController/LiftController.cs`, which owns the lift's state (`Down`/`Rising`/`Up`/`Falling`) under a lock, so a parallel `/down` mid-rise or `/up` mid-fall gets `409 Conflict` instead of reversing the lift. Travel is timed (`RiseMs`/`FallMs`, no limit switches) and the lift auto-lowers after `MaxUpMs`; tune those constants to the real rig. `meadow_monsterbox` uses `RequestProcessMode.Serial` instead, because its `shake`/`sound` handlers involve timed sequences that must not overlap. **Choose the mode based on whether your command handlers have state or hardware that can't tolerate concurrent access** — don't copy one blindly.
 
 ## ⚠️ `HeartbeatService` is a debug tool, not default wiring
 
