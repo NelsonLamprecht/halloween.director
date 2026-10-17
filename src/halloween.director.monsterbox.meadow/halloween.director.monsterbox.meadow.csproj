@@ -19,6 +19,9 @@
     <None Update="wifi.config.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="app.build.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="app.config.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
