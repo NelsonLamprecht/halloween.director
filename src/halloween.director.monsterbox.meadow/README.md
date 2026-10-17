@@ -32,3 +32,28 @@ Red until the server is up, then green while idle. The LED blinks white while a 
 1. Copy `wifi.config.yaml.template` to `wifi.config.yaml` and fill in the WiFi credentials. The file is gitignored.
 2. Optionally set `App.DeviceName` in `app.config.yaml`; it is the name the mobile app sees.
 3. Build and deploy `src/halloween.director.sln` to the Meadow F7 with the Meadow tooling in Visual Studio or VS Code.
+
+## Sounds and the SD card
+
+The MP3 module (YX5300) plays its SD card **by copy order**: the Nth file copied onto the card is track N, and `/sound?filenumber=F` plays track `F + 1`. The module cannot report file names, only counts, so the names live in `app.config.yaml`:
+
+```yaml
+Sounds:
+    Werewolf: 1
+    Raven: 13
+```
+
+Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). `GET /sounds` returns the list as JSON (`[{"number":1,"name":"Werewolf"},...]`) so the remote can build its buttons from it. File number 0 (the first file on the card) is not used today.
+
+**Naming the files on the card:** `NNN_Name.mp3`, where `NNN` is the file number from the config, zero-padded to three digits, and `Name` is the sound name with spaces as underscores: `001_Werewolf.mp3`, `012_Metal_Hit.mp3`, `013_Raven.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied.
+
+**Preparing a card** with `tools\Copy-SoundsToCard.ps1` (Windows PowerShell or PowerShell 7):
+
+1. Put the originals in one folder, named after the sound (`Raven.mp3`, `door_creek.mp3`; case, spaces, `_` and `-` are ignored) or already `013_anything.mp3`.
+2. Quick-format the card as **FAT32**. The card must be empty: deleting files does not reliably reset the order.
+3. Run it (add `-WhatIf` first to preview):
+   ```powershell
+   .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -FillerFile C:\Halloween\Sounds\silence.mp3
+   ```
+   `-FillerFile` (a short silent mp3) is copied into any file number missing from the config, which today is number 0. Add a sound by adding a `Name: number` line (the next free number) and re-running it on a freshly formatted card.
+4. Eject the card in Windows before pulling it.
