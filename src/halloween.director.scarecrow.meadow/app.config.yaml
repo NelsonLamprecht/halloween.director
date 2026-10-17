@@ -1,11 +1,11 @@
 # Application-level settings (see https://developer.wildernesslabs.co/Meadow/Meadow.OS/Configuration/Application_Settings_Configuration/)
 Lifecycle:
     RestartOnAppFailure: true
-    AppFailureRestartDelaySeconds: 30
+    AppFailureRestartDelaySeconds: 15
 
 Logging:
     LogLevel:
-        Default: "Debug"
+        Default: "Information"
 
 # Custom app settings. These flatten to dot-notated keys in App.Settings,
 # e.g. this resolves to Settings["App.DeviceName"].
