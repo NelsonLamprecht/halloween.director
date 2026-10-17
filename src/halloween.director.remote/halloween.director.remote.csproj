@@ -46,6 +46,12 @@
 		<TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
 	</PropertyGroup>
 
+	<!-- Side-loaded Android builds are a plain APK: Release defaults to an AAB, which -t:Install splits per
+	     device with bundletool and can fail on tablets with an unusual screen density
+	     ("Missing APKs for [SCREEN_DENSITY]"). An APK installs on any device. -->
+	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+		<AndroidPackageFormat>apk</AndroidPackageFormat>
+	</PropertyGroup>
 	<!-- Packaged (MSIX) Windows builds for local debugging via `dotnet publish`, per
 	     https://learn.microsoft.com/dotnet/maui/windows/deployment/publish-cli -->
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows' and '$(Configuration)' == 'Release'">

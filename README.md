@@ -36,7 +36,7 @@ adb shell monkey -p com.nlamprecht.halloween.director.remote 1     # launch it
 
 Wireless debugging: `adb pair <ip>:<pairing-port>` (enter the code), then `adb connect <ip>:<port>`, then run the same commands.
 
-To make an APK file instead (to copy to the tablet), run `dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk`; the `.apk` is in `bin\Release\net10.0-android\publish\`. Install it with `adb install -r <file>.apk`.
+The build produces a plain APK (`AndroidPackageFormat` is `apk` for Android in the csproj), so it installs on any tablet. To get the file to copy to a tablet, run `dotnet build -f net10.0-android -c Release -t:SignAndroidPackage`; it is `bin\Release\net10.0-android\com.nlamprecht.halloween.director.remote-Signed.apk`. Install it with `adb install -r <file>.apk`.
 
 Uninstall: `adb uninstall com.nlamprecht.halloween.director.remote`.
 
