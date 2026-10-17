@@ -13,7 +13,7 @@ namespace Halloween.Director.Shared.Services.MapleService
 
         public int Port { get; set; } = DefaultPort;
 
-        public int AdvertiseIntervalMs { get; set; } = 5000;
+        public int AdvertiseIntervalMs { get; set; } = 2000;
 
         // Parallel by default so a long-running request can't hold up the others
         public RequestProcessMode ProcessMode { get; set; } = RequestProcessMode.Parallel;

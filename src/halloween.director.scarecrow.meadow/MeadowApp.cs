@@ -37,7 +37,7 @@ namespace Halloween.Director.Scarecrow.Meadow
             relayController.Initialize(Device.Pins.D05);
 
             Services.Create<NetworkService>();
-            Services.Add(new MapleServiceOptions { AdvertiseIntervalMs = 1500 });
+            Services.Add(new MapleServiceOptions());
             Services.Create<MapleService>();
 
             await base.Initialize();
