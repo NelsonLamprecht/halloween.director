@@ -18,8 +18,13 @@ namespace Halloween.Director.Scarecrow.Meadow
     {
         private bool _servicesStarted;
 
+        // used if app.config.yaml is missing or doesn't have an App.DeviceName entry
+        private const string DefaultDeviceName = "Scarecrow-v1";
+
         public override async Task Initialize()
         {
+            ApplyDeviceName(DefaultDeviceName);
+
             var network = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
             network.SetAntenna(AntennaType.External);
             network.NetworkConnected += NetworkConnected;

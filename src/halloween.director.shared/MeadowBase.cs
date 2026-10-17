@@ -11,5 +11,21 @@ namespace Halloween.Director.Shared
         protected ServiceCollection Services { get; } = Resolver.Services;
 
         public MeadowBase() { }
+
+        // Names the device from app.config.yaml's App.DeviceName (the name Maple advertises),
+        // falling back to defaultName if the setting is missing.
+        protected void ApplyDeviceName(string defaultName)
+        {
+            if (Settings.TryGetValue("App.DeviceName", out var configuredDeviceName) && !string.IsNullOrWhiteSpace(configuredDeviceName))
+            {
+                Device.Information.DeviceName = configuredDeviceName;
+            }
+            else
+            {
+                Logger.Warn($"App.DeviceName not found in app.config.yaml; falling back to '{defaultName}'.");
+                Device.Information.DeviceName = defaultName;
+            }
+            Logger.Info($"Device name: {Device.Information.DeviceName}");
+        }
     }
 }

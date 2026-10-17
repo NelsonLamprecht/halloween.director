@@ -1,6 +1,13 @@
-Logging:
-  LogLevel:
-    Default: "Debug"
+# Application-level settings (see https://developer.wildernesslabs.co/Meadow/Meadow.OS/Configuration/Application_Settings_Configuration/)
 Lifecycle:
-  ResetOnAppFailure: true
-  AppFailureRestartDelaySeconds: 30
+    RestartOnAppFailure: true
+    AppFailureRestartDelaySeconds: 30
+
+Logging:
+    LogLevel:
+        Default: "Debug"
+
+# Custom app settings. These flatten to dot-notated keys in App.Settings,
+# e.g. this resolves to Settings["App.DeviceName"].
+App:
+    DeviceName: Scarecrow-v1

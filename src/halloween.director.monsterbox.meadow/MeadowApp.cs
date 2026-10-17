@@ -27,16 +27,7 @@ namespace Halloween.Director.Monsterbox.Meadow
         {
             Logger.Info("=== Initializing hardware... ===");
 
-            if (Settings.TryGetValue("App.DeviceName", out var configuredDeviceName) && !string.IsNullOrWhiteSpace(configuredDeviceName))
-            {
-                Device.Information.DeviceName = configuredDeviceName;
-            }
-            else
-            {
-                Logger.Warn($"App.DeviceName not found in app.config.yaml; falling back to '{DefaultDeviceName}'.");
-                Device.Information.DeviceName = DefaultDeviceName;
-            }
-            Logger.Info($"Device name: {Device.Information.DeviceName}");
+            ApplyDeviceName(DefaultDeviceName);
 
             var diagnosticsService = Services.Create<DiagnosticsService>();
             diagnosticsService.OutputMeadowOSInfo();
