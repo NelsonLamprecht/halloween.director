@@ -1,68 +1,60 @@
-﻿using System;
-using System.Threading.Tasks;
+using System;
+using System.Net;
 
 using Meadow;
 using Meadow.Foundation.Web.Maple;
 using Meadow.Foundation.Web.Maple.Routing;
-using Meadow.Logging;
 
-using ScarecrowRelayController = Halloween.Director.Scarecrow.Meadow.Controllers.RelayController.RelayController;
+using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     public class ControllerRequestHandler : RequestHandlerBase
     {
+        private readonly RelayController _relayController;
+        private readonly LedController _ledController;
+
+        // Maple constructs this handler itself (outside the DI container), so resolve
+        // dependencies from the global registry here. Safe because MapleService only
+        // starts after MeadowApp.Initialize() has registered these controllers.
         public ControllerRequestHandler()
         {
+            _relayController = Resolver.Services.Get<RelayController>();
+            _ledController = Resolver.Services.Get<LedController>();
         }
 
-        public override bool IsReusable => true;
-
-        private Logger Logger { 
-            get
-            {
-                return Resolver.Log;
-            }
-        }
-
-        private ScarecrowRelayController RelayController
-        {
-            get
-            {
-                return Resolver.Services.Get<ScarecrowRelayController>();
-            }
-        }
-
+        // Maple runs requests in parallel, and per-request state (QueryString,
+        // Context) lives on the handler instance, so a fresh handler per request
+        // keeps concurrent requests from overwriting each other.
+        public override bool IsReusable => false;
 
         [HttpPost("/up")]
-        public async Task<IActionResult> UpAsync()
+        public IActionResult Up()
         {
-            Logger.Debug("Controller Up");
-            try
-            {
-                RelayController.TurnOn();
-                await Task.CompletedTask;
-            }
-            catch (Exception ex)
-            {
-                Logger.Error(ex.ToString());
-            }
-            return new OkResult();
+            return Switch("Up", _relayController.TurnOn);
         }
 
         [HttpPost("/down")]
-        public async Task<IActionResult> DownAsync()
+        public IActionResult Down()
         {
-            Logger.Debug("Controller Down");
+            return Switch("Down", _relayController.TurnOff);
+        }
+
+        // 200 OK when the relay switched, 500 if it failed. An accepted command pulses
+        // the LED so it's visible the board got it.
+        private IActionResult Switch(string name, Action action)
+        {
             try
             {
-                RelayController.TurnOff();
-                await Task.CompletedTask;
+                action();
             }
             catch (Exception ex)
             {
-                Logger.Error(ex.ToString());
+                Resolver.Log.Error($"Controller {name} failed: {ex.Message}");
+                return new ServerErrorResult();
             }
+
+            _ledController.SignalActivity();
             return new OkResult();
         }
     }

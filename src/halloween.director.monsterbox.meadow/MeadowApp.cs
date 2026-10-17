@@ -7,6 +7,7 @@ using Meadow.Hardware;
 
 using Halloween.Director.Monsterbox.Meadow.Controllers;
 using Halloween.Director.Shared;
+using Halloween.Director.Shared.Controllers;
 using Halloween.Director.Shared.Services.DiagnosticsService;
 using Halloween.Director.Shared.Services.MapleService;
 using Halloween.Director.Shared.Services.NetworkService;

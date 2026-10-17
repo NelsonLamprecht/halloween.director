@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Meadow;
 using Meadow.Hardware;
 
-using Halloween.Director.Scarecrow.Meadow.Controllers.LEDController;
-using Halloween.Director.Scarecrow.Meadow.Controllers.RelayController;
+using Halloween.Director.Scarecrow.Meadow.Controllers;
 using Halloween.Director.Shared;
+using Halloween.Director.Shared.Controllers;
 using Halloween.Director.Shared.Services.DiagnosticsService;
 using Halloween.Director.Shared.Services.MapleService;
 using Halloween.Director.Shared.Services.NetworkService;
@@ -19,7 +19,6 @@ namespace Halloween.Director.Scarecrow.Meadow
         // the remote app sends scarecrow commands to this port (monsterbox uses 5417)
         private const int MaplePort = 5418;
 
-        private ILEDDeviceController _ledDevice;
         private bool _servicesStarted;
 
         public override async Task Initialize()
@@ -30,8 +29,10 @@ namespace Halloween.Director.Scarecrow.Meadow
 
             Services.Add(network);
 
-            //rework the device dependancy for the controller so its not just the meadow device
-            _ledDevice = Services.Create<OnBoardLEDDeviceController, ILEDDeviceController>();
+            // red until the Maple server is up, then LedController.ReadyColor
+            var ledController = Services.Create<LedController>();
+            ledController.Initialize();
+
             Services.Create<WatchdogService, IWatchdogService>();
 
             Services.Create<DiagnosticsService>();
@@ -63,13 +64,11 @@ namespace Halloween.Director.Scarecrow.Meadow
 
                 var relayController = Services.Get<RelayController>();
                 await relayController.Run();
-
-                _ledDevice.StartBlink(Color.Blue);
             }
 
             catch (Exception ex)
             {
-                _ledDevice.SetColor(Color.Red);
+                Services.Get<LedController>().SetColor(Color.Red);
                 Logger.Error(ex.ToString());
             }
             await base.Run();
@@ -106,7 +105,7 @@ namespace Halloween.Director.Scarecrow.Meadow
             }
             _servicesStarted = true;
 
-            Services.Get<ILEDDeviceController>().StartBlink(Color.Green);
+            Services.Get<LedController>().SetColor(LedController.ReadyColor);
         }
 
         public override Task OnShutdown()
@@ -119,9 +118,9 @@ namespace Halloween.Director.Scarecrow.Meadow
                 Services.Get<RelayController>().Dispose();
             }
 
-            if (Services.ContainsRegisteredType<ILEDDeviceController>() && Services.Get<ILEDDeviceController>() is IDisposable led)
+            if (Services.ContainsRegisteredType<LedController>())
             {
-                led.Dispose();
+                Services.Get<LedController>().Dispose();
             }
 
             return base.OnShutdown();

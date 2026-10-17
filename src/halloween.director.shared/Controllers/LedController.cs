@@ -6,11 +6,13 @@ using System.Threading.Tasks;
 using Meadow;
 using Meadow.Logging;
 
-using Halloween.Director.Shared.Controllers;
-
-namespace Halloween.Director.Monsterbox.Meadow.Controllers
+namespace Halloween.Director.Shared.Controllers
 {
-    internal class LedController : BaseController, IOnOrOffController, IDisposable
+    /// <summary>
+    /// Status LED on the F7's onboard RGB LED: red until the app is up, then
+    /// <see cref="ReadyColor"/>, with a pulse while commands are being handled.
+    /// </summary>
+    public class LedController : BaseController, IOnOrOffController, IDisposable
     {
         private readonly IMeadowDevice device;
 
@@ -40,24 +42,36 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
         // OnboardRgbLed does nothing on a device without the onboard LED, so every
         // public method is a no-op in that case rather than a NullReferenceException
+        private OnboardRgbLed Led => led ?? throw new InvalidOperationException($"{GetType().Name} is not initialized.");
+
         public void SetColor(Color color)
         {
-            led.SetColor(color);
+            Led.SetColor(color);
         }
 
         public void TurnOn()
         {
-            led.TurnOn(GetRandomColor());
+            Led.TurnOn(GetRandomColor());
         }
 
         public void TurnOff()
         {
-            led.TurnOff();
+            Led.TurnOff();
+        }
+
+        public void Stop()
+        {
+            Led.Stop();
+        }
+
+        public void StartBlink(Color color)
+        {
+            Led.StartBlink(color);
         }
 
         public void StartBlink()
         {
-            led.StartBlink(GetRandomColor());
+            Led.StartBlink(GetRandomColor());
         }
 
         public void StartPulse()
@@ -65,7 +79,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             // RgbPwmLed.StartPulse(Color, ...) showed white on the board, so the fade is
             // done here by scaling the brightness of a fixed-hue color with SetColor
             var hue = (float)(_random.NextDouble() * 360);
-            led.Animate(token => PulseLoop(hue, token));
+            Led.Animate(token => PulseLoop(hue, token));
         }
 
         async Task PulseLoop(float hue, CancellationToken cancellationToken)
@@ -80,7 +94,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                     // 0 -> 1 -> 0 over one cycle, starting dark
                     var wave = (float)(0.5 - 0.5 * Math.Cos(2 * Math.PI * phase));
                     var brightness = PulseLowBrightness + (1 - PulseLowBrightness) * wave;
-                    led.WriteColor(Color.FromHsba(hue, 1, brightness));
+                    Led.WriteColor(Color.FromHsba(hue, 1, brightness));
                     await Task.Delay(40, cancellationToken);
                 }
             }
@@ -99,7 +113,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         // ready once the last overlapping request has finished.
         public void BeginActivity()
         {
-            if (!led.IsAvailable)
+            if (!Led.IsAvailable)
             {
                 return;
             }
@@ -185,7 +199,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
         public void StartRunningColors()
         {
-            led.Animate(StartRunningColors);
+            Led.Animate(StartRunningColors);
         }
 
         protected async Task StartRunningColors(CancellationToken cancellationToken)
@@ -194,7 +208,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    led.WriteColor(GetRandomColor());
+                    Led.WriteColor(GetRandomColor());
                     await Task.Delay(1000, cancellationToken);
                 }
             }

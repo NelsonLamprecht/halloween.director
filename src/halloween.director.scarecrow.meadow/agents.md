@@ -21,19 +21,19 @@ WiFi connection is **not** hand-rolled — `meadow.config.yaml`'s `Coprocessor.A
 
 ## Controllers vs. Services
 
-- **`Controllers/`** = thin hardware drivers (`RelayController`, `OnBoardLEDDeviceController`). Each owns one piece of physical hardware.
+- **`Controllers/`** = thin hardware drivers (`RelayController`, plus the shared `LedController` from `halloween.director.shared`). Each owns one piece of physical hardware. `ControllerRequestHandler` (the Maple routes) lives here too, following the monsterbox pattern.
 - **`Services/`** = app-level concerns not tied to one piece of hardware: `MapleService` (HTTP server), `NetworkService` (post-connect diagnostics trigger), `DiagnosticsService` (device/OS/NTP/WiFi info logging), `Watchdog/WatchdogService` (hang recovery), `HeartbeatService` (**see warning below**).
 
 Both layers share the same shape: `Controllers/BaseController.cs` and `Services/BaseService.cs` — constructor takes a `Logger`, exposes it as a property, and a `virtual Task Run()` defaulting to a no-op. Only override `Run()` if the type needs to kick off work on its own; most services here (`DiagnosticsService`, `NetworkService`) are just DI-registered helpers invoked via their own named methods, not through `Run()`.
 
-**Interfaces where they earn their keep**: `IOnOrOffController` (`TurnOn`/`TurnOff`) and `ILEDDeviceController` (extends it, adds `SetColor`/`Stop`/`StartBlink`) let `MeadowApp` depend on an abstraction rather than a concrete controller type, registered via `Services.Create<OnBoardLEDDeviceController, ILEDDeviceController>()`. Only add an interface like this when something genuinely depends on the abstraction (e.g. to swap hardware later) — don't add one reflexively for every controller (`RelayController` here has no interface, because nothing needs one).
+**Shared interface**: `IOnOrOffController` (`TurnOn`/`TurnOff`, in `halloween.director.shared`) is the contract for every switchable output (relays, LED). "On" means active, whatever the electrical polarity is. Only add an interface when something genuinely depends on the abstraction; don't add one reflexively for every controller.
 
 ## Real constructor DI via `Resolver.Services` (`ServiceCollection`)
 
 Every controller/service constructor declares its dependencies; `Services.Create<T>()` resolves and injects them. No controller or service reaches into `Resolver.Services.Get<T>()` from inside its own business logic.
 
 - `Services.Create<T>()` — construct, resolve constructor params from already-registered services, register.
-- `Services.Create<TImpl, TInterface>()` — same, registered under an interface (`Services.Create<WatchdogService, IWatchdogService>()`, `Services.Create<OnBoardLEDDeviceController, ILEDDeviceController>()`).
+- `Services.Create<TImpl, TInterface>()` — same, registered under an interface (`Services.Create<WatchdogService, IWatchdogService>()`).
 - `Services.Add(instance)` — register an already-constructed object not built by us (the `IWiFiNetworkAdapter` from `Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>()`).
 - `Services.Get<T>()` — retrieve a previously registered instance.
 
@@ -43,7 +43,7 @@ Every controller/service constructor declares its dependencies; `Services.Create
 
 ## The `IMeadowDevice` vs. concrete device-type split
 
-Controllers take `IMeadowDevice device` via constructor injection, which covers the common surface (`CreateDigitalOutputPort`, `PlatformOS`, `Information`, etc.). But **named onboard pins** (`OnboardLedRed`/Green/Blue) only exist on the concrete `F7FeatherV1` type. `OnBoardLEDDeviceController` handles this with a runtime cast in its constructor: `if (this.device is F7FeatherV1 f7DeviceV1) { ... f7DeviceV1.Pins.OnboardLedRed ... }`. `RelayController` avoids needing this by not taking a named pin at all — it takes a generic `IPin devicePin` parameter in `Initialize(IPin devicePin)`, with the concrete pin (`Device.Pins.D05`) resolved by `MeadowApp` (which has the strongly-typed `Device: F7FeatherV1`) and passed down. Prefer that second pattern when practical; reach for the `is F7FeatherV1` cast only when the API you need genuinely isn't on the interface.
+Controllers take `IMeadowDevice device` via constructor injection, which covers the common surface (`CreateDigitalOutputPort`, `PlatformOS`, `Information`, etc.). But **named onboard pins** (`OnboardLedRed`/Green/Blue) only exist on the concrete `F7FeatherV1` type. The shared `OnboardRgbLed` (used by `LedController`) handles this with a runtime cast. `RelayController` avoids needing this by not taking a named pin at all — it takes a generic `IPin devicePin` parameter in `Initialize(IPin devicePin)`, with the concrete pin (`Device.Pins.D05`) resolved by `MeadowApp` (which has the strongly-typed `Device: F7FeatherV1`) and passed down. Prefer that second pattern when practical; reach for the `is F7FeatherV1` cast only when the API you need genuinely isn't on the interface.
 
 ## Watchdog
 

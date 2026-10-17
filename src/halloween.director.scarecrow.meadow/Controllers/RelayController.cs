@@ -7,7 +7,7 @@ using Meadow.Peripherals.Relays;
 
 using Halloween.Director.Shared.Controllers;
 
-namespace Halloween.Director.Scarecrow.Meadow.Controllers.RelayController
+namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     // <summary>
     // The commands all inverted since we are working with relays that keep the valves closed.
