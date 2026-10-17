@@ -105,3 +105,16 @@ public IActionResult Thing()                      // 1. synchronous IActionResul
 4. If it owns hardware or threads, implement `IDisposable` and add `DisposeIfRegistered<T>()` to the app's `DisposeServices()` (before anything it depends on).
 5. If it can be shared by both props, put it in `halloween.director.shared`.
 6. Keep chaos/testing code out of builds that control hardware.
+
+## Building the remote in a Linux / cloud session
+
+Only the Android target builds on Linux (the project adds the Windows target on Windows). Verified in a cloud session with `dl.google.com` allowed; the Microsoft Android installer (`-t:InstallAndroidDependencies`) also needs `aka.ms`, so installing the SDK with Google's `sdkmanager` avoids that:
+
+```bash
+apt-get install -y dotnet-sdk-10.0 openjdk-17-jdk-headless
+dotnet workload install maui-android
+# Android SDK from Google (command-line tools zip from https://developer.android.com/studio#command-tools)
+sdkmanager --sdk_root=/root/android-sdk "platform-tools" "build-tools;36.0.0" "platforms;android-36"
+cd src/halloween.director.remote
+dotnet build -f net10.0-android -p:AndroidSdkDirectory=/root/android-sdk -p:JavaSdkDirectory=/usr/lib/jvm/java-17-openjdk-amd64
+```
