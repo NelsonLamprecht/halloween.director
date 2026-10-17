@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodel="clr-namespace:MonsterBoxRemote.Maui.ViewModel"
+    x:DataType="viewmodel:MonsterBoxControllerViewModel"
+    x:Class="MonsterBoxRemote.Maui.Views.MonsterBoxOptionsPage"
+    BackgroundColor="{AppThemeBinding Light={StaticResource SpookyGreenLight}, Dark={StaticResource SpookyGreenDark}}"
+
+    Title="MonsterBox Options">
+
+    <ContentPage.Content>
+        <Grid>
+            <Grid
+                BackgroundColor="#88000000"
+                IsVisible="{Binding IsBusy}"
+                >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <StackLayout Spacing="10" HorizontalOptions="Center" VerticalOptions="Center">
+                    <Label Text="Please Wait..." TextColor="White" HorizontalOptions="Center" />
+                    <ActivityIndicator Color="White" IsRunning="True" />
+                </StackLayout>
+            </Grid>
+
+            <Grid
+                RowSpacing="10"
+                Padding="10">
+                <Grid.Triggers>
+                    <DataTrigger TargetType="Grid" Binding="{Binding IsBusy}" Value="True">
+                        <Setter Property="IsEnabled" Value="False" />
+                    </DataTrigger>
+                </Grid.Triggers>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!--Device selection - moved off the Controller page, which needed
+                    the vertical room for its button grid on narrow screens.-->
+                <Border
+                    Grid.Row="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+                        <Label
+                            Grid.Row="0"
+                            Text="DEVICES"
+                            Style="{StaticResource SectionHeaderStyle}" />
+                        <Picker
+                            Grid.Row="1"
+                            Title="MonsterBox host"
+                            TextColor="White" FontSize="16" BackgroundColor="{AppThemeBinding Light={StaticResource SpookyPurpleLight}, Dark={StaticResource SpookyPurpleDark}}"
+                            ItemsSource="{Binding HostList}" ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding MonsterBoxDevice, Mode=TwoWay}"
+                        />
+                        <!--Manual fallback for devices the UDP auto-discovery scan
+                            doesn't find (different subnet, firewall, prop not yet
+                            powered on during the scan). Adds to the shared HostList
+                            above (so it also shows up if the other picker is opened)
+                            and immediately assigns it as the MonsterBox device.-->
+                        <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                            <Entry
+                                Grid.Column="0"
+                                Placeholder="Add MonsterBox by IP address"
+                                PlaceholderColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}"
+                                TextColor="White"
+                                Keyboard="Url"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SpookyPurpleLight}, Dark={StaticResource SpookyPurpleDark}}"
+                                Text="{Binding ManualMonsterBoxAddress, Mode=TwoWay}"
+                                Completed="ManualMonsterBoxEntry_Completed"
+                            />
+                            <Button
+                                Grid.Column="1"
+                                Text="Add"
+                                Style="{StaticResource FxButtonStyle}"
+                                Command="{Binding AddManualMonsterBoxDeviceCommand}"
+                            />
+                        </Grid>
+                        <Picker
+                            Grid.Row="3"
+                            Title="Scarecrow host"
+                            TextColor="White" FontSize="16" BackgroundColor="{AppThemeBinding Light={StaticResource SpookyPurpleLight}, Dark={StaticResource SpookyPurpleDark}}"
+                            ItemsSource="{Binding HostList}" ItemDisplayBinding="{Binding Name}"
+                            SelectedItem="{Binding ScareCrowDevice, Mode=TwoWay}"
+                        />
+                        <Grid Grid.Row="4" ColumnDefinitions="*,Auto" ColumnSpacing="6">
+                            <Entry
+                                Grid.Column="0"
+                                Placeholder="Add Scarecrow by IP address"
+                                PlaceholderColor="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray500}}"
+                                TextColor="White"
+                                Keyboard="Url"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SpookyPurpleLight}, Dark={StaticResource SpookyPurpleDark}}"
+                                Text="{Binding ManualScarecrowAddress, Mode=TwoWay}"
+                                Completed="ManualScarecrowEntry_Completed"
+                            />
+                            <Button
+                                Grid.Column="1"
+                                Text="Add"
+                                Style="{StaticResource FxButtonStyle}"
+                                Command="{Binding AddManualScarecrowDeviceCommand}"
+                            />
+                        </Grid>
+                    </Grid>
+                </Border>
+                <Border
+                    Grid.Row="1"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="End"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackLayout
+                            Grid.Column="0"
+                            BackgroundColor="Black"
+                            Padding="0,0,0,10"
+                            >
+
+                            <Label
+                                Text="Begin Iterations"
+                                FontSize="16" Style="{StaticResource LabelStyle}" />
+
+                            <Label
+                                Text="{Binding BeginIterations}"
+                                FontSize="16" Style="{StaticResource LabelStyle}" />
+
+                            <Stepper
+                                Minimum="0"
+                                Maximum="100"
+                                Increment="5"
+                                Value="{Binding BeginIterations, Mode=TwoWay}"
+                                Style="{StaticResource StepperStyle}"
+                                />
+
+                        </StackLayout>
+
+                        <StackLayout
+                            Grid.Column="1"
+                            BackgroundColor="Black"
+                            Padding="0,0,0,10"
+                            >
+
+                            <Label
+                                Text="End Iterations"
+                                FontSize="16" Style="{StaticResource LabelStyle}" />
+
+                            <Label
+                                Text="{Binding EndIterations}"
+                                FontSize="16" Style="{StaticResource LabelStyle}" />
+
+                            <Stepper
+                                Minimum="0"
+                                Maximum="100"
+                                Increment="5"
+                                Value="{Binding EndIterations, Mode=TwoWay}"
+                                Style="{StaticResource StepperStyle}"
+                                />
+
+                        </StackLayout>
+
+                        <StackLayout
+                            Grid.Column="2"
+                            BackgroundColor="Black"
+                            Padding="0,0,0,10"
+                            >
+
+                            <Label
+                                Text="Begin Delay"
+                                FontSize="16" Style="{StaticResource LabelStyle}" />
+
+                            <Label
+                                Text="{Binding BeginDelay}"
+                                FontSize="16" Style="{StaticResource LabelStyle}" />
+
+                            <Stepper
+                                Minimum="0"
+                                Maximum="100"
+                                Increment="5"
+                                Value="{Binding BeginDelay, Mode=TwoWay}"
+                                Style="{StaticResource StepperStyle}"
+                                />
+
+                        </StackLayout>
+
+                        <StackLayout
+                            Grid.Column="3"
+                            BackgroundColor="Black"
+                            Padding="0,0,0,10"
+                            >
+
+                            <Label
+                                Text="End Delay"
+                                FontSize="16"
+                                Style="{StaticResource LabelStyle}" />
+
+                            <Label
+                                Text="{Binding EndDelay}"
+                                FontSize="16"
+                                Style="{StaticResource LabelStyle}" />
+
+                            <Stepper
+                                Minimum="0"
+                                Maximum="100"
+                                Increment="5"
+                                Value="{Binding EndDelay, Mode=TwoWay}"
+                                Style="{StaticResource StepperStyle}"
+                                />
+
+                        </StackLayout>
+
+                    </Grid>
+                </Border>
+
+            </Grid>
+        </Grid>
+    </ContentPage.Content>
+</ContentPage>

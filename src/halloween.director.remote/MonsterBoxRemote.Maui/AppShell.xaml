@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="MonsterBoxRemote.Maui.AppShell"
+    FlyoutBehavior="Disabled"
+    Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource SpookyPurpleLight}, Dark={StaticResource SpookyPurpleDark}}"
+    Shell.TabBarForegroundColor="White"
+    Shell.TabBarTitleColor="White"
+    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}"
+    Title="MonsterBox Remote">
+
+    <TabBar>
+        <!--Content is assigned in code-behind (see AppShell.xaml.cs) rather than
+            via ContentTemplate, since these pages take constructor-injected
+            dependencies (ViewModel, IServiceProvider) that DataTemplate's
+            parameterless-construction can't supply.-->
+        <ShellContent x:Name="ControllerTab" Title="Controller" />
+        <ShellContent x:Name="OptionsTab" Title="Options" />
+    </TabBar>
+</Shell>
