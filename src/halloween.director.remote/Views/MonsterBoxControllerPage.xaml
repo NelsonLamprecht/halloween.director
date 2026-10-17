@@ -7,7 +7,7 @@
     x:DataType="viewmodel:MonsterBoxControllerViewModel"
     x:Class="Halloween.Director.Remote.Views.MonsterBoxControllerPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyGreenLight}, Dark={StaticResource SpookyGreenDark}}"
-    Title="MonsterBox Controller">
+    Title="Halloween Director">
 
     <ContentPage.Content>
         <Grid>
