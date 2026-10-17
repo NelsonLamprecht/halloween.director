@@ -13,6 +13,14 @@ namespace Halloween.Director.Remote.Views
             InitializeComponent();
             ViewModel = viewModel;
             BindingContext = ViewModel;
+            Title = $"Options - {AppVersion.Text}";
+        }
+
+        // The device pickers are on this page, so this is where to look for advertising props.
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await ViewModel.GetServers();
         }
 
         // Let pressing Enter/Done on the keyboard submit the manual device

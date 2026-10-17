@@ -52,16 +52,22 @@ namespace Halloween.Director.Remote.ViewModel
             get => _monsterBoxDevice;
             set
             {
+                // The Picker's two-way binding sets this again right after the manual-add command does;
+                // only a different address needs another GET /sounds (Retry covers a failed one).
+                var changed = !string.Equals(_monsterBoxDevice?.IpAddress, value?.IpAddress, StringComparison.OrdinalIgnoreCase);
                 _monsterBoxDevice = value;
                 OnPropertyChanged(nameof(MonsterBoxDevice));
 
                 // the sound buttons come from whichever monsterbox is selected
-                _ = LoadSoundsAsync(value?.IpAddress);
+                if (changed)
+                {
+                    _ = LoadSoundsAsync(value?.IpAddress);
+                }
             }
         }
 
         // Sound buttons, built from the monsterbox's GET /sounds (the SoundCatalog in its
-        // app.config.yaml). Empty until it answers; if it can't be reached, the built-in list is shown.
+        // app.config.yaml). Empty until it answers; if it can't be reached, SoundsError shows with a Retry button.
         public ObservableCollection<SoundItem> FxSounds { get; } = new ObservableCollection<SoundItem>();
 
         public ObservableCollection<SoundItem> CreatureSounds { get; } = new ObservableCollection<SoundItem>();

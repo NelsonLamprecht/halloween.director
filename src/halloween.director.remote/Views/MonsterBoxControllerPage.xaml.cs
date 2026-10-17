@@ -11,12 +11,7 @@ namespace Halloween.Director.Remote.Views
             InitializeComponent();
             ViewModel = viewModel;
             BindingContext = ViewModel;
-        }
-
-        protected override async void OnAppearing()
-        {
-            base.OnAppearing();
-            await ViewModel.GetServers();
+            Title = $"Halloween Director {AppVersion.Text}";
         }
     }
 }

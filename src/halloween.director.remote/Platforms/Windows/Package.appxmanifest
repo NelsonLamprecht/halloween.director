@@ -6,7 +6,7 @@
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
   IgnorableNamespaces="uap rescap">
 
-  <Identity Name="com.kayza.monsterboxremote.maui" Publisher="CN=MonsterBoxRemote Dev" Version="1.0.0.0" />
+  <Identity Name="com.nlamprecht.halloween.director.remote" Publisher="CN=HalloweenDirector Dev" Version="1.0.0.0" />
 
   <mp:PhoneIdentity PhoneProductId="945EDC57-B875-43B4-BC26-49C8390AA75B" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 

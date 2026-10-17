@@ -23,7 +23,7 @@ namespace Halloween.Director.Monsterbox.Meadow
         {
             Logger.Info("=== Initializing hardware... ===");
 
-            ApplyStartupSettings(DefaultDeviceName);
+            ApplyStartupSettings(DefaultDeviceName, "monsterbox");
 
             var diagnosticsService = Services.Create<DiagnosticsService>();
             diagnosticsService.OutputMeadowOSInfo();
