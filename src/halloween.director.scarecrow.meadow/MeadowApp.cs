@@ -8,6 +8,7 @@ using Halloween.Director.Scarecrow.Meadow.Controllers;
 using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 using Halloween.Director.Shared.Services.DiagnosticsService;
+using Halloween.Director.Shared.Services.HeartbeatService;
 using Halloween.Director.Shared.Services.MapleService;
 using Halloween.Director.Shared.Services.NetworkService;
 using Halloween.Director.Shared.Services.Watchdog;
@@ -41,6 +42,7 @@ namespace Halloween.Director.Scarecrow.Meadow
             var relayController = Services.Create<RelayController>();
             relayController.Initialize(Device.Pins.D05);
 
+            Services.Create<HeartbeatService>();
             Services.Create<NetworkService>();
             Services.Add(new MapleServiceOptions());
             Services.Create<MapleService>();
@@ -65,6 +67,8 @@ namespace Halloween.Director.Scarecrow.Meadow
 
                 var relayController = Services.Get<RelayController>();
                 await relayController.Run();
+
+                await Services.Get<HeartbeatService>().Run();
             }
 
             catch (Exception ex)
@@ -112,6 +116,11 @@ namespace Halloween.Director.Scarecrow.Meadow
         public override Task OnShutdown()
         {
             Logger.Info("=== Shutting down... ===");
+
+            if (Services.ContainsRegisteredType<HeartbeatService>())
+            {
+                Services.Get<HeartbeatService>().Dispose();
+            }
 
             // relay first, so the valve is closed before the pin is released
             if (Services.ContainsRegisteredType<RelayController>())

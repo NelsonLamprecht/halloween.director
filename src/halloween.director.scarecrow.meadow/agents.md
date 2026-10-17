@@ -53,9 +53,9 @@ Controllers take `IMeadowDevice device` via constructor injection, which covers 
 
 `MapleService.Run()` here uses `RequestProcessMode.Parallel` — safe because `up`/`down` relay commands are simple, non-overlapping toggles with no shared mutable state to race on. `meadow_monsterbox` uses `RequestProcessMode.Serial` instead, because its `shake`/`sound` handlers involve timed sequences that must not overlap. **Choose the mode based on whether your command handlers have state or hardware that can't tolerate concurrent access** — don't copy one blindly.
 
-## ⚠️ `HeartbeatService` is a debug tool, not default wiring
+## `HeartbeatService`
 
-`Services/HeartbeatService/HeartbeatService.cs` exists in this repo but is **not** created/registered in `MeadowApp.Initialize()` — it's intentionally dead code, kept for deliberate restart testing. Its `Run()` loop counts down and `throw`s on purpose to exercise `Lifecycle.ResetOnAppFailure`/`AppFailureRestartDelaySeconds` (see `app.config.yaml`). If you ever need to test crash-recovery behavior, wire it up explicitly and pull it back out afterward — never leave it running in a build meant to actually control hardware for an event.
+`HeartbeatService` (in `halloween.director.shared`) logs `Heartbeat: up d.hh:mm:ss` at `Information` every 60s (`Interval`), so the device log shows when the app stopped or restarted. `MeadowApp` creates it in `Initialize()`, starts it in `Run()` (it returns immediately; the loop runs in the background) and disposes it in `OnShutdown()`. It used to be a crash-test tool that threw after 10s; that version is gone, so test crash recovery (`Lifecycle.RestartOnAppFailure`) with a deliberate throw in a scratch build instead.
 
 ## Adding a new controller or service
 
@@ -63,4 +63,4 @@ Controllers take `IMeadowDevice device` via constructor injection, which covers 
 2. If it owns real hardware and needs idempotent setup, give it a separate `Initialize(...)` method (parameterized with `IPin`/etc. as needed) rather than doing it in the constructor, and call that explicitly from `MeadowApp.Initialize()` after `Services.Create<T>()`.
 3. Register it in `MeadowApp.Initialize()` in dependency order — plain `Services.Create<T>()`, or `Create<TImpl, TInterface>()` if other code should depend on an abstraction.
 4. Only add an interface when something actually needs to depend on the abstraction rather than the concrete type.
-5. Leave `HeartbeatService`-style chaos/testing services unwired unless you're deliberately testing recovery.
+5. Keep chaos/testing code (deliberate throws, etc.) out of builds that control hardware.
