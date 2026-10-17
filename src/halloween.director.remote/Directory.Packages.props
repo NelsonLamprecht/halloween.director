@@ -1,0 +1,7 @@
+<Project>
+  <!-- The MAUI app manages its own package versions (it is not a Meadow firmware project),
+       so it stops the central Directory.Packages.props in src\ from applying here. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+</Project>

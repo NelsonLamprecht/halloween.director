@@ -1,0 +1,14 @@
+<Project>
+  <!-- Central package versions for the Meadow firmware projects: change MeadowVersion here to
+       upgrade them all. (The MAUI remote app opts out; see halloween.director.remote\Directory.Packages.props.) -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <MeadowVersion>2.5.0</MeadowVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Meadow.F7" Version="$(MeadowVersion)" />
+    <PackageVersion Include="Meadow.Foundation" Version="$(MeadowVersion)" />
+    <PackageVersion Include="Meadow.Foundation.Audio.Mp3.Yx5300" Version="$(MeadowVersion)" />
+    <PackageVersion Include="Meadow.Foundation.Web.Maple.Server" Version="$(MeadowVersion)" />
+  </ItemGroup>
+</Project>
