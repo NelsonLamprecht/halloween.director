@@ -74,9 +74,7 @@ namespace Halloween.Director.Monsterbox.Meadow
 
         public override Task Run()
         {
-            var watchdog = Services.Get<IWatchdogService>();
-            watchdog.Enable(15);
-            watchdog.Pet(10);
+            Services.Get<IWatchdogService>().Start();
 
             Services.Get<HeartbeatService>().Run();
 

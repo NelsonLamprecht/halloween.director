@@ -6,5 +6,8 @@ namespace Halloween.Director.Shared.Services.Watchdog
         void Enable(int inSeconds);
 
         void Pet(int inSeconds);
+
+        // Enable() with DefaultTimeoutSeconds, then Pet() every DefaultPetIntervalSeconds.
+        void Start();
     }
 }

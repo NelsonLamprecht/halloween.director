@@ -99,9 +99,7 @@ namespace Halloween.Director.Scarecrow.Meadow
         {
             try
             {
-                var w = Services.Get<IWatchdogService>();
-                w.Enable(15);
-                w.Pet(10);
+                Services.Get<IWatchdogService>().Start();
 
                 var relayController = Services.Get<RelayController>();
                 await relayController.Run();
