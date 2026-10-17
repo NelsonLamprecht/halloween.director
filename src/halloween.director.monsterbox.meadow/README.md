@@ -55,7 +55,7 @@ Each line is `Name: file number` (plain lines only: Meadow's config parser has n
    .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -WhatIf
    .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\
    ```
-   It prints the new list with `new` / `was N` markers, and the lines to paste into the remote's built-in fallback list (`SoundCatalogClient.Defaults`) when the config changed.
-4. Eject the card in Windows, then **redeploy the monsterbox** (the config is part of the app) and, if the numbers moved, the remote with its updated fallback list.
+   It prints the new list with `new` / `was N` markers.
+4. Eject the card in Windows, then **redeploy the monsterbox** (the config is part of the app). The remote reads the list from `/sounds`, so it needs no change.
 
 **Names on the card:** `NNN_Name.mp3`, where `NNN` is the file number zero-padded to three digits and `Name` is the sound name with spaces as underscores: `000_Werewolf.mp3`, `007_Raven.mp3`, `011_Creature_1.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied. A file that already starts with `NNN_` in the source folder has that prefix ignored.

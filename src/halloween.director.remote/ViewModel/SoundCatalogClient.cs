@@ -20,27 +20,6 @@ namespace Halloween.Director.Remote.ViewModel
     {
         private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(3);
 
-        /// <summary>
-        /// The sounds shown only if the monsterbox can't be reached: the list this app shipped with, which
-        /// matches the monsterbox's default Sounds section (tools\Copy-SoundsToCard.ps1 prints the lines to paste here when the list changes).
-        /// </summary>
-        public static IReadOnlyList<SoundEntry> Defaults { get; } = new[]
-        {
-            new SoundEntry(0, "Werewolf"),
-            new SoundEntry(1, "Laugh"),
-            new SoundEntry(2, "Chains"),
-            new SoundEntry(3, "Heartbeat"),
-            new SoundEntry(4, "Dragon Growl"),
-            new SoundEntry(5, "Door creek"),
-            new SoundEntry(6, "Metal Hit"),
-            new SoundEntry(7, "Raven"),
-            new SoundEntry(8, "Creature 1"),
-            new SoundEntry(9, "Creature 2"),
-            new SoundEntry(10, "Creature 3"),
-            new SoundEntry(11, "Creature 4"),
-            new SoundEntry(12, "Creature 5"),
-        };
-
         /// <summary>Names starting with this go in the CREATURES section; everything else is FX.</summary>
         public const string CreaturePrefix = "Creature";
 

@@ -21,8 +21,7 @@ App:
 # The Sounds section below is normally written by tools\Copy-SoundsToCard.ps1 from a folder of
 # sound files (it also copies them to the card in this order), so edit the folder and re-run the
 # script rather than editing the list by hand. Numbers run 0, 1, 2, ... with no gaps, FX first
-# and the creatures last. Changing a number means re-copying the card, and the remote's built-in
-# fallback list (SoundCatalogClient.Defaults) should be kept in step (the script prints it).
+# and the creatures last. Changing a number means re-copying the card.
 # If you do edit by hand: Meadow's config parser only reads plain "key: value" lines, so no lists,
 # no { } and no ':' in a name; line order doesn't matter (/sounds sorts by number).
 Sounds:

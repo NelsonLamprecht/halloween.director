@@ -56,6 +56,12 @@
                                     HorizontalOptions="Fill"
                                     Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Shake}">
                                 </Button>
+                                <Border IsVisible="{Binding HasSoundsError}" BackgroundColor="#B00020" Stroke="Transparent" StrokeShape="RoundRectangle 5" Padding="10">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding SoundsError}" TextColor="White" />
+                                        <Button Text="Retry" Command="{Binding RetrySoundsCommand}" HorizontalOptions="Start" />
+                                    </VerticalStackLayout>
+                                </Border>
                                 <Label
                                     Text="FX"
                                     Style="{StaticResource SectionHeaderStyle}" />

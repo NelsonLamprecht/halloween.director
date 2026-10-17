@@ -66,6 +66,18 @@ namespace Halloween.Director.Remote.ViewModel
 
         public ObservableCollection<SoundItem> CreatureSounds { get; } = new ObservableCollection<SoundItem>();
 
+        // Set when GET /sounds fails (no buttons are shown then); shown in an error box with a Retry button.
+        string? _soundsError;
+        public string? SoundsError
+        {
+            get => _soundsError;
+            private set { _soundsError = value; OnPropertyChanged(nameof(SoundsError)); OnPropertyChanged(nameof(HasSoundsError)); }
+        }
+
+        public bool HasSoundsError => !string.IsNullOrEmpty(_soundsError);
+
+        public Command RetrySoundsCommand => new Command(async () => await LoadSoundsAsync(MonsterBoxDevice?.IpAddress));
+
         ServerModel? _scareCrowDevice;
         public ServerModel? ScareCrowDevice
         {
@@ -217,21 +229,25 @@ namespace Halloween.Director.Remote.ViewModel
                 return;
             }
 
+            SoundsError = null;
             var watch = Stopwatch.StartNew();
             var sounds = await SoundCatalogClient.FetchAsync(hostAddress, ServerPort);
             Debug.WriteLine($"GET /sounds from {hostAddress} took {watch.ElapsedMilliseconds} ms ({(sounds == null ? "no list" : sounds.Count + " sounds")}).");
             if (sounds == null)
             {
-                // Couldn't get the list: show the built-in one so the panel isn't empty (unless a real list is already showing).
-                if (FxSounds.Count + CreatureSounds.Count == 0)
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    await MainThread.InvokeOnMainThreadAsync(() => ApplySounds(SoundCatalogClient.Defaults));
-                }
-
+                    ApplySounds(Array.Empty<SoundEntry>());
+                    SoundsError = $"Couldn't load the sound list from {hostAddress}.";
+                });
                 return;
             }
 
-            await MainThread.InvokeOnMainThreadAsync(() => ApplySounds(sounds));
+            await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                SoundsError = null;
+                ApplySounds(sounds);
+            });
         }
 
         // call on the main thread

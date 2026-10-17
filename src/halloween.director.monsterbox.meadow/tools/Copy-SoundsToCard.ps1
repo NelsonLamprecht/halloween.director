@@ -231,9 +231,6 @@ if ($newText -eq $raw) {
     [System.IO.File]::WriteAllText($ConfigPath, $newText, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host ''
     Write-Host "Updated $ConfigPath"
-    Write-Host ''
-    Write-Host "The remote's built-in fallback list (SoundCatalogClient.Defaults) is separate. To match, use:"
-    foreach ($item in $plan) { Write-Host ('            new SoundEntry({0}, "{1}"),' -f $item.Number, $item.Name) }
 }
 
 # ---- copy to the card, one file at a time in order --------------------------------------------------
