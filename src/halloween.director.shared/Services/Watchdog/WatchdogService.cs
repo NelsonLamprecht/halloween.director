@@ -17,23 +17,31 @@ namespace Halloween.Director.Shared.Services.Watchdog
 
         public void Enable(int inSeconds)
         {
-            device.WatchdogEnable(TimeSpan.FromSeconds(inSeconds));
+            Logger.InfoSection("WatchdogService.Enable", () =>
+            {
+                device.WatchdogEnable(TimeSpan.FromSeconds(inSeconds));
+                Logger.Info($"Device resets if the watchdog isn't petted within {inSeconds}s.");
+            });
         }
 
         public void Pet(int inSeconds)
         {
-            // Just for good measure, let's reset the watchdog to begin with.
-            device.WatchdogReset();
-            // Start a thread that restarts it.
-            Thread t = new Thread(() => {
-                while (true)
-                {
-                    Thread.Sleep(TimeSpan.FromSeconds(inSeconds));
-                    Logger.Debug($"Petting watchdog @ {DateTime.UtcNow}");
-                    device.WatchdogReset();
-                }
+            Logger.InfoSection("WatchdogService.Pet", () =>
+            {
+                // Just for good measure, let's reset the watchdog to begin with.
+                device.WatchdogReset();
+                // Start a thread that restarts it.
+                Thread t = new Thread(() => {
+                    while (true)
+                    {
+                        Thread.Sleep(TimeSpan.FromSeconds(inSeconds));
+                        Logger.Debug($"Petting watchdog @ {DateTime.UtcNow}");
+                        device.WatchdogReset();
+                    }
+                });
+                t.Start();
+                Logger.Info($"Petting the watchdog every {inSeconds}s.");
             });
-            t.Start();
         }
     }
 }

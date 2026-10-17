@@ -36,21 +36,26 @@ namespace Halloween.Director.Shared.Services.MapleService
         // existing server first, so it can be used to re-bind after the IP changes.
         public override Task Run()
         {
-            StopServer();
-
-            var address = networkAdapter.IpAddress;
-            mapleServer = new MapleServer(
-                address,
-                port: options.Port,
-                advertise: true,
-                processMode: options.ProcessMode)
+            Logger.InfoSection("MapleService.Run", () =>
             {
-                AdvertiseIntervalMs = options.AdvertiseIntervalMs,
-                DeviceName = device.Information.DeviceName
-            };
+                StopServer();
 
-            mapleServer.Start();
-            BoundAddress = address;
+                var address = networkAdapter.IpAddress;
+                mapleServer = new MapleServer(
+                    address,
+                    port: options.Port,
+                    advertise: true,
+                    processMode: options.ProcessMode)
+                {
+                    AdvertiseIntervalMs = options.AdvertiseIntervalMs,
+                    DeviceName = device.Information.DeviceName
+                };
+
+                mapleServer.Start();
+                BoundAddress = address;
+                Logger.Info($"Listening on http://{address}:{options.Port}/ ({options.ProcessMode}), advertising as '{device.Information.DeviceName}' every {options.AdvertiseIntervalMs}ms.");
+            });
+
             return base.Run();
         }
 

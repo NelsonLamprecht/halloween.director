@@ -38,14 +38,17 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
 
         public override Task Run()
         {
-            Logger.Debug("+StartHeartbeat");
-
-            if (cancellationTokenSource == null)
+            Logger.InfoSection("HeartbeatService.Run", () =>
             {
-                cancellationTokenSource = new CancellationTokenSource();
-                var token = cancellationTokenSource.Token;
-                _ = Task.Run(() => BeatAsync(token));
-            }
+                if (cancellationTokenSource == null)
+                {
+                    cancellationTokenSource = new CancellationTokenSource();
+                    var token = cancellationTokenSource.Token;
+                    _ = Task.Run(() => BeatAsync(token));
+                }
+
+                Logger.Info($"Logging a heartbeat every {Interval.TotalSeconds}s.");
+            });
 
             return base.Run();
         }

@@ -5,6 +5,7 @@ using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Peripherals.Relays;
 
+using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Scarecrow.Meadow.Controllers
@@ -29,9 +30,13 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
                 return;
             }
 
-            // open is on: the relays keep the valves closed. The output starts off so
-            // the valve is closed as quickly as possible when the board boots up.
-            relay = new RelayOutput(device, devicePin, RelayState.Open);
+            Logger.InfoSection($"{GetType().Name}.Initialize", () =>
+            {
+                // open is on: the relays keep the valves closed. The output starts off so
+                // the valve is closed as quickly as possible when the board boots up.
+                relay = new RelayOutput(device, devicePin, RelayState.Open);
+                Logger.Info($"Relay on {devicePin.Name}; starts off (valve closed).");
+            });
         }
 
         public void TurnOff()

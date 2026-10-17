@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 
 using Meadow.Logging;
 
@@ -16,6 +17,14 @@ namespace Halloween.Director.Shared
         {
             logger.Info(SectionHeader(title));
             writeBody();
+            logger.Info(new string('=', SectionWidth));
+        }
+
+        /// <summary>Like <see cref="InfoSection"/>, for a body that awaits.</summary>
+        public static async Task InfoSectionAsync(this Logger logger, string title, Func<Task> writeBody)
+        {
+            logger.Info(SectionHeader(title));
+            await writeBody();
             logger.Info(new string('=', SectionWidth));
         }
 

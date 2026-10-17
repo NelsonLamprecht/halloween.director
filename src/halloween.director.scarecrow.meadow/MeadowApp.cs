@@ -27,25 +27,36 @@ namespace Halloween.Director.Scarecrow.Meadow
             ApplyDeviceName(DefaultDeviceName);
 
             var network = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
-            network.SetAntenna(AntennaType.External);
-            network.NetworkConnected += NetworkConnected;
-
-            Services.Add(network);
+            Logger.InfoSection("WiFi", () =>
+            {
+                network.SetAntenna(AntennaType.External);
+                network.NetworkConnected += NetworkConnected;
+                Services.Add(network);
+                Logger.Info("Antenna set to External; waiting for the network to connect.");
+            });
 
             // red until the Maple server is up, then LedController.ReadyColor
             var ledController = Services.Create<LedController>();
             ledController.Initialize();
 
-            Services.Create<WatchdogService, IWatchdogService>();
+            Logger.InfoSection("Services", () =>
+            {
+                Services.Create<WatchdogService, IWatchdogService>();
+                Services.Create<DiagnosticsService>();
+            });
 
-            Services.Create<DiagnosticsService>();
+            // the controller logs its own section from Initialize()
             var relayController = Services.Create<RelayController>();
             relayController.Initialize(Device.Pins.D05);
 
-            Services.Create<HeartbeatService>();
-            Services.Create<NetworkService>();
-            Services.Add(new MapleServiceOptions());
-            Services.Create<MapleService>();
+            Logger.InfoSection("Network services", () =>
+            {
+                Services.Create<HeartbeatService>();
+                Services.Create<NetworkService>();
+                Services.Add(new MapleServiceOptions());
+                Services.Create<MapleService>();
+                Logger.Info("Heartbeat, Network and Maple services created.");
+            });
 
             await base.Initialize();
         }
@@ -54,7 +65,7 @@ namespace Halloween.Director.Scarecrow.Meadow
         {
             try
             {
-                Logger.Info("Running...");
+                Logger.InfoSection("Run", () => Logger.Info("Running..."));
 
                 var diagnostics = Services.Get<DiagnosticsService>();
                 diagnostics.OutputDeviceInfo();
@@ -83,6 +94,9 @@ namespace Halloween.Director.Scarecrow.Meadow
         // lets a startup failure be caught and logged instead of vanishing in an unobserved task
         private async void NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
+            Logger.InfoSection("WiFiConnected", () =>
+                Logger.Info($"WiFi connected. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
+
             var networkService = Services.Get<NetworkService>();
             networkService.NetworkIsConnected(sender);
 

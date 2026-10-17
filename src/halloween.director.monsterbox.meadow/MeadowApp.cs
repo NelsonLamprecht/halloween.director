@@ -36,35 +36,39 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             var wifiAdapter = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 
-            Logger.Info(
-                $"WiFi config from wifi.config.yaml -> DefaultSsid: '{wifiAdapter.DefaultSsid}', " +
-                $"AutoConnect: {wifiAdapter.AutoConnect}, AutoReconnect: {wifiAdapter.AutoReconnect}");
+            Logger.InfoSection("WiFi", () =>
+            {
+                Logger.Info(
+                    $"WiFi config from wifi.config.yaml -> DefaultSsid: '{wifiAdapter.DefaultSsid}', " +
+                    $"AutoConnect: {wifiAdapter.AutoConnect}, AutoReconnect: {wifiAdapter.AutoReconnect}");
 
-            // this device always runs on the external antenna; persisted so it's already
-            // in effect before AutomaticallyStartNetwork connects on every boot after the first
-            Logger.Info("Setting antenna to External...");
-            wifiAdapter.SetAntenna(AntennaType.External, true);
-            Services.Add(wifiAdapter);
+                // this device always runs on the external antenna; persisted so it's already
+                // in effect before AutomaticallyStartNetwork connects on every boot after the first
+                Logger.Info("Setting antenna to External...");
+                wifiAdapter.SetAntenna(AntennaType.External, true);
+                Services.Add(wifiAdapter);
+            });
 
-            Logger.Info("Initializing LedController...");
+            // each controller logs its own section from Initialize()
             var ledController = Services.Create<LedController>();
             ledController.Initialize();
 
-            Logger.Info("Initializing RelayController...");
             var relayController = Services.Create<RelayController>();
             relayController.Initialize(Device.Pins.D05, Device.Pins.D06);
 
-            Logger.Info("Initializing MP3Controller...");
             var mp3Controller = Services.Create<MP3Controller>();
             mp3Controller.Initialize();
 
-            Logger.Info("Creating remaining services...");
-            Services.Create<WatchdogService, IWatchdogService>();
-            Services.Create<NetworkService>();
-            Services.Create<HeartbeatService>();
-            Services.Create<CylindersController>();
-            Services.Add(new MapleServiceOptions());
-            Services.Create<MapleService>();
+            Logger.InfoSection("Services", () =>
+            {
+                Services.Create<WatchdogService, IWatchdogService>();
+                Services.Create<NetworkService>();
+                Services.Create<HeartbeatService>();
+                Services.Create<CylindersController>();
+                Services.Add(new MapleServiceOptions());
+                Services.Create<MapleService>();
+                Logger.Info("Watchdog, Network, Heartbeat, Cylinders and Maple services created.");
+            });
 
             wifiAdapter.NetworkConnecting += (sender) =>
                 Logger.Info($"WiFi connecting @ {_bootStopwatch.Elapsed}...");
@@ -83,7 +87,6 @@ namespace Halloween.Director.Monsterbox.Meadow
 
         public override Task Run()
         {
-            Logger.Info("Enabling watchdog...");
             var watchdog = Services.Get<IWatchdogService>();
             watchdog.Enable(15);
             watchdog.Pet(10);
@@ -100,7 +103,8 @@ namespace Halloween.Director.Monsterbox.Meadow
         // lets a startup failure be caught and logged instead of vanishing in an unobserved task
         private async void OnWifiConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
-            Logger.Info($"WiFi connected @ {_bootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}");
+            Logger.InfoSection("WiFiConnected", () =>
+                Logger.Info($"WiFi connected @ {_bootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
 
             var networkService = Services.Get<NetworkService>();
             networkService.NetworkIsConnected(sender);

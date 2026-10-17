@@ -5,6 +5,7 @@ using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Peripherals.Relays;
 
+using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Monsterbox.Meadow.Controllers
@@ -32,12 +33,15 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return;
             }
 
-            // closed is on: the pneumatics keep their valves closed
-            left = new RelayOutput(device, leftPin, RelayState.Closed);
-            right = new RelayOutput(device, rightPin, RelayState.Closed);
-            initialized = true;
+            Logger.InfoSection($"{GetType().Name}.Initialize", () =>
+            {
+                // closed is on: the pneumatics keep their valves closed
+                left = new RelayOutput(device, leftPin, RelayState.Closed);
+                right = new RelayOutput(device, rightPin, RelayState.Closed);
+                initialized = true;
 
-            Logger.Info($"{GetType().Name} is initialized.");
+                Logger.Info($"Left relay on {leftPin.Name}, right relay on {rightPin.Name}; both start off.");
+            });
         }
 
         /// <summary>The left cylinder's relay. On energizes the cylinder.</summary>
