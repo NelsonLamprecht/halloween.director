@@ -3,10 +3,11 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodel="clr-namespace:Halloween.Director.Remote.ViewModel"
+    xmlns:views="clr-namespace:Halloween.Director.Remote.Views"
     x:DataType="viewmodel:MonsterBoxControllerViewModel"
     x:Class="Halloween.Director.Remote.Views.MonsterBoxControllerPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyGreenLight}, Dark={StaticResource SpookyGreenDark}}"
-    Title="MonsterBox Controller">
+    Title="Halloween Director">
 
     <ContentPage.Content>
         <Grid>
@@ -33,12 +34,12 @@
                         <Setter Property="IsEnabled" Value="False" />
                     </DataTrigger>
                 </Grid.Triggers>
-                <!-- Stacked: MonsterBox on the top half, Scarecrow on the bottom
-                     half, each spanning the full width so the sound buttons
-                     aren't squeezed into a narrow column. -->
+                <!-- One screen for both props: the MonsterBox panel (the sound buttons, which scroll if there
+                     are many) takes all the height that is left, and the Scarecrow panel is a slim
+                     Up/Down bar that is always visible at the bottom. -->
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <!--Top panel: MonsterBox sound/shake controls-->
                 <Border
@@ -46,119 +47,40 @@
                     Grid.Row="0"
                     VerticalOptions="Fill"
                     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
-                        <Grid RowSpacing="6" ColumnSpacing="6"
-                              RowDefinitions="*,Auto,*,*,Auto,*"
-                              ColumnDefinitions="*,*,*,*,*">
-                            <Button
-                                Grid.Row="0"
-                                Grid.ColumnSpan="5"
-                                Text="Shake"
-                                Style="{StaticResource ShakeButtonStyle}"
-                                HorizontalOptions="Fill"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Shake}">
-                            </Button>
-                            <Label
-                                Grid.Row="1"
-                                Grid.ColumnSpan="5"
-                                Text="FX"
-                                Style="{StaticResource SectionHeaderStyle}" />
-                            <Button
-                                Grid.Row="2"
-                                Grid.Column="0"
-                                Text="Werewolf"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Werewolf}">
-                            </Button>
-                            <Button
-                                Grid.Column="1"
-                                Grid.Row="2"
-                                Text="Laugh"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Laugh}">
-                            </Button>
-                            <Button
-                                Grid.Column="2"
-                                Grid.Row="2"
-                                Text="Chains"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Chains}">
-                            </Button>
-                            <Button
-                                Grid.Column="3"
-                                Grid.Row="2"
-                                Text="Heart&#8203;beat"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Heartbeat}">
-                            </Button>
-                            <Button
-                                Grid.Column="4"
-                                Grid.Row="2"
-                                Text="Dragon Growl"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.DragonGrowl}">
-                            </Button>
-                            <Button
-                                Grid.Column="0"
-                                Grid.Row="3"
-                                Text="Door creek"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.DoorCreek}">
-                            </Button>
-                            <Button
-                                Grid.Column="1"
-                                Grid.Row="3"
-                                Text="Metal Hit"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.MetalHit}">
-                            </Button>
-                            <Button
-                                Grid.Column="2"
-                                Grid.Row="3"
-                                Text="Raven"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Raven}">
-                            </Button>
-                            <Label
-                                Grid.Row="4"
-                                Grid.ColumnSpan="5"
-                                Text="CREATURES"
-                                Style="{StaticResource SectionHeaderStyle}" />
-                            <Button
-                                Grid.Column="0"
-                                Grid.Row="5"
-                                Text="Creature 1"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature1}">
-                            </Button>
-                            <Button
-                                Grid.Column="1"
-                                Grid.Row="5"
-                                Text="Creature 2"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature2}">
-                            </Button>
-                            <Button
-                                Grid.Column="2"
-                                Grid.Row="5"
-                                Text="Creature 3"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature3}">
-                            </Button>
-                            <Button
-                                Grid.Column="3"
-                                Grid.Row="5"
-                                Text="Creature 4"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature4}">
-                            </Button>
-                            <Button
-                                Grid.Column="4"
-                                Grid.Row="5"
-                                Text="Creature 5"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature5}">
-                            </Button>
-                        </Grid>
+                        <!-- Scrolls, because the number of sounds comes from the monsterbox and can be more than fit on the panel. -->
+                        <ScrollView>
+                            <VerticalStackLayout Spacing="6">
+                                <Button
+                                    Text="Shake"
+                                    Style="{StaticResource ShakeButtonStyle}"
+                                    HorizontalOptions="Fill"
+                                    Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Shake}">
+                                </Button>
+                                <Border IsVisible="{Binding HasSoundsError}" BackgroundColor="#B00020" Stroke="Transparent" StrokeShape="RoundRectangle 5" Padding="10">
+                                    <VerticalStackLayout Spacing="6">
+                                        <Label Text="{Binding SoundsError}" TextColor="White" />
+                                        <Button Text="Retry" Command="{Binding RetrySoundsCommand}" HorizontalOptions="Start" />
+                                    </VerticalStackLayout>
+                                </Border>
+                                <Label
+                                    Text="FX"
+                                    Style="{StaticResource SectionHeaderStyle}" />
+                                <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
+                                <views:SoundGrid
+                                    Sounds="{Binding FxSounds}"
+                                    ButtonStyle="{StaticResource FxButtonStyle}"
+                                    ColumnSpacing="6"
+                                    RowSpacing="6" />
+                                <Label
+                                    Text="CREATURES"
+                                    Style="{StaticResource SectionHeaderStyle}" />
+                                <views:SoundGrid
+                                    Sounds="{Binding CreatureSounds}"
+                                    ButtonStyle="{StaticResource CreatureButtonStyle}"
+                                    ColumnSpacing="6"
+                                    RowSpacing="6" />
+                            </VerticalStackLayout>
+                        </ScrollView>
                 </Border>
                 <!--Bottom panel: Scarecrow up/down controls-->
                 <Border
@@ -166,22 +88,21 @@
                     Grid.Row="1"
                     VerticalOptions="Fill"
                     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
-                        <Grid RowSpacing="6"
-                              RowDefinitions="*,*">
+                        <Grid ColumnSpacing="6" ColumnDefinitions="*,*">
                             <Button
-                                Grid.Row="0"
+                                Grid.Column="0"
                                 Text="&#9650; Up"
                                 Style="{StaticResource ScarecrowButtonStyle}"
                                 HorizontalOptions="Fill"
-                                VerticalOptions="Fill"
+                                HeightRequest="76"
                                 Command="{Binding SendScarecrowCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Up}">
                             </Button>
                             <Button
-                                Grid.Row="1"
+                                Grid.Column="1"
                                 Text="&#9660; Down"
                                 Style="{StaticResource ScarecrowButtonStyle}"
                                 HorizontalOptions="Fill"
-                                VerticalOptions="Fill"
+                                HeightRequest="76"
                                 Command="{Binding SendScarecrowCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Down}">
                             </Button>
                         </Grid>

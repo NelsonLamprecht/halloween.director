@@ -53,6 +53,13 @@ namespace Halloween.Director.Monsterbox.Meadow
             var mp3Controller = Services.Create<MP3Controller>();
             mp3Controller.Initialize();
 
+            Logger.StartupSection("Sounds", () =>
+            {
+                var soundCatalog = SoundCatalog.FromSettings(Settings, Logger);
+                Services.Add(soundCatalog);
+                Logger.StartupDetail($"{soundCatalog.Count} sounds configured for GET /sounds.");
+            });
+
             Logger.StartupSection("Services", () =>
             {
                 Services.Create<WatchdogService, IWatchdogService>();

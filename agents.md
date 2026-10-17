@@ -7,7 +7,7 @@ Monorepo for the Halloween props. Open `src/halloween.director.sln`. Project-spe
 | `halloween.director.shared` | netstandard2.1 library used by both firmware projects: `MeadowBase`, base controller/service, LED, relay, watchdog, heartbeat, diagnostics, network and Maple services, `LoggerExtensions`. |
 | `halloween.director.monsterbox.meadow` | Meadow F7 firmware: two relays (cylinder shake) and an MP3 player. See its `agents.md`. |
 | `halloween.director.scarecrow.meadow` | Meadow F7 firmware: one relay driving a scissor lift. See its `agents.md`. |
-| `halloween.director.remote` | .NET MAUI app that controls the props over HTTP. Not a Meadow project (needs the .NET 10 SDK and MAUI workload). |
+| `halloween.director.remote` | .NET MAUI app that controls the props over HTTP. Its sound buttons come from the monsterbox's `GET /sounds` (`SoundCatalogClient`), with a built-in fallback list. Not a Meadow project (needs the .NET 10 SDK and MAUI workload). |
 
 Namespaces are `Halloween.Director.*` (project and folder names stay lowercase). Both firmware projects are `OutputType` `Library` with `AssemblyName` `App` and **no `Program.cs`**: Meadow OS finds the `App` subclass itself.
 
@@ -105,3 +105,16 @@ public IActionResult Thing()                      // 1. synchronous IActionResul
 4. If it owns hardware or threads, implement `IDisposable` and add `DisposeIfRegistered<T>()` to the app's `DisposeServices()` (before anything it depends on).
 5. If it can be shared by both props, put it in `halloween.director.shared`.
 6. Keep chaos/testing code out of builds that control hardware.
+
+## Building the remote in a Linux / cloud session
+
+Only the Android target builds on Linux (the project adds the Windows target on Windows). Verified in a cloud session with `dl.google.com` allowed; the Microsoft Android installer (`-t:InstallAndroidDependencies`) also needs `aka.ms`, so installing the SDK with Google's `sdkmanager` avoids that:
+
+```bash
+apt-get install -y dotnet-sdk-10.0 openjdk-17-jdk-headless
+dotnet workload install maui-android
+# Android SDK from Google (command-line tools zip from https://developer.android.com/studio#command-tools)
+sdkmanager --sdk_root=/root/android-sdk "platform-tools" "build-tools;36.0.0" "platforms;android-36"
+cd src/halloween.director.remote
+dotnet build -f net10.0-android -p:AndroidSdkDirectory=/root/android-sdk -p:JavaSdkDirectory=/usr/lib/jvm/java-17-openjdk-amd64
+```

@@ -27,7 +27,7 @@
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
 		<!-- Display name -->
-		<ApplicationTitle>MonsterBoxRemote.Maui</ApplicationTitle>
+		<ApplicationTitle>Halloween Director</ApplicationTitle>
 
 		<!-- App Identifier -->
 		<ApplicationId>com.kayza.monsterboxremote.maui</ApplicationId>

@@ -14,6 +14,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         private readonly MP3Controller _mp3Controller;
         private readonly CylindersController _cylindersController;
         private readonly LedController _ledController;
+        private readonly SoundCatalog _soundCatalog;
 
         // Maple constructs this handler itself (outside the DI container), so resolve
         // dependencies from the global registry here. Safe because MapleService only
@@ -23,6 +24,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             _mp3Controller = Resolver.Services.Get<MP3Controller>();
             _cylindersController = Resolver.Services.Get<CylindersController>();
             _ledController = Resolver.Services.Get<LedController>();
+            _soundCatalog = Resolver.Services.Get<SoundCatalog>();
         }
 
         // Maple runs requests in parallel, and per-request state (QueryString,
@@ -36,6 +38,15 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         private string Query(string name)
         {
             return QueryString?[name];
+        }
+
+        // The sounds on the card and their file numbers, from app.config.yaml's Sounds section,
+        // so the remote can build its buttons instead of hard-coding them.
+        [HttpGet("/sounds")]
+        public IActionResult Sounds()
+        {
+            Resolver.Log.Info($"Sounds request: {_soundCatalog.Count} sounds.");
+            return new ContentResult(_soundCatalog.ToJson(), "application/json");
         }
 
         [HttpPost("/sound")]
