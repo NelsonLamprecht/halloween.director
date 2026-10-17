@@ -18,22 +18,22 @@ namespace Halloween.Director.Shared
         public static bool StartupDetails { get; set; } = true;
 
         /// <summary>
-        /// Runs <paramref name="writeBody"/> between a centered "====Title====" header and a
-        /// "=====" footer of the same width. The banner is skipped when
+        /// Runs <paramref name="writeBody"/> between a centered "====Title:Begin====" header and a
+        /// matching "====Title:End====" footer of the same width. The banners are skipped when
         /// <see cref="StartupDetails"/> is off; the body always runs.
         /// </summary>
         public static void StartupSection(this Logger logger, string title, Action writeBody)
         {
             if (StartupDetails)
             {
-                logger.Info(SectionHeader(title));
+                logger.Info(Banner($"{title}:Begin"));
             }
 
             writeBody();
 
             if (StartupDetails)
             {
-                logger.Info(new string('=', SectionWidth));
+                logger.Info(Banner($"{title}:End"));
             }
         }
 
@@ -42,14 +42,14 @@ namespace Halloween.Director.Shared
         {
             if (StartupDetails)
             {
-                logger.Info(SectionHeader(title));
+                logger.Info(Banner($"{title}:Begin"));
             }
 
             await writeBody();
 
             if (StartupDetails)
             {
-                logger.Info(new string('=', SectionWidth));
+                logger.Info(Banner($"{title}:End"));
             }
         }
 
@@ -62,11 +62,11 @@ namespace Halloween.Director.Shared
             }
         }
 
-        private static string SectionHeader(string title)
+        private static string Banner(string text)
         {
-            var padding = Math.Max(0, SectionWidth - title.Length);
+            var padding = Math.Max(0, SectionWidth - text.Length);
             var left = padding / 2;
-            return new string('=', left) + title + new string('=', padding - left);
+            return new string('=', left) + text + new string('=', padding - left);
         }
     }
 }
