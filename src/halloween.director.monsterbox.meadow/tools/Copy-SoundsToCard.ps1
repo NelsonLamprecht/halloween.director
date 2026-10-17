@@ -57,7 +57,7 @@ Updates app.config.yaml and copies the files to the freshly formatted card at E:
 
 .EXAMPLE
 .\Copy-SoundsToCard.ps1 -SourceFolder ..\sounds\ -Destination e:\ -WhatIf
-Only updates app.config.yaml.
+Run from the tools folder with the sounds folder in the monsterbox project: previews the config change and the copy to the card at e:\ (leave out -Destination to only update app.config.yaml).
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
 param(
