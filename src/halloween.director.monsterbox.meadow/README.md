@@ -1,4 +1,4 @@
-# halloween.scares.monsterbox.meadow
+# halloween.director.monsterbox.meadow
 
 Wilderness Labs Meadow F7 firmware for the monsterbox prop: two relays drive pneumatic cylinders (the shake) and a YX5300 MP3 module plays sounds. A companion mobile app triggers both over HTTP.
 
@@ -31,4 +31,4 @@ Red until the server is up, then green while idle. The LED pulses while a comman
 
 1. Copy `wifi.config.yaml.template` to `wifi.config.yaml` and fill in the WiFi credentials. The file is gitignored.
 2. Optionally set `App.DeviceName` in `app.config.yaml`; it is the name the mobile app sees.
-3. Build and deploy `src/halloween.scares.sln` to the Meadow F7 with the Meadow tooling in Visual Studio or VS Code.
+3. Build and deploy `src/halloween.director.sln` to the Meadow F7 with the Meadow tooling in Visual Studio or VS Code.

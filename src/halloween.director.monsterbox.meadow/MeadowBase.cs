@@ -2,7 +2,7 @@ using Meadow;
 using Meadow.Devices;
 using Meadow.Logging;
 
-namespace halloween.scares.monsterbox.meadow
+namespace halloween.director.monsterbox.meadow
 {
     public abstract class MeadowBase: App<F7FeatherV1>
     {

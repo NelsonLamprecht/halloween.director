@@ -1,7 +1,7 @@
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace halloween.scares.monsterbox.meadow.Services.NetworkService
+namespace halloween.director.monsterbox.meadow.Services.NetworkService
 {
     internal class NetworkService: BaseService
     {

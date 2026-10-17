@@ -7,7 +7,7 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace halloween.scares.monsterbox.meadow.Services.MapleService
+namespace halloween.director.monsterbox.meadow.Services.MapleService
 {
     internal class MapleService : BaseService
     {

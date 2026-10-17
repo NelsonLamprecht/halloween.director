@@ -1,4 +1,4 @@
-namespace halloween.scares.monsterbox.meadow.Services.Watchdog
+namespace halloween.director.monsterbox.meadow.Services.Watchdog
 {
     internal interface IWatchdogService: IRunableService
     {

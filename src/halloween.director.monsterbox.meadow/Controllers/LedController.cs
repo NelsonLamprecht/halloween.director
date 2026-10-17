@@ -8,7 +8,7 @@ using Meadow.Devices;
 using Meadow.Foundation.Leds;
 using Meadow.Logging;
 
-namespace halloween.scares.monsterbox.meadow.Controllers
+namespace halloween.director.monsterbox.meadow.Controllers
 {
     internal class LedController : BaseController, IDisposable
     {

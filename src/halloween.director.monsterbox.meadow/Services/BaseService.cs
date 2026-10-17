@@ -1,7 +1,7 @@
 using Meadow.Logging;
 using System.Threading.Tasks;
 
-namespace halloween.scares.monsterbox.meadow.Services
+namespace halloween.director.monsterbox.meadow.Services
 {
     public class BaseService: IRunableService
     {
