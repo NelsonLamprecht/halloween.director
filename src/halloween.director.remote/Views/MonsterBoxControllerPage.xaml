@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:viewmodel="clr-namespace:Halloween.Director.Remote.ViewModel"
+    xmlns:views="clr-namespace:Halloween.Director.Remote.Views"
     x:DataType="viewmodel:MonsterBoxControllerViewModel"
     x:Class="Halloween.Director.Remote.Views.MonsterBoxControllerPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyGreenLight}, Dark={StaticResource SpookyGreenDark}}"
@@ -59,44 +60,19 @@
                                     Text="FX"
                                     Style="{StaticResource SectionHeaderStyle}" />
                                 <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
-                                <FlexLayout
-                                    Wrap="Wrap"
-                                    Direction="Row"
-                                    JustifyContent="Start"
-                                    AlignContent="Start"
-                                    BindableLayout.ItemsSource="{Binding FxSounds}">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="viewmodel:SoundItem">
-                                            <Button
-                                                Text="{Binding Name}"
-                                                Style="{StaticResource FxButtonStyle}"
-                                                FlexLayout.Basis="19%"
-                                                Margin="1"
-                                                Command="{Binding PlayCommand}" />
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </FlexLayout>
+                                <views:SoundGrid
+                                    Sounds="{Binding FxSounds}"
+                                    ButtonStyle="{StaticResource FxButtonStyle}"
+                                    ColumnSpacing="6"
+                                    RowSpacing="6" />
                                 <Label
                                     Text="CREATURES"
                                     Style="{StaticResource SectionHeaderStyle}" />
-                                <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
-                                <FlexLayout
-                                    Wrap="Wrap"
-                                    Direction="Row"
-                                    JustifyContent="Start"
-                                    AlignContent="Start"
-                                    BindableLayout.ItemsSource="{Binding CreatureSounds}">
-                                    <BindableLayout.ItemTemplate>
-                                        <DataTemplate x:DataType="viewmodel:SoundItem">
-                                            <Button
-                                                Text="{Binding Name}"
-                                                Style="{StaticResource CreatureButtonStyle}"
-                                                FlexLayout.Basis="19%"
-                                                Margin="1"
-                                                Command="{Binding PlayCommand}" />
-                                        </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </FlexLayout>
+                                <views:SoundGrid
+                                    Sounds="{Binding CreatureSounds}"
+                                    ButtonStyle="{StaticResource CreatureButtonStyle}"
+                                    ColumnSpacing="6"
+                                    RowSpacing="6" />
                             </VerticalStackLayout>
                         </ScrollView>
                 </Border>
