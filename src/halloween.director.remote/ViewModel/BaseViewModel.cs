@@ -91,6 +91,8 @@ namespace Halloween.Director.Remote.ViewModel
             return _manualDeviceAddresses.Contains(server.IpAddress);
         }
 
+        public Command ScanForServersCommand => new Command(async () => await GetServers());
+
         public async Task GetServers()
         {
             if (IsBusy)
@@ -105,7 +107,7 @@ namespace Halloween.Director.Remote.ViewModel
                 // added devices and whatever's currently assigned to a device slot
                 // (MonsterBoxDevice/ScareCrowDevice - see the override in
                 // MonsterBoxControllerViewModel) survive repeat scans - e.g. every
-                // time the Controller tab reappears - instead of a fresh batch of
+                // time the Options tab reappears - instead of a fresh batch of
                 // announcements wiping out a selection made from an earlier scan.
                 for (int i = HostList.Count - 1; i >= 0; i--)
                 {

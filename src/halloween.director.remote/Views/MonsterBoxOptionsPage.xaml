@@ -43,7 +43,7 @@
                 <Border
                     Grid.Row="0"
                     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
-                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
+                    <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" RowSpacing="6">
                         <Label
                             Grid.Row="0"
                             Text="DEVICES"
@@ -103,6 +103,14 @@
                                 Command="{Binding AddManualScarecrowDeviceCommand}"
                             />
                         </Grid>
+                        <!--The scan also runs whenever this tab appears; this repeats it
+                            (the props broadcast every 2s and the scan listens for 10s).-->
+                        <Button
+                            Grid.Row="5"
+                            Text="Scan for devices"
+                            Style="{StaticResource FxButtonStyle}"
+                            Command="{Binding ScanForServersCommand}"
+                        />
                     </Grid>
                 </Border>
                 <Border

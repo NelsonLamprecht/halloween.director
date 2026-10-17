@@ -15,6 +15,13 @@ namespace Halloween.Director.Remote.Views
             BindingContext = ViewModel;
         }
 
+        // The device pickers are on this page, so this is where to look for advertising props.
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            await ViewModel.GetServers();
+        }
+
         // Let pressing Enter/Done on the keyboard submit the manual device
         // address, same as tapping Add - Entry has no Command/CommandParameter
         // of its own to bind Completed to directly.
