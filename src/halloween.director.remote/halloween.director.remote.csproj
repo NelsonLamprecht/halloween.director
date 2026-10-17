@@ -30,7 +30,7 @@
 		<ApplicationTitle>Halloween Director</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.kayza.monsterboxremote.maui</ApplicationId>
+		<ApplicationId>com.nlamprecht.halloween.director.remote</ApplicationId>
 
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
