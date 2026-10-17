@@ -31,10 +31,17 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         // per request costs only the two lookups above.
         public override bool IsReusable => false;
 
+        // Maple only creates QueryString when the URL contains a '?', so it is null for a plain
+        // "POST /shake" (reading it directly throws a NullReferenceException).
+        private string Query(string name)
+        {
+            return QueryString?[name];
+        }
+
         [HttpPost("/sound")]
         public IActionResult Sound()
         {
-            if (!byte.TryParse(QueryString["filenumber"], out var fileNumber) || fileNumber > MP3Controller.MaxFileNumber)
+            if (!byte.TryParse(Query("filenumber"), out var fileNumber) || fileNumber > MP3Controller.MaxFileNumber)
             {
                 Resolver.Log.Warn($"Sound request missing or invalid 'filenumber' (0-{MP3Controller.MaxFileNumber}).");
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
@@ -70,22 +77,22 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         {
             var config = new ShakeConfiguration();
 
-            if (int.TryParse(QueryString["bi"], out var beginIterations))
+            if (int.TryParse(Query("bi"), out var beginIterations))
             {
                 config.BeginIterations = beginIterations;
             }
 
-            if (int.TryParse(QueryString["ei"], out var endIterations))
+            if (int.TryParse(Query("ei"), out var endIterations))
             {
                 config.EndIterations = endIterations;
             }
 
-            if (int.TryParse(QueryString["bd"], out var beginDelay))
+            if (int.TryParse(Query("bd"), out var beginDelay))
             {
                 config.BeginDelay = beginDelay;
             }
 
-            if (int.TryParse(QueryString["ed"], out var endDelay))
+            if (int.TryParse(Query("ed"), out var endDelay))
             {
                 config.EndDelay = endDelay;
             }
