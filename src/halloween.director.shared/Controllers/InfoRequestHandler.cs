@@ -17,7 +17,10 @@ namespace Halloween.Director.Shared.Controllers
         [HttpGet("/info")]
         public IActionResult Info()
         {
-            return new ContentResult(DeviceInfo.ToJson(Resolver.Device.Information.DeviceName), "application/json");
+            var name = Resolver.Device.Information.DeviceName;
+            Resolver.Log.Info($"Info request: {name}, {DeviceInfo.Type}, {DeviceInfo.Version}.");
+
+            return new ContentResult(DeviceInfo.ToJson(name), "application/json");
         }
     }
 }
