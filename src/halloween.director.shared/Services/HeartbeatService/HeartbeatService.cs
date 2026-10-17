@@ -10,7 +10,7 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
 {
     /// <summary>
     /// Follows the Meadow.Core.Samples "Config_Files" heartbeat: a background loop that logs
-    /// the time and IP address every 10 seconds, so the device log shows the app is alive
+    /// the time and IP address every <see cref="DefaultIntervalSeconds"/> seconds, so the device log shows the app is alive
     /// and when it stopped or restarted. <see cref="Run"/> starts the loop and returns
     /// straight away, like the sample's <c>StartHeartbeat()</c>.
     /// </summary>
@@ -25,7 +25,10 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
             this.networkAdapter = networkAdapter;
         }
 
-        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(10);
+        /// <summary>How often the heartbeat is logged, for every prop. Change it here.</summary>
+        public const int DefaultIntervalSeconds = 30;
+
+        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(DefaultIntervalSeconds);
 
         /// <summary>
         /// For testing Lifecycle.RestartOnAppFailure only: throws from the heartbeat task after
