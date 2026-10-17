@@ -56,7 +56,7 @@ Shows the new list, the config change and every file it would copy, and changes 
 Updates app.config.yaml and copies the files to the freshly formatted card at E:\.
 
 .EXAMPLE
-.\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds
+.\Copy-SoundsToCard.ps1 -SourceFolder ..\sounds\ -Destination e:\ -WhatIf
 Only updates app.config.yaml.
 #>
 [CmdletBinding(SupportsShouldProcess = $true)]
