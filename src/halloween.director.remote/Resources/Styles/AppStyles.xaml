@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- This app's own design language, ported from the original MobileMaple
+         App.xaml. Kept separate from Styles.xaml (MAUI's scaffold defaults for
+         controls this app doesn't use) so it's obvious at a glance what's
+         actually load-bearing here. -->
+
+    <!-- IMPORTANT: do not declare {AppThemeBinding}/{OnAppTheme} as a standalone
+         keyed resource (e.g. <AppThemeBinding x:Key="Foo" .../>) anywhere in this
+         app. It compiles and works fine on Android, but reliably fail-fast
+         crashes WinUI3/Windows (0xc000027b in Microsoft.UI.Xaml.dll) - isolated
+         and confirmed with a minimal repro (a completely stock `dotnet new maui`
+         app crashes identically the moment one such resource is added, even
+         with zero other custom code). Always apply {AppThemeBinding} inline -
+         directly on a property, or inside a <Style><Setter .../></Style> - which
+         is the pattern MAUI's own scaffold Styles.xaml uses throughout and is
+         confirmed safe. The raw Light/Dark Color pairs below (in Colors.xaml)
+         are fine as plain keyed resources; it's only the AppThemeBinding/
+         OnAppTheme wrapper itself that must never be a standalone resource. -->
+
+    <Style x:Key="ButtonStyle" TargetType="Button">
+        <!-- White (not black) text: black-on-purple/gray measured ~3.1:1 and
+             ~2.8:1 against WCAG AA's 4.5:1 minimum for normal text. White gets
+             both states comfortably above 6.5:1. -->
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="CornerRadius" Value="5" />
+        <!-- Tighter horizontal padding than a plain "20" all around: it's the
+             difference between "Dragongrowl" clipping and it wrapping cleanly
+             inside the button at normal column widths. Button centers text by
+             default, so no explicit alignment setter is needed (and Button has
+             no HorizontalTextAlignment property to set - that's a Label/
+             InputView thing; trying it here fails XAML compilation). -->
+        <Setter Property="Padding" Value="6,14" />
+        <!-- Let long/two-word labels (Metal Hit, Door creek, Dragon Growl) wrap
+             to a second line instead of clipping, since Button has no portable
+             auto-shrink-to-fit. -->
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+        <!-- Restores the touch-target floor (Material 48dp / HIG 44pt) that's
+             lost because this named style fully replaces Styles.xaml's implicit
+             Button style (styles don't merge) rather than just extending it. -->
+        <Setter Property="MinimumHeightRequest" Value="48" />
+        <Setter Property="MinimumWidthRequest" Value="48" />
+        <!-- Default (not busy) background. -->
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SpookyPurpleLight}, Dark={StaticResource SpookyPurpleDark}}" />
+        <!-- Centralizes what used to be a pair of <Button.Triggers> DataTriggers
+             repeated on every single button in MonsterBoxControllerPage.xaml -
+             one definition here instead of ~14 copies. -->
+        <Style.Triggers>
+            <DataTrigger TargetType="Button" Binding="{Binding IsBusy}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource ButtonInactiveLight}, Dark={StaticResource ButtonInactiveDark}}" />
+            </DataTrigger>
+            <!-- Brief flash so a failed command (device unreachable, bad
+                 response, exception) is visible instead of looking identical
+                 to a successful press. See MonsterBoxControllerViewModel's
+                 IsCommandFailed/SignalCommandFailedAsync. -->
+            <DataTrigger TargetType="Button" Binding="{Binding IsCommandFailed}" Value="True">
+                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SpookyRedLight}, Dark={StaticResource SpookyRedDark}}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Category accents, all BasedOn ButtonStyle so they inherit the IsBusy
+         trigger, wrap/padding, and touch-target floor above; only the color
+         (and Shake's size) differs. -->
+    <Style x:Key="ShakeButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="Padding" Value="6,16" />
+        <Setter Property="MinimumHeightRequest" Value="56" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SpookyRedLight}, Dark={StaticResource SpookyRedDark}}" />
+    </Style>
+
+    <Style x:Key="CreatureButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="4,10" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SpookyTealLight}, Dark={StaticResource SpookyTealDark}}" />
+    </Style>
+
+    <Style x:Key="FxButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Padding" Value="4,10" />
+    </Style>
+
+    <Style x:Key="ScarecrowButtonStyle" TargetType="Button" BasedOn="{StaticResource ButtonStyle}">
+        <Setter Property="FontSize" Value="26" />
+    </Style>
+
+    <Style x:Key="LabelStyle" TargetType="Label">
+        <Setter Property="TextColor" Value="White"/>
+        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <Style x:Key="SectionHeaderStyle" TargetType="Label" BasedOn="{StaticResource LabelStyle}">
+        <!-- No Opacity here (there used to be one, at 0.75): blending white text
+             toward the Orange panel background measures ~2.1:1 in light mode -
+             well under WCAG AA's 4.5:1 minimum - even though the same blend
+             happens to clear it in dark mode. Full-opacity white plus the
+             smaller size/letter-spacing below is enough to read as a header
+             without sacrificing contrast in either theme. -->
+        <Setter Property="HorizontalOptions" Value="Start" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="CharacterSpacing" Value="1.5" />
+        <Setter Property="Margin" Value="2,10,0,2" />
+    </Style>
+
+    <Style x:Key="StepperStyle" TargetType="Stepper">
+        <Setter Property="HorizontalOptions" Value="Center"/>
+        <Setter Property="VerticalOptions" Value="Center"/>
+        <Setter Property="Margin" Value="0,5,0,0"/>
+        <Setter Property="BackgroundColor" Value="Transparent"/>
+    </Style>
+
+</ResourceDictionary>

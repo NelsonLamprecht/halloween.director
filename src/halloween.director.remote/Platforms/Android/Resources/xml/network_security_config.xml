@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!--
+      The Meadow F7 boards this app controls (MonsterBox, Scarecrow) are only
+      ever reached over the local LAN via plain HTTP - Wilderness Labs' Maple
+      server has no TLS support - and boards are addressed by a dynamically
+      discovered IP (via UDP advertisement scanning), not a fixed hostname.
+      Android's network-security-config only matches cleartext exceptions by
+      exact hostname/IP, not by CIDR/subnet range, so a per-device allowlist
+      isn't practical here. Cleartext stays permitted app-wide, functionally
+      the same as the previous android:usesCleartextTraffic="true" manifest
+      flag, but the decision and its reasoning now live in one documented
+      file instead of a bare manifest attribute.
+    -->
+    <base-config cleartextTrafficPermitted="true" />
+</network-security-config>
