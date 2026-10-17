@@ -22,7 +22,7 @@ namespace Halloween.Director.Remote.ViewModel
 
         /// <summary>
         /// The sounds shown until (or if) the monsterbox answers: the list this app shipped with, which
-        /// matches the monsterbox's default Sounds section.
+        /// matches the monsterbox's default Sounds section (tools\Copy-SoundsToCard.ps1 prints the lines to paste here when the list changes).
         /// </summary>
         public static IReadOnlyList<SoundEntry> Defaults { get; } = new[]
         {

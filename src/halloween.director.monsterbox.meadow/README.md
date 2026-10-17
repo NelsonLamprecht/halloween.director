@@ -44,17 +44,18 @@ Sounds:
     Creature 1: 8
 ```
 
-Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). Number the sounds `0, 1, 2, ...` with no gaps, FX first and the creatures last. `GET /sounds` returns the list as JSON (`[{"number":0,"name":"Werewolf"},...]`) so the remote can build its buttons from it (it shows its built-in list until a monsterbox answers, and keeps it if one can't be reached; names starting with `Creature` go in the CREATURES section, everything else under FX). If you change a number, also update the remote's built-in list (`SoundCatalogClient.Defaults`).
+Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). The sounds are numbered `0, 1, 2, ...` with no gaps, FX first and the creatures (names starting with `Creature`) last. `GET /sounds` returns the list as JSON (`[{"number":0,"name":"Werewolf"},...]`) so the remote can build its buttons from it. The remote shows its built-in list until a monsterbox answers, and keeps it if one can't be reached; names starting with `Creature` go in the CREATURES section, everything else under FX.
 
-**Naming the files on the card:** `NNN_Name.mp3`, where `NNN` is the file number from the config, zero-padded to three digits, and `Name` is the sound name with spaces as underscores: `000_Werewolf.mp3`, `006_Metal_Hit.mp3`, `007_Raven.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied.
+**You don't edit that list by hand.** Keep all the sound files in one folder and run `tools\Copy-SoundsToCard.ps1` (Windows PowerShell or PowerShell 7). It reads the folder, numbers the sounds, rewrites the `Sounds:` section of `app.config.yaml` (nothing else in the file changes) and copies the files to the card in that order:
 
-**Preparing a card** with `tools\Copy-SoundsToCard.ps1` (Windows PowerShell or PowerShell 7):
-
-1. Put the originals in one folder, named after the sound (`Raven.mp3`, `door_creek.mp3`; case, spaces, `_` and `-` are ignored) or already `007_anything.mp3`.
+1. Put the `.mp3` / `.wav` files in one folder. The file name becomes the sound name: `Raven.mp3` is "Raven", `evil_laugh.mp3` is "Evil laugh" (`_` and `-` become spaces). A sound already in the config keeps its spelling and its place in the order, so the remote's buttons don't move; a new file is added after the existing non-creature sounds and before the creatures. Use `-Order Alphabetical` to sort by name instead. A file that was removed from the folder is dropped from the list (the script warns), and the numbers after it shift.
 2. Quick-format the card as **FAT32**. The card must be empty: deleting files does not reliably reset the order.
-3. Run it (add `-WhatIf` first to preview):
+3. Preview, then run it (omit `-Destination` to only update the config):
    ```powershell
+   .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\ -WhatIf
    .\tools\Copy-SoundsToCard.ps1 -SourceFolder C:\Halloween\Sounds -Destination E:\
    ```
-   If the numbers ever have a gap, pass `-FillerFile` (a short silent mp3) and it is copied into each missing number. To add a sound, add a `Name: number` line using the next free number and re-run it on a freshly formatted card.
-4. Eject the card in Windows before pulling it.
+   It prints the new list with `new` / `was N` markers, and the lines to paste into the remote's built-in fallback list (`SoundCatalogClient.Defaults`) when the config changed.
+4. Eject the card in Windows, then **redeploy the monsterbox** (the config is part of the app) and, if the numbers moved, the remote with its updated fallback list.
+
+**Names on the card:** `NNN_Name.mp3`, where `NNN` is the file number zero-padded to three digits and `Name` is the sound name with spaces as underscores: `000_Werewolf.mp3`, `007_Raven.mp3`, `011_Creature_1.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied. A file that already starts with `NNN_` in the source folder has that prefix ignored.
