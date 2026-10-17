@@ -14,3 +14,24 @@ App:
     # for the production build to log only the essentials.
     StartupDetails: true
     DeviceName: Monsterbox-v1
+
+# The sounds on the MP3 module's SD card: "Name: file number". The module can't report file
+# names, so GET /sounds returns this list and the remote builds its buttons from it. The file
+# number is what /sound?filenumber= sends (number 13 = the 14th file copied to the card; see
+# tools\Copy-SoundsToCard.ps1). The line format matters: Meadow's config parser only reads
+# plain "key: value" lines, so no lists, no { } and no ':' in a name.
+# File number 0 (the first file on the card) is not used by the remote today.
+Sounds:
+    Werewolf: 1
+    Laugh: 2
+    Chains: 3
+    Heartbeat: 4
+    Dragon Growl: 5
+    Door creek: 6
+    Creature 1: 7
+    Creature 2: 8
+    Creature 3: 9
+    Creature 4: 10
+    Creature 5: 11
+    Metal Hit: 12
+    Raven: 13
