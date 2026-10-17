@@ -16,7 +16,12 @@ namespace Halloween.Director.Remote.ViewModel
 {
     public class BaseViewModel : INotifyPropertyChanged, IDisposable
     {
+        // Requests (shake can run several seconds) get the longer timeout.
         private const int MapleClientListenTimeout = 10000;
+
+        // How long a scan listens for advertisements. The props broadcast every 2 seconds, so this hears
+        // each of them a couple of times.
+        private const int ScanListenTimeout = 5000;
 
         // Addresses added via AddOrGetManualDevice, so GetServers() can leave
         // them in HostList across rescans instead of wiping them out along with
@@ -24,6 +29,10 @@ namespace Halloween.Director.Remote.ViewModel
         private readonly HashSet<string> _manualDeviceAddresses = new(StringComparer.OrdinalIgnoreCase);
 
         public MapleClient client { get; private set; }
+
+        // Scans use their own client: the listen timeout also bounds a MapleClient's HTTP requests, and
+        // shortening the scan must not shorten how long a /shake may take.
+        private MapleClient scanner { get; }
 
         int _serverPort;
         public int ServerPort
@@ -53,7 +62,8 @@ namespace Halloween.Director.Remote.ViewModel
             // MapleClient.ListenTimeout has a protected setter as of Maple.Client 0.96.0,
             // so the timeout must be supplied via the constructor instead of an initializer.
             client = new MapleClient(listenTimeout: TimeSpan.FromMilliseconds(MapleClientListenTimeout));
-            client.Servers.CollectionChanged += ServersCollectionChanged;
+            scanner = new MapleClient(listenTimeout: TimeSpan.FromMilliseconds(ScanListenTimeout));
+            scanner.Servers.CollectionChanged += ServersCollectionChanged;
         }
 
         // Adds (or reuses, if already present) a ServerModel for a manually-typed
@@ -117,9 +127,13 @@ namespace Halloween.Director.Remote.ViewModel
                     }
                 }
 
+                // MapleClient only reports a server it hasn't already got in Servers, so forget the earlier
+                // scan's or a rescan would never put those devices back in HostList.
+                scanner.Servers.Clear();
+
                 using (new MulticastLockScope())
                 {
-                    await client.StartScanningForAdvertisingServers();
+                    await scanner.StartScanningForAdvertisingServers();
                 }
             }
             catch (Exception ex)
@@ -172,7 +186,7 @@ namespace Halloween.Director.Remote.ViewModel
 
         public void Dispose()
         {
-            client.Servers.CollectionChanged -= ServersCollectionChanged;
+            scanner.Servers.CollectionChanged -= ServersCollectionChanged;
             GC.SuppressFinalize(this);
         }
     }

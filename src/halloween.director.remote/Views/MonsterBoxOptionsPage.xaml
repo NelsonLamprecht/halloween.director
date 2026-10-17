@@ -104,7 +104,7 @@
                             />
                         </Grid>
                         <!--The scan also runs whenever this tab appears; this repeats it
-                            (the props broadcast every 2s and the scan listens for 10s).-->
+                            (the props broadcast every 2s and the scan listens for 5s).-->
                         <Button
                             Grid.Row="5"
                             Text="Scan for devices"
