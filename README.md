@@ -13,7 +13,7 @@ See `agents.md` for the shared architecture and patterns, and each project's `ag
 
 ## Installing the remote on an Android tablet
 
-The remote's Android application id is `com.nlamprecht.halloween.director.remote`, so installing again updates the app in place.
+The remote's Android application id is `com.nlamprecht.halloween.director.remote`; installing again updates the app in place.
 
 ### Enable side loading (once per tablet)
 
@@ -38,6 +38,6 @@ Wireless debugging: `adb pair <ip>:<pairing-port>` (enter the code), then `adb c
 
 To make an APK file instead (to copy to the tablet), run `dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk`; the `.apk` is in `bin\Release\net10.0-android\publish\`. Install it with `adb install -r <file>.apk`.
 
-Uninstall: `adb uninstall com.nlamprecht.halloween.director.remote`. If the old `com.kayza.monsterboxremote.maui` copy is still on the tablet, remove it the same way (the new id installs as a separate app).
+Uninstall: `adb uninstall com.nlamprecht.halloween.director.remote`.
 
 The tablet must be on the same WiFi network as the props.
