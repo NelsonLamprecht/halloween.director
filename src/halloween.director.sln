@@ -15,6 +15,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\agents.md = ..\agents.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tools", "tools", "{3E688B30-D0CE-42FE-9233-FF375C735154}"
+	ProjectSection(SolutionItems) = preProject
+		halloween.director.monsterbox.meadow\tools\Copy-SoundsToCard.ps1 = halloween.director.monsterbox.meadow\tools\Copy-SoundsToCard.ps1
+	EndProjectSection
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "halloween.director.scarecrow.meadow", "halloween.director.scarecrow.meadow\halloween.director.scarecrow.meadow.csproj", "{8415F84A-D43E-4891-B9F6-C1E5EBB0B206}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "halloween.director.remote", "halloween.director.remote\halloween.director.remote.csproj", "{03E23DE7-6AD0-487A-9B6D-4A79C81F4F9F}"
@@ -48,6 +53,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3E688B30-D0CE-42FE-9233-FF375C735154} = {26F03D32-9A97-4C4E-80ED-40DECB1C0621}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {22FB9318-3336-4041-BBE5-05C782104231}
