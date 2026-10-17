@@ -89,12 +89,14 @@ namespace Halloween.Director.Shared.Controllers
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var phase = (clock.Elapsed.TotalMilliseconds % PulseDuration.TotalMilliseconds)
-                        / PulseDuration.TotalMilliseconds;
+                    var cycles = clock.Elapsed.TotalMilliseconds / PulseDuration.TotalMilliseconds;
+                    var phase = cycles % 1;
                     // 0 -> 1 -> 0 over one cycle, starting dark
                     var wave = (float)(0.5 - 0.5 * Math.Cos(2 * Math.PI * phase));
                     var brightness = PulseLowBrightness + (1 - PulseLowBrightness) * wave;
-                    Led.WriteColor(Color.FromHsba(hue, 1, brightness));
+                    // a new hue every cycle, so the color visibly changes as well as the brightness
+                    var cycleHue = (hue + (int)cycles * PulseHueStep) % 360;
+                    Led.WriteColor(Color.FromHsba(cycleHue, 1, brightness));
                     await Task.Delay(40, cancellationToken);
                 }
             }
@@ -104,9 +106,12 @@ namespace Halloween.Director.Shared.Controllers
             }
         }
 
-        // one full fade up/down of the activity pulse
-        private static readonly TimeSpan PulseDuration = TimeSpan.FromSeconds(2);
-        private const float PulseLowBrightness = 0.1f;
+        // Activity pulse tuning: one full fade up/down takes PulseDuration (shorter = faster),
+        // PulseLowBrightness is how dark it gets between pulses (lower = more contrast) and
+        // PulseHueStep is how many degrees (0-360) the color moves on each pulse.
+        private static readonly TimeSpan PulseDuration = TimeSpan.FromMilliseconds(600);
+        private const float PulseLowBrightness = 0f;
+        private const float PulseHueStep = 70f;
 
         // Pulses while at least one command is being handled, then returns to ReadyColor.
         // Counted, because Maple handles requests in parallel: the LED only goes back to
@@ -188,8 +193,8 @@ namespace Halloween.Director.Shared.Controllers
         // Color shown when the board is idle and ready to accept a command
         public static readonly Color ReadyColor = Color.Green;
 
-        // shortest time the pulse stays visible (one full pulse cycle)
-        private static readonly TimeSpan MinActivityPulse = PulseDuration;
+        // shortest time the pulse stays visible (a few pulses, so a quick command is still noticeable)
+        private static readonly TimeSpan MinActivityPulse = TimeSpan.FromSeconds(2);
 
         private readonly object _activityLock = new object();
         private readonly Stopwatch _pulseClock = new Stopwatch();
