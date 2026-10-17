@@ -7,6 +7,10 @@ using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Logging;
 
+using Halloween.Director.Shared.Controllers;
+using Halloween.Director.Shared.Services.MapleService;
+using Halloween.Director.Shared.Services.NetworkService;
+
 namespace Halloween.Director.Shared
 {
     public abstract class MeadowBase: App<F7FeatherV1>
@@ -40,6 +44,50 @@ namespace Halloween.Director.Shared
                 Logger.Warn($"WiFi disconnected @ {BootStopwatch.Elapsed}. Reason: {args.Reason}");
             wifi.NetworkError += (sender, args) =>
                 Logger.Error($"WiFi network error @ {BootStopwatch.Elapsed}. ErrorCode: {args.ErrorCode}");
+        }
+
+        private bool _networkServicesStarted;
+
+        // Subscribe to this from NetworkConnected. It runs the network diagnostics, then starts
+        // the Maple server, then turns the LED to ready. The app must have created NetworkService,
+        // MapleService and LedController first.
+        //
+        // async void is deliberate: this is an event handler, and awaiting MapleService.Run()
+        // lets a startup failure be caught and logged instead of vanishing in an unobserved task.
+        protected async void OnNetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
+        {
+            Logger.StartupSection("WiFiConnected", () =>
+                Logger.Info($"WiFi connected @ {BootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
+
+            Services.Get<NetworkService>().NetworkIsConnected(sender);
+
+            // AutomaticallyReconnect can raise this again after a drop. The Maple server is
+            // bound to a specific IP, so leave it alone if the address is unchanged and
+            // rebuild it if DHCP handed out a new one.
+            var mapleService = Services.Get<MapleService>();
+            if (_networkServicesStarted && args.IpAddress.Equals(mapleService.BoundAddress))
+            {
+                return;
+            }
+
+            try
+            {
+                Logger.Info(_networkServicesStarted
+                    ? $"IP changed to {args.IpAddress}; restarting MapleService..."
+                    : "Starting MapleService...");
+                await mapleService.Run();
+            }
+            catch (Exception ex)
+            {
+                // the next NetworkConnected event retries
+                Logger.Error($"MapleService failed to start: {ex}");
+                return;
+            }
+            _networkServicesStarted = true;
+
+            Services.Get<LedController>().SetColor(LedController.ReadyColor);
+
+            Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
         public override Task OnError(Exception e)

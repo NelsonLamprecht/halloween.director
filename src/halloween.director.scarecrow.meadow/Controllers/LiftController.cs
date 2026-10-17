@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 using Meadow.Logging;
 
-using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Scarecrow.Meadow.Controllers

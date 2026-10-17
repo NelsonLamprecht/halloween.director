@@ -1,4 +1,3 @@
-using System;
 using System.Threading.Tasks;
 
 using Meadow.Hardware;
@@ -16,7 +15,6 @@ namespace Halloween.Director.Monsterbox.Meadow
 {
     public class MeadowApp : MeadowBase
     {
-        private bool _servicesStarted = false;
 
         // used if app.config.yaml is missing or doesn't have an App.DeviceName entry
         private const string DefaultDeviceName = "Monsterbox-v1";
@@ -67,7 +65,7 @@ namespace Halloween.Director.Monsterbox.Meadow
             });
 
             LogWifiEvents(wifiAdapter);
-            wifiAdapter.NetworkConnected += OnWifiConnected;
+            wifiAdapter.NetworkConnected += OnNetworkConnected;
 
             Logger.Info("=== Hardware initialized. ===");
 
@@ -83,48 +81,9 @@ namespace Halloween.Director.Monsterbox.Meadow
             Services.Get<HeartbeatService>().Run();
 
             // network connection is handled by Meadow OS via wifi.config.yaml and
-            // AutomaticallyStartNetwork in meadow.config.yaml; see OnWifiConnected
+            // AutomaticallyStartNetwork in meadow.config.yaml; see OnNetworkConnected
             Logger.Info($"=== Running @ {BootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
             return base.Run();
-        }
-
-        // async void is deliberate: this is an event handler, and awaiting MapleService.Run()
-        // lets a startup failure be caught and logged instead of vanishing in an unobserved task
-        private async void OnWifiConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
-        {
-            Logger.StartupSection("WiFiConnected", () =>
-                Logger.Info($"WiFi connected @ {BootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
-
-            var networkService = Services.Get<NetworkService>();
-            networkService.NetworkIsConnected(sender);
-
-            // AutomaticallyReconnect can raise this again after a drop. The Maple server is
-            // bound to a specific IP, so leave it alone if the address is unchanged and
-            // rebuild it if DHCP handed out a new one.
-            var mapleService = Services.Get<MapleService>();
-            if (_servicesStarted && args.IpAddress.Equals(mapleService.BoundAddress))
-            {
-                return;
-            }
-
-            try
-            {
-                Logger.Info(_servicesStarted
-                    ? $"IP changed to {args.IpAddress}; restarting MapleService..."
-                    : "Starting MapleService...");
-                await mapleService.Run();
-            }
-            catch (Exception ex)
-            {
-                // the next NetworkConnected event retries
-                Logger.Error($"MapleService failed to start: {ex}");
-                return;
-            }
-            _servicesStarted = true;
-
-            Services.Get<LedController>().SetColor(LedController.ReadyColor);
-
-            Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
         public override Task OnShutdown()
