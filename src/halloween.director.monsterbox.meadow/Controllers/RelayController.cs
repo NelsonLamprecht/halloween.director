@@ -40,25 +40,11 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             Logger.Info($"{GetType().Name} is initialized.");
         }
 
-        public void TurnOffLeft()
-        {
-            Left.TurnOff();
-        }
+        /// <summary>The left cylinder's relay. On energizes the cylinder.</summary>
+        public IOnOrOffController Left => left ?? throw NotInitialized();
 
-        public void TurnOffRight()
-        {
-            Right.TurnOff();
-        }
-
-        public void TurnOnLeft()
-        {
-            Left.TurnOn();
-        }
-
-        public void TurnOnRight()
-        {
-            Right.TurnOn();
-        }
+        /// <summary>The right cylinder's relay. On energizes the cylinder.</summary>
+        public IOnOrOffController Right => right ?? throw NotInitialized();
 
         public void Dispose()
         {
@@ -66,10 +52,6 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             left?.Dispose();
             right?.Dispose();
         }
-
-        private RelayOutput Left => left ?? throw NotInitialized();
-
-        private RelayOutput Right => right ?? throw NotInitialized();
 
         private InvalidOperationException NotInitialized()
         {

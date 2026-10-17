@@ -22,7 +22,7 @@ WiFi connection itself is **not** hand-rolled — `meadow.config.yaml`'s `Coproc
 
 ## Controllers vs. Services
 
-- **`Controllers/`** = thin hardware drivers (`RelayController`, `MP3Controller`, `LedController`). Each owns one piece of physical hardware and exposes simple imperative methods (`TurnOnLeft()`, `QueueFile(...)`, `SetColor(...)`).
+- **`Controllers/`** = thin hardware drivers (`RelayController`, `MP3Controller`, `LedController`). Each owns one piece of physical hardware and exposes simple imperative methods (`Left.TurnOn()`, `QueueFile(...)`, `SetColor(...)`).
 - **`Services/`** = app-level concerns that aren't tied to one piece of hardware (`MapleService` — the HTTP server; `NetworkService` — post-connect diagnostics; `DiagnosticsService` — device/OS/NTP/WiFi info logging; `Watchdog/WatchdogService` — hang recovery).
 - `CylindersController` sits one level up from `RelayController` — it's still in `Controllers/` because it's still hardware-shaped (shake orchestration), but note it depends on another controller (`RelayController`) via constructor injection, not on `IMeadowDevice` directly. That's fine — dependencies compose.
 
@@ -47,7 +47,7 @@ Every controller/service constructor declares what it needs, and `Services.Creat
 Controllers take `IMeadowDevice device` via constructor injection — that interface covers the common surface (`CreateDigitalOutputPort`, `PlatformOS`, `Information`, etc.). But **named onboard pins** (`OnboardLedRed`, `OnboardLedGreen`, `OnboardLedBlue`) only exist on the concrete `F7FeatherV1` type's `Pins` property, not on the generic interface. Two ways this gets handled here:
 
 - `LedController` receives the generic `IMeadowDevice` and casts internally: `if (device is F7FeatherV1 f7Device) { ... f7Device.Pins.OnboardLedRed ... }`.
-- `RelayController` avoids the cast entirely by not needing named pins inside the controller at all — `MeadowApp.Initialize()` (which has the strongly-typed `Device: F7FeatherV1` from `App<F7FeatherV1>`) resolves `Device.Pins.D05`/`Device.Pins.D06` itself and passes them in as generic `IPin` arguments to `RelayController.Initialize(IPin leftPin, IPin rightPin)`.
+- `RelayController` avoids the cast entirely by not needing named pins inside the controller at all — `MeadowApp.Initialize()` (which has the strongly-typed `Device: F7FeatherV1` from `App<F7FeatherV1>`) resolves `Device.Pins.D05`/`Device.Pins.D06` itself and passes them in as generic `IPin` arguments to `RelayController.Initialize(IPin leftPin, IPin rightPin)`, which exposes the two channels as `Left` and `Right` (`IOnOrOffController`, from the shared project).
 
 Prefer the second pattern (resolve concrete pins at the composition root, inject `IPin`) when practical — it keeps the controller decoupled from the concrete device type. Only reach for the `is F7FeatherV1` cast when the API you need (like named onboard LED pins) genuinely isn't available any other way.
 
