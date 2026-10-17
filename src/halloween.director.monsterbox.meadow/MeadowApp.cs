@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 
 using Meadow.Hardware;
@@ -18,7 +17,6 @@ namespace Halloween.Director.Monsterbox.Meadow
     public class MeadowApp : MeadowBase
     {
         private bool _servicesStarted = false;
-        private readonly Stopwatch _bootStopwatch = Stopwatch.StartNew();
 
         // used if app.config.yaml is missing or doesn't have an App.DeviceName entry
         private const string DefaultDeviceName = "Monsterbox-v1";
@@ -38,9 +36,7 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             Logger.StartupSection("WiFi", () =>
             {
-                Logger.Info(
-                    $"WiFi config from wifi.config.yaml -> DefaultSsid: '{wifiAdapter.DefaultSsid}', " +
-                    $"AutoConnect: {wifiAdapter.AutoConnect}, AutoReconnect: {wifiAdapter.AutoReconnect}");
+                LogWifiConfig(wifiAdapter);
 
                 // this device always runs on the external antenna; persisted so it's already
                 // in effect before AutomaticallyStartNetwork connects on every boot after the first
@@ -70,15 +66,8 @@ namespace Halloween.Director.Monsterbox.Meadow
                 Logger.StartupDetail("Watchdog, Network, Heartbeat, Cylinders and Maple services created.");
             });
 
-            wifiAdapter.NetworkConnecting += (sender) =>
-                Logger.Info($"WiFi connecting @ {_bootStopwatch.Elapsed}...");
+            LogWifiEvents(wifiAdapter);
             wifiAdapter.NetworkConnected += OnWifiConnected;
-            wifiAdapter.NetworkConnectFailed += (sender) =>
-                Logger.Warn($"WiFi connect failed @ {_bootStopwatch.Elapsed}.");
-            wifiAdapter.NetworkDisconnected += (sender, args) =>
-                Logger.Warn($"WiFi disconnected @ {_bootStopwatch.Elapsed}. Reason: {args.Reason}");
-            wifiAdapter.NetworkError += (sender, args) =>
-                Logger.Error($"WiFi network error @ {_bootStopwatch.Elapsed}. ErrorCode: {args.ErrorCode}");
 
             Logger.Info("=== Hardware initialized. ===");
 
@@ -95,7 +84,7 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             // network connection is handled by Meadow OS via wifi.config.yaml and
             // AutomaticallyStartNetwork in meadow.config.yaml; see OnWifiConnected
-            Logger.Info($"=== Running @ {_bootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
+            Logger.Info($"=== Running @ {BootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
             return base.Run();
         }
 
@@ -104,7 +93,7 @@ namespace Halloween.Director.Monsterbox.Meadow
         private async void OnWifiConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
             Logger.StartupSection("WiFiConnected", () =>
-                Logger.Info($"WiFi connected @ {_bootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
+                Logger.Info($"WiFi connected @ {BootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
 
             var networkService = Services.Get<NetworkService>();
             networkService.NetworkIsConnected(sender);
@@ -135,18 +124,12 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             Services.Get<LedController>().SetColor(LedController.ReadyColor);
 
-            Logger.Info($"=== Startup complete @ {_bootStopwatch.Elapsed}. ===");
-        }
-
-        public override Task OnError(Exception e)
-        {
-            Logger.Error($"Unhandled application error @ {_bootStopwatch.Elapsed}: {e}");
-            return base.OnError(e);
+            Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
         public override Task OnShutdown()
         {
-            Logger.Info($"=== Shutting down @ {_bootStopwatch.Elapsed}... ===");
+            Logger.Info($"=== Shutting down @ {BootStopwatch.Elapsed}... ===");
 
             if (Services.ContainsRegisteredType<HeartbeatService>())
             {

@@ -24,13 +24,23 @@ namespace Halloween.Director.Scarecrow.Meadow
 
         public override async Task Initialize()
         {
+            Logger.Info("=== Initializing hardware... ===");
+
             ApplyStartupSettings(DefaultDeviceName);
+
+            var diagnosticsService = Services.Create<DiagnosticsService>();
+            diagnosticsService.OutputMeadowOSInfo();
+            diagnosticsService.OutputDeviceInfo();
+            diagnosticsService.OutputNtpInfo();
 
             var network = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
             Logger.StartupSection("WiFi", () =>
             {
-                network.SetAntenna(AntennaType.External);
-                network.NetworkConnected += NetworkConnected;
+                LogWifiConfig(network);
+
+                // this device always runs on the external antenna; persisted so it's already
+                // in effect before AutomaticallyStartNetwork connects on every boot after the first
+                network.SetAntenna(AntennaType.External, true);
                 Services.Add(network);
                 Logger.StartupDetail("Antenna set to External; waiting for the network to connect.");
             });
@@ -42,7 +52,6 @@ namespace Halloween.Director.Scarecrow.Meadow
             Logger.StartupSection("Services", () =>
             {
                 Services.Create<WatchdogService, IWatchdogService>();
-                Services.Create<DiagnosticsService>();
             });
 
             // the controller logs its own section from Initialize()
@@ -58,6 +67,11 @@ namespace Halloween.Director.Scarecrow.Meadow
                 Logger.StartupDetail("Heartbeat, Network and Maple services created.");
             });
 
+            LogWifiEvents(network);
+            network.NetworkConnected += NetworkConnected;
+
+            Logger.Info("=== Hardware initialized. ===");
+
             await base.Initialize();
         }
 
@@ -65,13 +79,6 @@ namespace Halloween.Director.Scarecrow.Meadow
         {
             try
             {
-                Logger.StartupSection("Run", () => Logger.StartupDetail("Running..."));
-
-                var diagnostics = Services.Get<DiagnosticsService>();
-                diagnostics.OutputDeviceInfo();
-                diagnostics.OutputMeadowOSInfo();
-                diagnostics.OutputNtpInfo();
-
                 var w = Services.Get<IWatchdogService>();
                 w.Enable(15);
                 w.Pet(10);
@@ -80,6 +87,10 @@ namespace Halloween.Director.Scarecrow.Meadow
                 await relayController.Run();
 
                 await Services.Get<HeartbeatService>().Run();
+
+                // network connection is handled by Meadow OS via wifi.config.yaml and
+                // AutomaticallyStartNetwork in meadow.config.yaml; see NetworkConnected
+                Logger.Info($"=== Running @ {BootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
             }
 
             catch (Exception ex)
@@ -95,7 +106,7 @@ namespace Halloween.Director.Scarecrow.Meadow
         private async void NetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
             Logger.StartupSection("WiFiConnected", () =>
-                Logger.StartupDetail($"WiFi connected. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
+                Logger.Info($"WiFi connected @ {BootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
 
             var networkService = Services.Get<NetworkService>();
             networkService.NetworkIsConnected(sender);
@@ -125,11 +136,13 @@ namespace Halloween.Director.Scarecrow.Meadow
             _servicesStarted = true;
 
             Services.Get<LedController>().SetColor(LedController.ReadyColor);
+
+            Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
         public override Task OnShutdown()
         {
-            Logger.Info("=== Shutting down... ===");
+            Logger.Info($"=== Shutting down @ {BootStopwatch.Elapsed}... ===");
 
             if (Services.ContainsRegisteredType<HeartbeatService>())
             {

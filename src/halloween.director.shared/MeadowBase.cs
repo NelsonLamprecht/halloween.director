@@ -1,5 +1,10 @@
+using System;
+using System.Diagnostics;
+using System.Threading.Tasks;
+
 using Meadow;
 using Meadow.Devices;
+using Meadow.Hardware;
 using Meadow.Logging;
 
 namespace Halloween.Director.Shared
@@ -10,7 +15,38 @@ namespace Halloween.Director.Shared
 
         protected ServiceCollection Services { get; } = Resolver.Services;
 
+        /// <summary>Time since the app object was created, for the "@ 00:00:04" log timestamps.</summary>
+        protected Stopwatch BootStopwatch { get; } = Stopwatch.StartNew();
+
         public MeadowBase() { }
+
+        // Logs what wifi.config.yaml and meadow.config.yaml gave the adapter.
+        protected void LogWifiConfig(IWiFiNetworkAdapter wifi)
+        {
+            Logger.Info(
+                $"WiFi config from wifi.config.yaml -> DefaultSsid: '{wifi.DefaultSsid}', " +
+                $"AutoConnect: {wifi.AutoConnect}, AutoReconnect: {wifi.AutoReconnect}");
+        }
+
+        // Logs the WiFi lifecycle events. The app subscribes to NetworkConnected itself,
+        // because that is where it starts its network services.
+        protected void LogWifiEvents(IWiFiNetworkAdapter wifi)
+        {
+            wifi.NetworkConnecting += (sender) =>
+                Logger.Info($"WiFi connecting @ {BootStopwatch.Elapsed}...");
+            wifi.NetworkConnectFailed += (sender) =>
+                Logger.Warn($"WiFi connect failed @ {BootStopwatch.Elapsed}.");
+            wifi.NetworkDisconnected += (sender, args) =>
+                Logger.Warn($"WiFi disconnected @ {BootStopwatch.Elapsed}. Reason: {args.Reason}");
+            wifi.NetworkError += (sender, args) =>
+                Logger.Error($"WiFi network error @ {BootStopwatch.Elapsed}. ErrorCode: {args.ErrorCode}");
+        }
+
+        public override Task OnError(Exception e)
+        {
+            Logger.Error($"Unhandled application error @ {BootStopwatch.Elapsed}: {e}");
+            return base.OnError(e);
+        }
 
         // Applies app.config.yaml's App settings: App.StartupDetails (default true) turns the
         // startup banners and detail lines on or off, and App.DeviceName names the device (the
