@@ -16,9 +16,6 @@ namespace Halloween.Director.Scarecrow.Meadow
 {
     public class MeadowApp : MeadowBase
     {
-        // the remote app sends scarecrow commands to this port (monsterbox uses 5417)
-        private const int MaplePort = 5418;
-
         private bool _servicesStarted;
 
         public override async Task Initialize()
@@ -40,8 +37,7 @@ namespace Halloween.Director.Scarecrow.Meadow
             relayController.Initialize(Device.Pins.D05);
 
             Services.Create<NetworkService>();
-            // each prop listens on its own port so several can share one network
-            Services.Add(new MapleServiceOptions(MaplePort) { AdvertiseIntervalMs = 1500 });
+            Services.Add(new MapleServiceOptions { AdvertiseIntervalMs = 1500 });
             Services.Create<MapleService>();
 
             await base.Initialize();

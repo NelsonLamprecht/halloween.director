@@ -17,9 +17,6 @@ namespace Halloween.Director.Monsterbox.Meadow
 {
     public class MeadowApp : MeadowBase
     {
-        // the remote app sends monsterbox commands to this port (scarecrow uses 5418)
-        private const int MaplePort = 5417;
-
         private bool _servicesStarted = false;
         private readonly Stopwatch _bootStopwatch = Stopwatch.StartNew();
 
@@ -74,8 +71,7 @@ namespace Halloween.Director.Monsterbox.Meadow
             Services.Create<WatchdogService, IWatchdogService>();
             Services.Create<NetworkService>();
             Services.Create<CylindersController>();
-            // each prop listens on its own port so several can share one network
-            Services.Add(new MapleServiceOptions(MaplePort));
+            Services.Add(new MapleServiceOptions());
             Services.Create<MapleService>();
 
             wifiAdapter.NetworkConnecting += (sender) =>
