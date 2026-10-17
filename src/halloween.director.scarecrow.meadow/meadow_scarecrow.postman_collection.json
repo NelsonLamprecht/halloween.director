@@ -1,0 +1,71 @@
+{
+	"info": {
+		"_postman_id": "895e7b82-7efd-4096-a1c2-03ba70d8c029",
+		"name": "meadow_scarecrow",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "978946"
+	},
+	"item": [
+		{
+			"name": "up",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{meadow_host}}/up",
+					"host": [
+						"{{meadow_host}}"
+					],
+					"path": [
+						"up"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "down",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{meadow_host}}/down",
+					"host": [
+						"{{meadow_host}}"
+					],
+					"path": [
+						"down"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "meadow_host",
+			"value": "http://192.168.1.92:5417",
+			"type": "string"
+		}
+	]
+}
