@@ -62,102 +62,53 @@
                                 Grid.ColumnSpan="5"
                                 Text="FX"
                                 Style="{StaticResource SectionHeaderStyle}" />
-                            <Button
+                            <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
+                            <FlexLayout
                                 Grid.Row="2"
-                                Grid.Column="0"
-                                Text="Werewolf"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Werewolf}">
-                            </Button>
-                            <Button
-                                Grid.Column="1"
-                                Grid.Row="2"
-                                Text="Laugh"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Laugh}">
-                            </Button>
-                            <Button
-                                Grid.Column="2"
-                                Grid.Row="2"
-                                Text="Chains"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Chains}">
-                            </Button>
-                            <Button
-                                Grid.Column="3"
-                                Grid.Row="2"
-                                Text="Heart&#8203;beat"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Heartbeat}">
-                            </Button>
-                            <Button
-                                Grid.Column="4"
-                                Grid.Row="2"
-                                Text="Dragon Growl"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.DragonGrowl}">
-                            </Button>
-                            <Button
-                                Grid.Column="0"
-                                Grid.Row="3"
-                                Text="Door creek"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.DoorCreek}">
-                            </Button>
-                            <Button
-                                Grid.Column="1"
-                                Grid.Row="3"
-                                Text="Metal Hit"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.MetalHit}">
-                            </Button>
-                            <Button
-                                Grid.Column="2"
-                                Grid.Row="3"
-                                Text="Raven"
-                                Style="{StaticResource FxButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Raven}">
-                            </Button>
+                                Grid.RowSpan="2"
+                                Grid.ColumnSpan="5"
+                                Wrap="Wrap"
+                                Direction="Row"
+                                JustifyContent="Start"
+                                AlignContent="Start"
+                                BindableLayout.ItemsSource="{Binding FxSounds}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="viewmodel:SoundItem">
+                                        <Button
+                                            Text="{Binding Name}"
+                                            Style="{StaticResource FxButtonStyle}"
+                                            FlexLayout.Basis="19%"
+                                            Margin="1"
+                                            Command="{Binding PlayCommand}" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
                             <Label
                                 Grid.Row="4"
                                 Grid.ColumnSpan="5"
                                 Text="CREATURES"
                                 Style="{StaticResource SectionHeaderStyle}" />
-                            <Button
-                                Grid.Column="0"
+                            <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
+                            <FlexLayout
                                 Grid.Row="5"
-                                Text="Creature 1"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature1}">
-                            </Button>
-                            <Button
-                                Grid.Column="1"
-                                Grid.Row="5"
-                                Text="Creature 2"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature2}">
-                            </Button>
-                            <Button
-                                Grid.Column="2"
-                                Grid.Row="5"
-                                Text="Creature 3"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature3}">
-                            </Button>
-                            <Button
-                                Grid.Column="3"
-                                Grid.Row="5"
-                                Text="Creature 4"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature4}">
-                            </Button>
-                            <Button
-                                Grid.Column="4"
-                                Grid.Row="5"
-                                Text="Creature 5"
-                                Style="{StaticResource CreatureButtonStyle}"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Creature5}">
-                            </Button>
+                                Grid.RowSpan="1"
+                                Grid.ColumnSpan="5"
+                                Wrap="Wrap"
+                                Direction="Row"
+                                JustifyContent="Start"
+                                AlignContent="Start"
+                                BindableLayout.ItemsSource="{Binding CreatureSounds}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="viewmodel:SoundItem">
+                                        <Button
+                                            Text="{Binding Name}"
+                                            Style="{StaticResource CreatureButtonStyle}"
+                                            FlexLayout.Basis="19%"
+                                            Margin="1"
+                                            Command="{Binding PlayCommand}" />
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
                         </Grid>
                 </Border>
                 <!--Bottom panel: Scarecrow up/down controls-->

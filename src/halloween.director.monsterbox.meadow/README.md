@@ -43,7 +43,7 @@ Sounds:
     Raven: 13
 ```
 
-Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). `GET /sounds` returns the list as JSON (`[{"number":1,"name":"Werewolf"},...]`) so the remote can build its buttons from it. File number 0 (the first file on the card) is not used today.
+Each line is `Name: file number` (plain lines only: Meadow's config parser has no lists or `{ }`). `GET /sounds` returns the list as JSON (`[{"number":1,"name":"Werewolf"},...]`) so the remote can build its buttons from it (it shows its built-in list until a monsterbox answers, and keeps it if one can't be reached; names starting with `Creature` go in the CREATURES section, everything else under FX). File number 0 (the first file on the card) is not used today.
 
 **Naming the files on the card:** `NNN_Name.mp3`, where `NNN` is the file number from the config, zero-padded to three digits, and `Name` is the sound name with spaces as underscores: `001_Werewolf.mp3`, `012_Metal_Hit.mp3`, `013_Raven.mp3`. The number in the name is for people (the module ignores names), but it must match the order the files were copied.
 

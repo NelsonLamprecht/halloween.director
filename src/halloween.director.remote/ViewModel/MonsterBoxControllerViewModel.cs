@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -49,8 +50,21 @@ namespace Halloween.Director.Remote.ViewModel
         public ServerModel? MonsterBoxDevice
         {
             get => _monsterBoxDevice;
-            set { _monsterBoxDevice = value; OnPropertyChanged(nameof(MonsterBoxDevice)); }
+            set
+            {
+                _monsterBoxDevice = value;
+                OnPropertyChanged(nameof(MonsterBoxDevice));
+
+                // the sound buttons come from whichever monsterbox is selected
+                _ = LoadSoundsAsync(value?.IpAddress);
+            }
         }
+
+        // Sound buttons, built from the monsterbox's GET /sounds (the SoundCatalog in its
+        // app.config.yaml). Until it answers, or if it can't be reached, the built-in list is shown.
+        public ObservableCollection<SoundItem> FxSounds { get; } = new ObservableCollection<SoundItem>();
+
+        public ObservableCollection<SoundItem> CreatureSounds { get; } = new ObservableCollection<SoundItem>();
 
         ServerModel? _scareCrowDevice;
         public ServerModel? ScareCrowDevice
@@ -94,6 +108,8 @@ namespace Halloween.Director.Remote.ViewModel
             SendMonsterBoxCommand = new Command(async (obj) => await SendMeadowCommand(MonsterBoxDevice?.IpAddress, obj as string));
             SendScarecrowCommand = new Command(async (obj) => await SendMeadowCommand(ScareCrowDevice?.IpAddress, obj as string));
 
+            ApplySounds(SoundCatalogClient.Defaults);
+
             AddManualMonsterBoxDeviceCommand = new Command(() =>
             {
                 var device = AddOrGetManualDevice(ManualMonsterBoxAddress);
@@ -123,17 +139,13 @@ namespace Halloween.Director.Remote.ViewModel
 
         async Task SendMeadowCommand(string? hostAddress, string? command)
         {
-            if (IsBusy || string.IsNullOrEmpty(hostAddress) || string.IsNullOrEmpty(command))
+            if (string.IsNullOrEmpty(command))
             {
                 return;
             }
 
-            IsBusy = true;
-            bool succeeded;
-
-            try
+            await RunCommandAsync(hostAddress, async () =>
             {
-                bool response = false;
                 switch (command.ToLower())
                 {
                     case MonsterBoxCommands.Shake:
@@ -146,43 +158,40 @@ namespace Halloween.Director.Remote.ViewModel
                                 ["ed"] = EndDelay.ToString(),
                             };
                             var complexCommand = RequestUriUtil.GetUriWithQueryString(command, query).ToLower();
-                            response = await PostHttpDataWithCommand(hostAddress,complexCommand);
-                            break;
-                        }
-                    case MonsterBoxCommands.Werewolf:
-                    case MonsterBoxCommands.Laugh:
-                    case MonsterBoxCommands.Chains:
-                    case MonsterBoxCommands.Heartbeat:
-                    case MonsterBoxCommands.DragonGrowl:
-                    case MonsterBoxCommands.DoorCreek:
-                    case MonsterBoxCommands.MetalHit:
-                    case MonsterBoxCommands.Raven:
-                    case MonsterBoxCommands.Creature1:
-                    case MonsterBoxCommands.Creature2:
-                    case MonsterBoxCommands.Creature3:
-                    case MonsterBoxCommands.Creature4:
-                    case MonsterBoxCommands.Creature5:
-                        {
-                            Dictionary<string, string>? query = ResolveSoundParameters(command);
-                            if (query != null)
-                            {
-                                var complexCommand = RequestUriUtil.GetUriWithQueryString("sound", query).ToLower();
-                                response = await PostHttpDataWithCommand(hostAddress,complexCommand);
-                            }
-                            else
-                            {
-                                Debug.WriteLine("Unknown sound file.");
-                            }
-                            break;
+                            return await PostHttpDataWithCommand(hostAddress!, complexCommand);
                         }
                     default:
                         {
-                            response = await PostHttpDataWithCommand(hostAddress,command);
-                            break;
+                            return await PostHttpDataWithCommand(hostAddress!, command);
                         }
                 }
+            });
+        }
 
-                succeeded = response;
+        async Task SendSoundAsync(string? hostAddress, int fileNumber)
+        {
+            await RunCommandAsync(hostAddress, async () =>
+            {
+                var complexCommand = RequestUriUtil.GetUriWithQueryString("sound", BuildSoundQuery(fileNumber)).ToLower();
+                return await PostHttpDataWithCommand(hostAddress!, complexCommand);
+            });
+        }
+
+        // Shared by every command: ignores presses while one is in flight, shows the busy overlay,
+        // and flashes the buttons if the monsterbox/scarecrow didn't accept it.
+        private async Task RunCommandAsync(string? hostAddress, Func<Task<bool>> send)
+        {
+            if (IsBusy || string.IsNullOrEmpty(hostAddress))
+            {
+                return;
+            }
+
+            IsBusy = true;
+            bool succeeded;
+
+            try
+            {
+                succeeded = await send();
             }
             catch (Exception ex)
             {
@@ -199,6 +208,46 @@ namespace Halloween.Director.Remote.ViewModel
             if (!succeeded)
             {
                 await SignalCommandFailedAsync();
+            }
+        }
+
+        // Asks the selected monsterbox for its sounds. If it can't be reached the buttons stay as they are.
+        private async Task LoadSoundsAsync(string? hostAddress)
+        {
+            if (string.IsNullOrEmpty(hostAddress))
+            {
+                return;
+            }
+
+            var sounds = await SoundCatalogClient.FetchAsync(hostAddress, ServerPort);
+            if (sounds == null)
+            {
+                Debug.WriteLine($"No sound list from {hostAddress}; keeping the current buttons.");
+                return;
+            }
+
+            await MainThread.InvokeOnMainThreadAsync(() => ApplySounds(sounds));
+        }
+
+        // call on the main thread
+        private void ApplySounds(IReadOnlyList<SoundEntry> sounds)
+        {
+            FxSounds.Clear();
+            CreatureSounds.Clear();
+
+            foreach (var sound in sounds)
+            {
+                var number = sound.Number;
+                var item = new SoundItem(sound.Name, number, new Command(async () => await SendSoundAsync(MonsterBoxDevice?.IpAddress, number)));
+
+                if (sound.Name.StartsWith(SoundCatalogClient.CreaturePrefix, StringComparison.OrdinalIgnoreCase))
+                {
+                    CreatureSounds.Add(item);
+                }
+                else
+                {
+                    FxSounds.Add(item);
+                }
             }
         }
 
@@ -225,69 +274,6 @@ namespace Halloween.Director.Remote.ViewModel
             {
                 ["filenumber"] = fileNumber.ToString()
             };
-        }
-
-        private static Dictionary<string, string>? ResolveSoundParameters(string command)
-        {
-            switch (command)
-            {
-                case MonsterBoxCommands.Werewolf:
-                    {
-                        return BuildSoundQuery(1);
-                    }
-                case MonsterBoxCommands.Laugh:
-                    {
-                        return BuildSoundQuery(2);
-                    }
-                case MonsterBoxCommands.Chains:
-                    {
-                        return BuildSoundQuery(3);
-                    }
-                case MonsterBoxCommands.Heartbeat:
-                    {
-                        return BuildSoundQuery(4);
-                    }
-                case MonsterBoxCommands.DragonGrowl:
-                    {
-                        return BuildSoundQuery(5);
-                    }
-                case MonsterBoxCommands.DoorCreek:
-                    {
-                        return BuildSoundQuery(6);
-                    }
-                case MonsterBoxCommands.Creature1:
-                    {
-                        return BuildSoundQuery(7);
-                    }
-                case MonsterBoxCommands.Creature2:
-                    {
-                        return BuildSoundQuery(8);
-                    }
-                case MonsterBoxCommands.Creature3:
-                    {
-                        return BuildSoundQuery(9);
-                    }
-                case MonsterBoxCommands.Creature4:
-                    {
-                        return BuildSoundQuery(10);
-                    }
-                case MonsterBoxCommands.Creature5:
-                    {
-                        return BuildSoundQuery(11);
-                    }
-                case MonsterBoxCommands.MetalHit:
-                    {
-                        return BuildSoundQuery(12);
-                    }
-                case MonsterBoxCommands.Raven:
-                    {
-                        return BuildSoundQuery(13);
-                    }
-                default:
-                    {
-                        return null;
-                    }
-            }
         }
 
         private async Task<bool> PostHttpDataWithCommand(string hostAddress, string command)
