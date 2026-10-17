@@ -44,8 +44,46 @@ WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.Automatically
 - **`WatchdogService`**: `Start()` arms it (`DefaultTimeoutSeconds` 15) and starts an independent thread that pets it every `DefaultPetIntervalSeconds` (10), so a slow request handler can't trip it.
 - **`HeartbeatService`**: logs `<time> <ip> (up d.hh:mm:ss)` every `DefaultIntervalSeconds` (30), like the Meadow.Core.Samples `Config_Files` heartbeat. `TestRestartAfterBeats` throws on purpose to test restarts; never set it on a prop.
 - **`MapleService`** + `MapleServiceOptions`: both props listen on Maple's default port `5417` (they run on separate devices) and advertise every 2s. `RequestProcessMode.Parallel`; handlers must keep `IsReusable => false` because Maple keeps per-request state (`QueryString`) on the handler instance. Choose Serial vs Parallel by whether your commands can tolerate concurrency.
-  **Route methods must return `IActionResult` synchronously, never `Task<IActionResult>`.** Maple 2.5.0 only awaits `IActionResult` handlers: for an async one it replies with an empty `200` immediately (so 400/409/500 never reach the client) and swallows exceptions. To wait on async work (the monsterbox `/shake`), block with `.GetAwaiter().GetResult()`; the thread-pool thread and Meadow's lack of a synchronization context make that safe.
-  **`QueryString` is `null` when the URL has no `?`** (Maple only creates it then), so read parameters null-safely (`QueryString?["name"]`); a plain `POST /shake` otherwise throws a NullReferenceException.
+  Route handlers have hard rules; see **Maple request handlers** below before adding or changing one.
+
+## Maple request handlers (read before adding a route)
+
+These are Maple 2.5.0 behaviours that fail silently or confusingly. Every `ControllerRequestHandler` must follow them. They were found the hard way (an async `/shake` returned an empty `200` and logged nothing).
+
+1. **Return `IActionResult` synchronously. Never `async Task<IActionResult>`.** Maple only awaits handlers whose return type is `IActionResult`. For an async one it closes the response immediately with an empty `200` (so your `400`/`409`/`500` never reach the client) and swallows any exception, so a broken handler looks like a successful one with no logs. To wait on async work, block: `SomeAsync().GetAwaiter().GetResult()`. That is safe: each request runs on its own thread-pool thread (Parallel mode) and Meadow has no synchronization context to deadlock on. A long-running blocked handler does not stop other requests (a `/sound` is still answered during a `/shake`).
+2. **`QueryString` is `null` when the URL has no `?`.** Maple only creates it when a query string is present, so `QueryString["x"]` throws a `NullReferenceException` for a plain `POST /shake`. Read it null-safely (`QueryString?["x"]`, or the handler's `Query("x")` helper) and treat a missing parameter as "use the default" or as a `400`, never as an error.
+3. **`IsReusable => false`.** Maple keeps per-request state (`QueryString`, `Context`) on the handler instance, so a shared instance lets parallel requests overwrite each other's parameters.
+4. **Resolve controllers in the constructor from `Resolver.Services`.** Maple creates the handler outside DI (see above). Only do it for types registered before `MapleService` starts.
+5. **Return explicit status codes and log each outcome.** `OkResult` = done, `400` (`HttpStatusCode.BadRequest`) = bad input, `409` = busy, `ServerErrorResult` = a failure you caught. Log the accepted request at Information, rejects at Warning and failures at Error, and signal activity on the LED only for accepted commands.
+6. **Wrap anything that can throw** and return `ServerErrorResult` after logging; an unhandled exception becomes a `500` page with the stack trace, not a log line.
+
+Template:
+
+```csharp
+[HttpPost("/thing")]
+public IActionResult Thing()                      // 1. synchronous IActionResult
+{
+    if (!int.TryParse(Query("n"), out var n))     // 2. null-safe query read
+    {
+        Resolver.Log.Warn("Thing request missing or invalid 'n'.");
+        return new StatusCodeResult(HttpStatusCode.BadRequest);
+    }
+
+    Resolver.Log.Info($"Thing request: n={n}.");  // 5. log the accepted request
+    try
+    {
+        _controller.DoThingAsync(n).GetAwaiter().GetResult();   // 1. block on async work
+    }
+    catch (Exception ex)
+    {
+        Resolver.Log.Error($"Thing failed: {ex.Message}");
+        return new ServerErrorResult();           // 6.
+    }
+
+    _ledController.SignalActivity();
+    return new OkResult();
+}
+```
 
 ## Logging
 
