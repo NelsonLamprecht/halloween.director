@@ -3,28 +3,40 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Meadow.Hardware;
 using Meadow.Logging;
 
 namespace Halloween.Director.Shared.Services.HeartbeatService
 {
     /// <summary>
-    /// Logs a "still alive" line with the uptime on a fixed interval, so the device log
-    /// shows when the app stopped or restarted. <see cref="Run"/> starts the loop in the
-    /// background and returns straight away.
+    /// Follows the Meadow.Core.Samples "Config_Files" heartbeat: a background loop that logs
+    /// the time and IP address every 10 seconds, so the device log shows the app is alive
+    /// and when it stopped or restarted. <see cref="Run"/> starts the loop and returns
+    /// straight away, like the sample's <c>StartHeartbeat()</c>.
     /// </summary>
     public class HeartbeatService : BaseService, IDisposable
     {
+        private readonly INetworkAdapter networkAdapter;
         private readonly Stopwatch uptime = Stopwatch.StartNew();
         private CancellationTokenSource cancellationTokenSource;
 
-        public HeartbeatService(Logger logger) : base(logger)
+        public HeartbeatService(Logger logger, INetworkAdapter networkAdapter) : base(logger)
         {
+            this.networkAdapter = networkAdapter;
         }
 
-        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(60);
+        public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(10);
+
+        /// <summary>
+        /// For testing Lifecycle.RestartOnAppFailure only: throws from the heartbeat task after
+        /// this many beats, as the sample does ("Testing restart..."). Leave null on a prop.
+        /// </summary>
+        public int? TestRestartAfterBeats { get; set; }
 
         public override Task Run()
         {
+            Logger.Debug("+StartHeartbeat");
+
             if (cancellationTokenSource == null)
             {
                 cancellationTokenSource = new CancellationTokenSource();
@@ -37,12 +49,21 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
 
         private async Task BeatAsync(CancellationToken cancellationToken)
         {
+            Logger.Trace("Heartbeat Task Started");
+            var beats = 0;
+
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
+                    beats++;
+                    Logger.Info($"{DateTime.Now} {networkAdapter.IpAddress} (up {uptime.Elapsed:d\\.hh\\:mm\\:ss})");
                     await Task.Delay(Interval, cancellationToken);
-                    Logger.Info($"Heartbeat: up {uptime.Elapsed:d\\.hh\\:mm\\:ss}");
+
+                    if (TestRestartAfterBeats.HasValue && beats >= TestRestartAfterBeats.Value)
+                    {
+                        throw new Exception("Testing restart...");
+                    }
                 }
             }
             catch (OperationCanceledException)

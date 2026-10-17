@@ -55,7 +55,7 @@ Controllers take `IMeadowDevice device` via constructor injection, which covers 
 
 ## `HeartbeatService`
 
-`HeartbeatService` (in `halloween.director.shared`) logs `Heartbeat: up d.hh:mm:ss` at `Information` every 60s (`Interval`), so the device log shows when the app stopped or restarted. `MeadowApp` creates it in `Initialize()`, starts it in `Run()` (it returns immediately; the loop runs in the background) and disposes it in `OnShutdown()`. It used to be a crash-test tool that threw after 10s; that version is gone, so test crash recovery (`Lifecycle.RestartOnAppFailure`) with a deliberate throw in a scratch build instead.
+`HeartbeatService` (in `halloween.director.shared`) logs `<time> <ip> (up d.hh:mm:ss)` at `Information` every 10s (`Interval`), like the Meadow.Core.Samples `Config_Files` heartbeat, so the device log shows when the app stopped or restarted. `MeadowApp` creates it in `Initialize()`, starts it in `Run()` (it returns immediately; the loop runs in the background) and disposes it in `OnShutdown()`. The sample also throws on purpose to test restarts; here that is opt-in (`TestRestartAfterBeats`, off by default) and must never be set in a build that controls hardware.
 
 ## Adding a new controller or service
 

@@ -9,6 +9,7 @@ using Halloween.Director.Monsterbox.Meadow.Controllers;
 using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 using Halloween.Director.Shared.Services.DiagnosticsService;
+using Halloween.Director.Shared.Services.HeartbeatService;
 using Halloween.Director.Shared.Services.MapleService;
 using Halloween.Director.Shared.Services.NetworkService;
 using Halloween.Director.Shared.Services.Watchdog;
@@ -61,6 +62,7 @@ namespace Halloween.Director.Monsterbox.Meadow
             Logger.Info("Creating remaining services...");
             Services.Create<WatchdogService, IWatchdogService>();
             Services.Create<NetworkService>();
+            Services.Create<HeartbeatService>();
             Services.Create<CylindersController>();
             Services.Add(new MapleServiceOptions());
             Services.Create<MapleService>();
@@ -86,6 +88,8 @@ namespace Halloween.Director.Monsterbox.Meadow
             var watchdog = Services.Get<IWatchdogService>();
             watchdog.Enable(15);
             watchdog.Pet(10);
+
+            Services.Get<HeartbeatService>().Run();
 
             // network connection is handled by Meadow OS via wifi.config.yaml and
             // AutomaticallyStartNetwork in meadow.config.yaml; see OnWifiConnected
@@ -140,6 +144,11 @@ namespace Halloween.Director.Monsterbox.Meadow
         public override Task OnShutdown()
         {
             Logger.Info($"=== Shutting down @ {_bootStopwatch.Elapsed}... ===");
+
+            if (Services.ContainsRegisteredType<HeartbeatService>())
+            {
+                Services.Get<HeartbeatService>().Dispose();
+            }
 
             if (Services.ContainsRegisteredType<LedController>())
             {
