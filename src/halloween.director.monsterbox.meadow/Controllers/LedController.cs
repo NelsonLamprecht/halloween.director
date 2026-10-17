@@ -53,7 +53,7 @@ namespace halloween.director.monsterbox.meadow.Controllers
         {
             cancellationTokenSource?.Cancel();
 
-bett            // our own animation task (pulse / running colors) must also be done writing
+            // our own animation task (pulse / running colors) must also be done writing
             try
             {
                 animationTask?.Wait(500);
