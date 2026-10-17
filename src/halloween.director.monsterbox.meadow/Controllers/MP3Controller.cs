@@ -71,7 +71,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return;
             }
 
-            Logger.InfoSection($"{GetType().Name}.Initialize", () =>
+            Logger.TraceSection($"{GetType().Name}.Initialize", () =>
             {
                 if (device is F7FeatherV1 f7Device)
                 {
@@ -86,8 +86,10 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
                 initialized = true;
 
-                Logger.Info($"MP3 player on {SerialPortName}, volume 30.");
+                Logger.Trace($"MP3 player on {SerialPortName}, volume 30.");
             });
+
+            Logger.Info($"{GetType().Name} is initialized.");
         }
 
         // Returns immediately. The file plays as soon as the current track (if any)

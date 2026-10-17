@@ -10,7 +10,14 @@ namespace Halloween.Director.Shared
 
         protected ServiceCollection Services { get; } = Resolver.Services;
 
-        public MeadowBase() { }
+        public MeadowBase()
+        {
+#if DEBUG
+            // Debug builds log at Trace so the TraceSection startup banners show. Release
+            // builds keep the level from app.config.yaml (Logging.LogLevel.Default).
+            Logger.LogLevel = LogLevel.Trace;
+#endif
+        }
 
         // Names the device from app.config.yaml's App.DeviceName (the name Maple advertises),
         // falling back to defaultName if the setting is missing.

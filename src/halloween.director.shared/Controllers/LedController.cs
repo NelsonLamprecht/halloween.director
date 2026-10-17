@@ -32,15 +32,17 @@ namespace Halloween.Director.Shared.Controllers
                 return;
             }
 
-            Logger.InfoSection($"{GetType().Name}.Initialize", () =>
+            Logger.TraceSection($"{GetType().Name}.Initialize", () =>
             {
                 led = new OnboardRgbLed(Logger, device);
                 led.SetColor(Color.Red);
 
                 initialized = true;
 
-                Logger.Info($"Onboard LED available: {led.IsAvailable}. Red until the app is ready.");
+                Logger.Trace($"Onboard LED available: {led.IsAvailable}. Red until the app is ready.");
             });
+
+            Logger.Info($"{GetType().Name} is initialized.");
         }
 
         // OnboardRgbLed does nothing on a device without the onboard LED, so every

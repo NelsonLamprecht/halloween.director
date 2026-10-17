@@ -36,7 +36,7 @@ namespace Halloween.Director.Shared.Services.MapleService
         // existing server first, so it can be used to re-bind after the IP changes.
         public override Task Run()
         {
-            Logger.InfoSection("MapleService.Run", () =>
+            Logger.TraceSection("MapleService.Run", () =>
             {
                 StopServer();
 
@@ -53,7 +53,7 @@ namespace Halloween.Director.Shared.Services.MapleService
 
                 mapleServer.Start();
                 BoundAddress = address;
-                Logger.Info($"Listening on http://{address}:{options.Port}/ ({options.ProcessMode}), advertising as '{device.Information.DeviceName}' every {options.AdvertiseIntervalMs}ms.");
+                Logger.Trace($"Listening on http://{address}:{options.Port}/ ({options.ProcessMode}), advertising as '{device.Information.DeviceName}' every {options.AdvertiseIntervalMs}ms.");
             });
 
             return base.Run();

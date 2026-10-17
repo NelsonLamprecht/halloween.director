@@ -36,7 +36,7 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             var wifiAdapter = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 
-            Logger.InfoSection("WiFi", () =>
+            Logger.TraceSection("WiFi", () =>
             {
                 Logger.Info(
                     $"WiFi config from wifi.config.yaml -> DefaultSsid: '{wifiAdapter.DefaultSsid}', " +
@@ -59,7 +59,7 @@ namespace Halloween.Director.Monsterbox.Meadow
             var mp3Controller = Services.Create<MP3Controller>();
             mp3Controller.Initialize();
 
-            Logger.InfoSection("Services", () =>
+            Logger.TraceSection("Services", () =>
             {
                 Services.Create<WatchdogService, IWatchdogService>();
                 Services.Create<NetworkService>();
@@ -67,7 +67,7 @@ namespace Halloween.Director.Monsterbox.Meadow
                 Services.Create<CylindersController>();
                 Services.Add(new MapleServiceOptions());
                 Services.Create<MapleService>();
-                Logger.Info("Watchdog, Network, Heartbeat, Cylinders and Maple services created.");
+                Logger.Trace("Watchdog, Network, Heartbeat, Cylinders and Maple services created.");
             });
 
             wifiAdapter.NetworkConnecting += (sender) =>
@@ -103,7 +103,7 @@ namespace Halloween.Director.Monsterbox.Meadow
         // lets a startup failure be caught and logged instead of vanishing in an unobserved task
         private async void OnWifiConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
-            Logger.InfoSection("WiFiConnected", () =>
+            Logger.TraceSection("WiFiConnected", () =>
                 Logger.Info($"WiFi connected @ {_bootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
 
             var networkService = Services.Get<NetworkService>();

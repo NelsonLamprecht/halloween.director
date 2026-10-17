@@ -15,7 +15,7 @@ namespace Halloween.Director.Shared.Services.DiagnosticsService
 
         public void OutputMeadowOSInfo()
         {
-            Logger.InfoSection("OutputMeadowOSInfo", () =>
+            Logger.TraceSection("OutputMeadowOSInfo", () =>
             {
                 Logger.Info($"OS version: {MeadowOS.SystemInformation.OSVersion}");
                 Logger.Info($"Runtime version: {MeadowOS.SystemInformation.RuntimeVersion}");
@@ -25,7 +25,7 @@ namespace Halloween.Director.Shared.Services.DiagnosticsService
 
         public void OutputDeviceInfo()
         {
-            Logger.InfoSection("OutputDeviceInfo", () =>
+            Logger.TraceSection("OutputDeviceInfo", () =>
             {
                 Logger.Info($"Device name: {device.Information.DeviceName}");
                 Logger.Info($"Processor serial number: {device.Information.ProcessorSerialNumber}");
@@ -39,7 +39,7 @@ namespace Halloween.Director.Shared.Services.DiagnosticsService
 
         public void OutputNtpInfo()
         {
-            Logger.InfoSection("OutputNtpInfo", () =>
+            Logger.TraceSection("OutputNtpInfo", () =>
             {
                 Logger.Info($"NTP Client Enabled: {device.PlatformOS.NtpClient.Enabled}");
             });
@@ -47,7 +47,7 @@ namespace Halloween.Director.Shared.Services.DiagnosticsService
 
         public void OutputDeviceWifiInfo(INetworkAdapter sender)
         {
-            Logger.InfoSection("OutputDeviceWifiInfo", () =>
+            Logger.TraceSection("OutputDeviceWifiInfo", () =>
             {
                 if (sender is IWiFiNetworkAdapter wifi)
                 {

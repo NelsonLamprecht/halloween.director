@@ -17,16 +17,16 @@ namespace Halloween.Director.Shared.Services.Watchdog
 
         public void Enable(int inSeconds)
         {
-            Logger.InfoSection("WatchdogService.Enable", () =>
+            Logger.TraceSection("WatchdogService.Enable", () =>
             {
                 device.WatchdogEnable(TimeSpan.FromSeconds(inSeconds));
-                Logger.Info($"Device resets if the watchdog isn't petted within {inSeconds}s.");
+                Logger.Trace($"Device resets if the watchdog isn't petted within {inSeconds}s.");
             });
         }
 
         public void Pet(int inSeconds)
         {
-            Logger.InfoSection("WatchdogService.Pet", () =>
+            Logger.TraceSection("WatchdogService.Pet", () =>
             {
                 // Just for good measure, let's reset the watchdog to begin with.
                 device.WatchdogReset();
@@ -40,7 +40,7 @@ namespace Halloween.Director.Shared.Services.Watchdog
                     }
                 });
                 t.Start();
-                Logger.Info($"Petting the watchdog every {inSeconds}s.");
+                Logger.Trace($"Petting the watchdog every {inSeconds}s.");
             });
         }
     }

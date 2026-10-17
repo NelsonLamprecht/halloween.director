@@ -10,22 +10,22 @@ namespace Halloween.Director.Shared
         public const int SectionWidth = 71;
 
         /// <summary>
-        /// Logs a titled block at Information: a centered "====Title====" header, whatever
+        /// Wraps a block of work in a titled banner that is only logged at Trace: a centered "====Title====" header, whatever
         /// <paramref name="writeBody"/> logs, then a "=====" footer of the same width.
         /// </summary>
-        public static void InfoSection(this Logger logger, string title, Action writeBody)
+        public static void TraceSection(this Logger logger, string title, Action writeBody)
         {
-            logger.Info(SectionHeader(title));
+            logger.Trace(SectionHeader(title));
             writeBody();
-            logger.Info(new string('=', SectionWidth));
+            logger.Trace(new string('=', SectionWidth));
         }
 
-        /// <summary>Like <see cref="InfoSection"/>, for a body that awaits.</summary>
-        public static async Task InfoSectionAsync(this Logger logger, string title, Func<Task> writeBody)
+        /// <summary>Like <see cref="TraceSection"/>, for a body that awaits.</summary>
+        public static async Task TraceSectionAsync(this Logger logger, string title, Func<Task> writeBody)
         {
-            logger.Info(SectionHeader(title));
+            logger.Trace(SectionHeader(title));
             await writeBody();
-            logger.Info(new string('=', SectionWidth));
+            logger.Trace(new string('=', SectionWidth));
         }
 
         private static string SectionHeader(string title)
