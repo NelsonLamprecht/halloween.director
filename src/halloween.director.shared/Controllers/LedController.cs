@@ -10,7 +10,7 @@ namespace Halloween.Director.Shared.Controllers
 {
     /// <summary>
     /// Status LED on the F7's onboard RGB LED: red until the app is up, then
-    /// <see cref="ReadyColor"/>, with a pulse while commands are being handled.
+    /// <see cref="ReadyColor"/>, with a hard white blink while commands are being handled.
     /// </summary>
     public class LedController : BaseController, IOnOrOffController, IDisposable
     {
@@ -74,30 +74,22 @@ namespace Halloween.Director.Shared.Controllers
             Led.StartBlink(GetRandomColor());
         }
 
-        public void StartPulse()
+        public void StartActivityBlink()
         {
-            // RgbPwmLed.StartPulse(Color, ...) showed white on the board, so the fade is
-            // done here by scaling the brightness of a fixed-hue color with SetColor
-            var hue = (float)(_random.NextDouble() * 360);
-            Led.Animate(token => PulseLoop(hue, token));
+            // a hard on/off blink in a fixed color: much easier to notice than a fade
+            Led.Animate(BlinkLoop);
         }
 
-        async Task PulseLoop(float hue, CancellationToken cancellationToken)
+        async Task BlinkLoop(CancellationToken cancellationToken)
         {
-            var clock = Stopwatch.StartNew();
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    var cycles = clock.Elapsed.TotalMilliseconds / PulseDuration.TotalMilliseconds;
-                    var phase = cycles % 1;
-                    // 0 -> 1 -> 0 over one cycle, starting dark
-                    var wave = (float)(0.5 - 0.5 * Math.Cos(2 * Math.PI * phase));
-                    var brightness = PulseLowBrightness + (1 - PulseLowBrightness) * wave;
-                    // a new hue every cycle, so the color visibly changes as well as the brightness
-                    var cycleHue = (hue + (int)cycles * PulseHueStep) % 360;
-                    Led.WriteColor(Color.FromHsba(cycleHue, 1, brightness));
-                    await Task.Delay(40, cancellationToken);
+                    Led.WriteColor(ActivityColor);
+                    await Task.Delay(BlinkOn, cancellationToken);
+                    Led.WriteColor(Color.Black);
+                    await Task.Delay(BlinkOff, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
@@ -106,14 +98,13 @@ namespace Halloween.Director.Shared.Controllers
             }
         }
 
-        // Activity pulse tuning: one full fade up/down takes PulseDuration (shorter = faster),
-        // PulseLowBrightness is how dark it gets between pulses (lower = more contrast) and
-        // PulseHueStep is how many degrees (0-360) the color moves on each pulse.
-        private static readonly TimeSpan PulseDuration = TimeSpan.FromMilliseconds(600);
-        private const float PulseLowBrightness = 0f;
-        private const float PulseHueStep = 70f;
+        // Activity blink tuning: ActivityColor is shown for BlinkOn, then the LED is off for
+        // BlinkOff (shorter = faster).
+        public static readonly Color ActivityColor = Color.White;
+        private static readonly TimeSpan BlinkOn = TimeSpan.FromMilliseconds(120);
+        private static readonly TimeSpan BlinkOff = TimeSpan.FromMilliseconds(120);
 
-        // Pulses while at least one command is being handled, then returns to ReadyColor.
+        // Blinks while at least one command is being handled, then returns to ReadyColor.
         // Counted, because Maple handles requests in parallel: the LED only goes back to
         // ready once the last overlapping request has finished.
         public void BeginActivity()
@@ -128,11 +119,11 @@ namespace Halloween.Director.Shared.Controllers
                 _activityVersion++;
                 _activeRequests++;
 
-                if (!_pulsing)
+                if (!_blinking)
                 {
-                    _pulsing = true;
-                    _pulseClock.Restart();
-                    StartPulse();
+                    _blinking = true;
+                    _blinkClock.Restart();
+                    StartActivityBlink();
                 }
             }
         }
@@ -151,15 +142,15 @@ namespace Halloween.Director.Shared.Controllers
                     return;
                 }
 
-                var remaining = MinActivityPulse - _pulseClock.Elapsed;
+                var remaining = MinActivityBlink - _blinkClock.Elapsed;
                 if (remaining <= TimeSpan.Zero)
                 {
                     ReturnToReady();
                     return;
                 }
 
-                // finished faster than the pulse is noticeable (e.g. /sound only queues
-                // the file); hold the pulse without delaying the HTTP response. A newer
+                // finished faster than the blink is noticeable (e.g. /sound only queues
+                // the file); hold the blink without delaying the HTTP response. A newer
                 // BeginActivity bumps the version, which cancels this return-to-ready.
                 var version = _activityVersion;
                 _ = Task.Run(async () =>
@@ -176,7 +167,7 @@ namespace Halloween.Director.Shared.Controllers
             }
         }
 
-        // For commands that complete instantly: a pulse of MinActivityPulse, then ready.
+        // For commands that complete instantly: a blink of MinActivityBlink, then ready.
         public void SignalActivity()
         {
             BeginActivity();
@@ -186,21 +177,21 @@ namespace Halloween.Director.Shared.Controllers
         // call with _activityLock held
         private void ReturnToReady()
         {
-            _pulsing = false;
+            _blinking = false;
             SetColor(ReadyColor);
         }
 
         // Color shown when the board is idle and ready to accept a command
         public static readonly Color ReadyColor = Color.Green;
 
-        // shortest time the pulse stays visible (a few pulses, so a quick command is still noticeable)
-        private static readonly TimeSpan MinActivityPulse = TimeSpan.FromSeconds(2);
+        // shortest time the blink stays visible, so a quick command is still noticeable
+        private static readonly TimeSpan MinActivityBlink = TimeSpan.FromSeconds(2);
 
         private readonly object _activityLock = new object();
-        private readonly Stopwatch _pulseClock = new Stopwatch();
+        private readonly Stopwatch _blinkClock = new Stopwatch();
         private int _activeRequests;
         private int _activityVersion;
-        private bool _pulsing;
+        private bool _blinking;
 
         public void StartRunningColors()
         {

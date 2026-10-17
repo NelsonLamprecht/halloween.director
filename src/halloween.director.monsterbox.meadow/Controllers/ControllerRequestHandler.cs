@@ -51,7 +51,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return new ServerErrorResult();
             }
 
-            // the command was accepted: pulse so it's visible the board got it
+            // the command was accepted: blink so it's visible the board got it
             _ledController.SignalActivity();
             return new OkResult();
         }
@@ -89,7 +89,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            // pulse for the whole shake and return to ready when it finishes, so the LED
+            // blink for the whole shake and return to ready when it finishes, so the LED
             // shows the board received the command and when it can take another
             _ledController.BeginActivity();
             try

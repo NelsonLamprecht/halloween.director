@@ -40,7 +40,7 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
             return Switch("Down", _relayController.TurnOff);
         }
 
-        // 200 OK when the relay switched, 500 if it failed. An accepted command pulses
+        // 200 OK when the relay switched, 500 if it failed. An accepted command blinks
         // the LED so it's visible the board got it.
         private IActionResult Switch(string name, Action action)
         {
