@@ -1,11 +1,11 @@
 using System;
 
 using Meadow;
-using Meadow.Foundation.Relays;
 using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Peripherals.Relays;
 
+using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Monsterbox.Meadow.Controllers
@@ -17,10 +17,8 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
     {
         private readonly IMeadowDevice device;
 
-        private IDigitalOutputPort _leftRelayPort;
-        private IDigitalOutputPort _rightRelayPort;
-        private Relay relayLeft;
-        private Relay relayRight;
+        private RelayOutput left;
+        private RelayOutput right;
         private bool initialized = false;
 
         public RelayController(Logger logger, IMeadowDevice device) : base(logger)
@@ -34,52 +32,36 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             {
                 return;
             }
-            // true so port is closed as quickly as possible when board boots up.
-            //opendrain is what seems to work with a relay board
-            _leftRelayPort = device.CreateDigitalOutputPort(leftPin, true, OutputType.OpenDrain);
-            _rightRelayPort = device.CreateDigitalOutputPort(rightPin, true, OutputType.OpenDrain);
-            relayLeft = new Relay(_leftRelayPort, RelayType.NormallyOpen);
-            relayRight = new Relay(_rightRelayPort, RelayType.NormallyOpen);
-            TurnOffLeft();
-            TurnOffRight();
-            initialized = true;
+
+            Logger.StartupSection($"{GetType().Name}.Initialize", () =>
+            {
+                // closed is on: the pneumatics keep their valves closed
+                left = new RelayOutput(device, leftPin, RelayState.Closed);
+                right = new RelayOutput(device, rightPin, RelayState.Closed);
+                initialized = true;
+
+                Logger.StartupDetail($"Left relay on {leftPin.Name}, right relay on {rightPin.Name}; both start off.");
+            });
 
             Logger.Info($"{GetType().Name} is initialized.");
         }
 
-        public void TurnOffLeft()
-        {
-            relayLeft.State = RelayState.Open;
-        }
+        /// <summary>The left cylinder's relay. On energizes the cylinder.</summary>
+        public IOnOrOffController Left => left ?? throw NotInitialized();
 
-        public void TurnOffRight()
-        {
-            relayRight.State = RelayState.Open;
-        }
-
-        public void TurnOnLeft()
-        {
-            relayLeft.State = RelayState.Closed;
-        }
-
-        public void TurnOnRight()
-        {
-            relayRight.State = RelayState.Closed;
-        }
+        /// <summary>The right cylinder's relay. On energizes the cylinder.</summary>
+        public IOnOrOffController Right => right ?? throw NotInitialized();
 
         public void Dispose()
         {
-            // leave the cylinders de-energized before letting go of the pins
-            if (initialized)
-            {
-                TurnOffLeft();
-                TurnOffRight();
-            }
+            // each output leaves its cylinder de-energized before releasing its pin
+            left?.Dispose();
+            right?.Dispose();
+        }
 
-            (relayLeft as IDisposable)?.Dispose();
-            (relayRight as IDisposable)?.Dispose();
-            _leftRelayPort?.Dispose();
-            _rightRelayPort?.Dispose();
+        private InvalidOperationException NotInitialized()
+        {
+            return new InvalidOperationException($"{GetType().Name} is not initialized.");
         }
     }
 }

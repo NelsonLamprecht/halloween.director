@@ -90,22 +90,22 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             {
                 if (turnOn)
                 {
-                    relayController.TurnOnLeft();
+                    relayController.Left.TurnOn();
                 }
                 else
                 {
-                    relayController.TurnOffLeft();
+                    relayController.Left.TurnOff();
                 }
             }
             else
             {
                 if (turnOn)
                 {
-                    relayController.TurnOnRight();
+                    relayController.Right.TurnOn();
                 }
                 else
                 {
-                    relayController.TurnOffRight();
+                    relayController.Right.TurnOff();
                 }
             }
 
@@ -114,8 +114,8 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
         private void Stop()
         {
-            relayController.TurnOffLeft();
-            relayController.TurnOffRight();
+            relayController.Left.TurnOff();
+            relayController.Right.TurnOff();
         }
 
         // Cancels any running shake and waits briefly for it to switch the relays off,

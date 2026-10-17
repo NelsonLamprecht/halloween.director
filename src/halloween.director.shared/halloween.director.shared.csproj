@@ -8,6 +8,8 @@
     <Description>Shared Meadow F7 building blocks (base app, controllers, watchdog, diagnostics, network) for halloween.director props.</Description>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow.F7" Version="2.5.0" />
+    <PackageReference Include="Meadow.F7" />
+    <PackageReference Include="Meadow.Foundation" />
+    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" />
   </ItemGroup>
 </Project>

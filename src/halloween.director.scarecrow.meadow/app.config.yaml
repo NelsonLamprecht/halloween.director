@@ -1,6 +1,20 @@
-Logging:
-  LogLevel:
-    Default: "Debug"
+# Application-level settings (see https://developer.wildernesslabs.co/Meadow/Meadow.OS/Configuration/Application_Settings_Configuration/)
 Lifecycle:
-  ResetOnAppFailure: true
-  AppFailureRestartDelaySeconds: 30
+    RestartOnAppFailure: true
+    AppFailureRestartDelaySeconds: 15
+
+Logging:
+    LogLevel:
+        Default: "Information"
+
+# Custom app settings. These flatten to dot-notated keys in App.Settings,
+# e.g. this resolves to Settings["App.DeviceName"].
+App:
+    # Startup banners and extra detail lines in the log. true while developing; set to false
+    # for the production build to log only the essentials.
+    StartupDetails: true
+    DeviceName: Scarecrow-v1
+
+    # Longest the lift stays up before it lowers itself, in seconds (0 = no limit).
+    # The default is LiftOptions.DefaultMaxUpSeconds.
+    LiftMaxUpSeconds: 30

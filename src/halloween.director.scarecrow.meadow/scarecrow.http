@@ -1,0 +1,9 @@
+### Scarecrow Maple server endpoints
+### Edit @host below to match the device's IP (see boot log / Resolver.Log output for "WiFi connected. IP: ...")
+@host = 192.168.1.92:5417
+
+### Up: raises the lift (200 when done or already up, 500 if the relay failed). It lowers itself after App.LiftMaxUpSeconds (30s).
+POST http://{{host}}/up
+
+### Down: lowers the lift (200 when done or already down)
+POST http://{{host}}/down

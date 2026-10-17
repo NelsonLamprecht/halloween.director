@@ -25,7 +25,7 @@ The Maple server listens on port `5417` and advertises itself over UDP. Requests
 
 ## LED
 
-Red until the server is up, then green while idle. The LED pulses while a command is being handled and returns to green when the board can take another.
+Red until the server is up, then green while idle. The LED blinks white while a command is being handled and returns to green when the board can take another.
 
 ## Setup
 

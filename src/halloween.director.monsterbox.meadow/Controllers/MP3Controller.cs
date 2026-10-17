@@ -8,6 +8,7 @@ using Meadow.Devices;
 using Meadow.Foundation.Audio.Mp3;
 using Meadow.Logging;
 
+using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
 
 namespace Halloween.Director.Monsterbox.Meadow.Controllers
@@ -70,18 +71,23 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
                 return;
             }
 
-            if (device is F7FeatherV1 f7Device)
+            Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
-                _mp3Player = new Yx5300(f7Device, f7Device.PlatformOS.GetSerialPortName(SerialPortName));
+                if (device is F7FeatherV1 f7Device)
+                {
+                    _mp3Player = new Yx5300(f7Device, f7Device.PlatformOS.GetSerialPortName(SerialPortName));
 
-                _mp3Player.SetVolume(30);
+                    _mp3Player.SetVolume(30);
 
-                // the worker is the only thing that talks to the module's UART from
-                // here on, so Play() and GetStatus() can never collide
-                _ = Task.Run(RunPlaybackWorker);
-            }
+                    // the worker is the only thing that talks to the module's UART from
+                    // here on, so Play() and GetStatus() can never collide
+                    _ = Task.Run(RunPlaybackWorker);
+                }
 
-            initialized = true;
+                initialized = true;
+
+                Logger.StartupDetail($"MP3 player on {SerialPortName}, volume 30.");
+            });
 
             Logger.Info($"{GetType().Name} is initialized.");
         }

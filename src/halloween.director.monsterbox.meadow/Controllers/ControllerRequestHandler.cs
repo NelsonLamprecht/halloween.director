@@ -6,9 +6,9 @@ using Meadow;
 using Meadow.Foundation.Web.Maple;
 using Meadow.Foundation.Web.Maple.Routing;
 
-using Halloween.Director.Monsterbox.Meadow.Controllers;
+using Halloween.Director.Shared.Controllers;
 
-namespace Halloween.Director.Monsterbox.Meadow
+namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
     public class ControllerRequestHandler : RequestHandlerBase
     {
@@ -41,6 +41,8 @@ namespace Halloween.Director.Monsterbox.Meadow
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
             }
 
+            Resolver.Log.Info($"Sound request: file {fileNumber}.");
+
             try
             {
                 _mp3Controller.QueueFile(fileNumber);
@@ -51,7 +53,7 @@ namespace Halloween.Director.Monsterbox.Meadow
                 return new ServerErrorResult();
             }
 
-            // the command was accepted: pulse so it's visible the board got it
+            // the command was accepted: blink so it's visible the board got it
             _ledController.SignalActivity();
             return new OkResult();
         }
@@ -89,13 +91,16 @@ namespace Halloween.Director.Monsterbox.Meadow
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
             }
 
-            // pulse for the whole shake and return to ready when it finishes, so the LED
+            Resolver.Log.Info($"Shake request: {config.BeginIterations}-{config.EndIterations} iterations, {config.BeginDelay}-{config.EndDelay}ms delay.");
+
+            // blink for the whole shake and return to ready when it finishes, so the LED
             // shows the board received the command and when it can take another
             _ledController.BeginActivity();
             try
             {
                 if (!await _cylindersController.TryShakeAsync(config))
                 {
+                    Resolver.Log.Warn("Shake request rejected: a shake is already running (409).");
                     return new StatusCodeResult(HttpStatusCode.Conflict);
                 }
             }

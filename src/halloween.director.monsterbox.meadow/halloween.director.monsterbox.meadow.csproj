@@ -2,21 +2,24 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <OutputType>Exe</OutputType>
+    <OutputType>Library</OutputType>
     <AssemblyName>App</AssemblyName>
     <UserSecretsId>95367c51-a945-4cbd-b060-d04df25214e7</UserSecretsId>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Meadow.F7" Version="2.5.0" />
-    <PackageReference Include="Meadow.Foundation" Version="2.5.0" />
-    <PackageReference Include="Meadow.Foundation.Audio.Mp3.Yx5300" Version="2.5.0" />
-    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" Version="2.5.0" />
+    <PackageReference Include="Meadow.F7" />
+    <PackageReference Include="Meadow.Foundation" />
+    <PackageReference Include="Meadow.Foundation.Audio.Mp3.Yx5300" />
+    <PackageReference Include="Meadow.Foundation.Web.Maple.Server" />
   </ItemGroup>
   <ItemGroup>
     <None Update="meadow.config.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="wifi.config.yaml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="app.build.yaml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="app.config.yaml">
