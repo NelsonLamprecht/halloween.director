@@ -4,6 +4,8 @@
        you can tell which build is running:
          BuildStamp  - what is shown and logged: UTC yyMMdd.HHmm, for example 261017.1742
          BuildNumber - minutes since 2025-01-01 (UTC); Android's integer versionCode, which has to keep rising
+         git hash    - the commit the build was made from, with "+dirty" if there are uncommitted changes
+                       (so a hash never claims code it doesn't match); left out if git isn't available
        Pass -p:BuildNumber=123 (for example from CI) to use your own number; the stamp then shows it too. -->
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
@@ -14,9 +16,26 @@
 
     <!-- what the firmware logs at boot and the remote shows (see BuildInfo / AppVersion) -->
     <InformationalVersion>$(VersionPrefix) (build $(BuildStamp))</InformationalVersion>
+    <!-- the version above already says everything; don't let the SDK add its own "+<hash>" -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
 
     <!-- the remote app: the version name, and Android's integer versionCode -->
     <ApplicationDisplayVersion>$(VersionPrefix)</ApplicationDisplayVersion>
     <ApplicationVersion>$(BuildNumber)</ApplicationVersion>
   </PropertyGroup>
+
+  <!-- Adds the git hash (and +dirty) to the version before it is compiled into the assembly. Does nothing,
+       and never fails the build, when git or the repository isn't there. -->
+  <Target Name="StampGitHash" BeforeTargets="GetAssemblyAttributes;GenerateAssemblyInfo">
+    <Exec Command="git -C &quot;$(MSBuildThisFileDirectory.TrimEnd('\'))&quot; rev-parse --short=7 HEAD" ConsoleToMSBuild="true" StandardOutputImportance="low" StandardErrorImportance="low" IgnoreExitCode="true" ContinueOnError="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitHash" />
+    </Exec>
+    <Exec Condition="'$(GitHash)' != ''" Command="git -C &quot;$(MSBuildThisFileDirectory.TrimEnd('\'))&quot; status --porcelain" ConsoleToMSBuild="true" StandardOutputImportance="low" StandardErrorImportance="low" IgnoreExitCode="true" ContinueOnError="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="GitStatus" />
+    </Exec>
+    <PropertyGroup Condition="'$(GitHash)' != '' And !$(GitHash.Contains(' '))">
+      <GitDirty Condition="'$(GitStatus)' != ''">+dirty</GitDirty>
+      <InformationalVersion>$(VersionPrefix) (build $(BuildStamp) $(GitHash)$(GitDirty))</InformationalVersion>
+    </PropertyGroup>
+  </Target>
 </Project>

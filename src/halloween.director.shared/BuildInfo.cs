@@ -10,16 +10,8 @@ namespace Halloween.Director.Shared
     {
         public static string Describe(Assembly assembly)
         {
-            var attribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
-            var version = attribute?.InformationalVersion;
-            if (string.IsNullOrEmpty(version))
-            {
-                return "unknown version";
-            }
-
-            // the SDK can append "+<source revision>"; the build number already says it
-            var plus = version.IndexOf('+');
-            return plus < 0 ? version : version.Substring(0, plus);
+            var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
+            return string.IsNullOrEmpty(version) ? "unknown version" : version;
         }
     }
 }

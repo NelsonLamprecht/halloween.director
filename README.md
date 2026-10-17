@@ -48,7 +48,8 @@ The tablet must be on the same WiFi network as the props.
 
 - **Build stamp:** the UTC date and time as `yyMMdd.HHmm`, for example `261017.1742`. It's what the app shows and the firmware logs, and it's different for every build made in a different minute.
 - **Build number:** minutes since 2025-01-01 (UTC). It's Android's `versionCode`, so every build is newer than the last. Pass `-p:BuildNumber=123` to use your own number instead (the stamp then shows it).
-- **Remote app:** the page headers show `v1.0.0 (build 261017.1742)`. The splash screen is a static image, so the version is on the first page.
-- **Firmware:** each prop logs `App 1.0.0 (build 261017.1742)` at the start of boot (`ApplyStartupSettings`).
+- **Git hash:** the commit the build was made from, with `+dirty` added when there are uncommitted changes, so a hash never claims code it doesn't match. It's left out if `git` isn't available.
+- **Remote app:** the page headers show `v1.0.0 (build 261017.1742 a3f9c1+dirty)`. The splash screen is a static image, so the version is on the first page.
+- **Firmware:** each prop logs `App 1.0.0 (build 261017.1742 a3f9c1)` at the start of boot (`ApplyStartupSettings`).
 
 If the number on the screen or in the log isn't the one you just built, the old build is still running.
