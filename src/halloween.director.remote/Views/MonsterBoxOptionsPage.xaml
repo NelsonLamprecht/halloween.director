@@ -7,7 +7,7 @@
     x:Class="Halloween.Director.Remote.Views.MonsterBoxOptionsPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyGreenLight}, Dark={StaticResource SpookyGreenDark}}"
 
-    Title="MonsterBox Options">
+    Title="Options">
 
     <ContentPage.Content>
         <Grid>
