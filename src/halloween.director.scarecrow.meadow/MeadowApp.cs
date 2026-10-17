@@ -1,14 +1,15 @@
-﻿using System;
+using System;
+using halloween.director.shared;
 using System.Threading.Tasks;
 using Meadow;
 using Meadow.Hardware;
 
 using halloween.director.scarecrow.meadow.Controllers.LEDController;
 using halloween.director.scarecrow.meadow.Controllers.RelayController;
-using halloween.director.scarecrow.meadow.Services.DiagnosticsService;
+using halloween.director.shared.Services.DiagnosticsService;
 using halloween.director.scarecrow.meadow.Services.MapleService;
-using halloween.director.scarecrow.meadow.Services.NetworkService;
-using halloween.director.scarecrow.meadow.Services.Watchdog;
+using halloween.director.shared.Services.NetworkService;
+using halloween.director.shared.Services.Watchdog;
 
 namespace halloween.director.scarecrow.meadow
 {

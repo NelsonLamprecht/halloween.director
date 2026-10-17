@@ -23,4 +23,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\halloween.director.shared\halloween.director.shared.csproj" />
+  </ItemGroup>
 </Project>

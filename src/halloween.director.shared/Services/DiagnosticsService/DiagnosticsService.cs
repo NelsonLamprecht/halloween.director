@@ -1,8 +1,8 @@
-﻿using Meadow;
+using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace halloween.director.scarecrow.meadow.Services.DiagnosticsService
+namespace halloween.director.shared.Services.DiagnosticsService
 {
     public class DiagnosticsService : BaseService
     {
@@ -32,7 +32,6 @@ namespace halloween.director.scarecrow.meadow.Services.DiagnosticsService
             Logger.Info($"Processor ID: {device.Information.UniqueID}");
             Logger.Info($"Model: {device.Information.Model}");
             Logger.Info($"Processor type: {device.Information.ProcessorType}");
-            Logger.Info($"Product: {device.Information.Model}");
             Logger.Info($"Coprocessor type: {device.Information.CoprocessorType}");
             Logger.Info($"Coprocessor firmware version: {device.Information.CoprocessorOSVersion}");
             Logger.Info(outputFooter);
@@ -40,7 +39,7 @@ namespace halloween.director.scarecrow.meadow.Services.DiagnosticsService
 
         public void OutputNtpInfo()
         {
-            Logger.Info($"=========================OutputMeadowOSInfo============================");
+            Logger.Info($"===========================OutputNtpInfo===============================");
             Logger.Info($"NTP Client Enabled: {device.PlatformOS.NtpClient.Enabled}");
             Logger.Info(outputFooter);
         }
@@ -56,6 +55,6 @@ namespace halloween.director.scarecrow.meadow.Services.DiagnosticsService
             Logger.Info($"MacAddress: {sender.MacAddress}");
             Logger.Info($"IpAddress: {sender.IpAddress}");
             Logger.Info(outputFooter);
-            }
         }
     }
+}

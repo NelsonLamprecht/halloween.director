@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>halloween.director.shared</RootNamespace>
+    <AssemblyName>halloween.director.shared</AssemblyName>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>true</IsPackable>
+    <Description>Shared Meadow F7 building blocks (base app, controllers, watchdog, diagnostics, network) for halloween.director props.</Description>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Meadow.F7" Version="2.5.0" />
+  </ItemGroup>
+</Project>

@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Threading;
 
 using Meadow;
 using Meadow.Logging;
 
-namespace halloween.director.scarecrow.meadow.Services.Watchdog
+namespace halloween.director.shared.Services.Watchdog
 {
-    internal class WatchdogService : BaseService, IWatchdogService
+    public class WatchdogService : BaseService, IWatchdogService
     {
         private readonly IMeadowDevice device;
 
@@ -14,7 +14,7 @@ namespace halloween.director.scarecrow.meadow.Services.Watchdog
         {
             this.device = device;
         }
-        
+
         public void Enable(int inSeconds)
         {
             device.WatchdogEnable(TimeSpan.FromSeconds(inSeconds));

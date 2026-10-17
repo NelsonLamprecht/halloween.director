@@ -1,9 +1,9 @@
-﻿using Meadow.Hardware;
+using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace halloween.director.scarecrow.meadow.Services.NetworkService
+namespace halloween.director.shared.Services.NetworkService
 {
-    internal class NetworkService: BaseService
+    public class NetworkService: BaseService
     {
         private readonly DiagnosticsService.DiagnosticsService diagnosticsService;
 
