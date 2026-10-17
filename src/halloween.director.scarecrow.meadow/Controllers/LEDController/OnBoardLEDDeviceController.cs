@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 
 using Meadow;
 using Meadow.Devices;
@@ -10,7 +9,6 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers.LEDController
 {
     public class OnBoardLEDDeviceController : ILEDDeviceController
     {
-        CancellationTokenSource cancellationTokenSource = null;
         private readonly IMeadowDevice device;
         private readonly RgbPwmLed rgbLed = null;
 
@@ -40,7 +38,6 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers.LEDController
         public void Stop()
         {
             rgbLed?.StopAnimation();
-            cancellationTokenSource?.Cancel();
         }
 
         public void StartBlink(Color color)

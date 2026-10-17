@@ -16,7 +16,6 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers.RelayController
         private readonly IMeadowDevice device;
         private Relay relay;
         private bool initialized = false;
-        private IPin devicePin;
 
         public RelayController(Logger logger, IMeadowDevice device) : base(logger)
         {
@@ -29,8 +28,7 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers.RelayController
             {
                 return;
             }
-            this.devicePin = devicePin;
-            var outputPort = device.CreateDigitalOutputPort(this.devicePin, true, OutputType.OpenDrain);
+            var outputPort = device.CreateDigitalOutputPort(devicePin, true, OutputType.OpenDrain);
             relay = new Relay(outputPort, RelayType.NormallyOpen);
 
             // so port is closed as quickly as possible when board boots up
