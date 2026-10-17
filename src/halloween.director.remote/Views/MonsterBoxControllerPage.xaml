@@ -33,12 +33,12 @@
                         <Setter Property="IsEnabled" Value="False" />
                     </DataTrigger>
                 </Grid.Triggers>
-                <!-- Stacked: MonsterBox on the top half, Scarecrow on the bottom
-                     half, each spanning the full width so the sound buttons
-                     aren't squeezed into a narrow column. -->
+                <!-- One screen for both props: the MonsterBox panel (the sound buttons, which scroll if there
+                     are many) takes all the height that is left, and the Scarecrow panel is a slim
+                     Up/Down bar that is always visible at the bottom. -->
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <!--Top panel: MonsterBox sound/shake controls-->
                 <Border
@@ -46,70 +46,59 @@
                     Grid.Row="0"
                     VerticalOptions="Fill"
                     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
-                        <Grid RowSpacing="6" ColumnSpacing="6"
-                              RowDefinitions="*,Auto,*,*,Auto,*"
-                              ColumnDefinitions="*,*,*,*,*">
-                            <Button
-                                Grid.Row="0"
-                                Grid.ColumnSpan="5"
-                                Text="Shake"
-                                Style="{StaticResource ShakeButtonStyle}"
-                                HorizontalOptions="Fill"
-                                Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Shake}">
-                            </Button>
-                            <Label
-                                Grid.Row="1"
-                                Grid.ColumnSpan="5"
-                                Text="FX"
-                                Style="{StaticResource SectionHeaderStyle}" />
-                            <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
-                            <FlexLayout
-                                Grid.Row="2"
-                                Grid.RowSpan="2"
-                                Grid.ColumnSpan="5"
-                                Wrap="Wrap"
-                                Direction="Row"
-                                JustifyContent="Start"
-                                AlignContent="Start"
-                                BindableLayout.ItemsSource="{Binding FxSounds}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="viewmodel:SoundItem">
-                                        <Button
-                                            Text="{Binding Name}"
-                                            Style="{StaticResource FxButtonStyle}"
-                                            FlexLayout.Basis="19%"
-                                            Margin="1"
-                                            Command="{Binding PlayCommand}" />
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                            <Label
-                                Grid.Row="4"
-                                Grid.ColumnSpan="5"
-                                Text="CREATURES"
-                                Style="{StaticResource SectionHeaderStyle}" />
-                            <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
-                            <FlexLayout
-                                Grid.Row="5"
-                                Grid.RowSpan="1"
-                                Grid.ColumnSpan="5"
-                                Wrap="Wrap"
-                                Direction="Row"
-                                JustifyContent="Start"
-                                AlignContent="Start"
-                                BindableLayout.ItemsSource="{Binding CreatureSounds}">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="viewmodel:SoundItem">
-                                        <Button
-                                            Text="{Binding Name}"
-                                            Style="{StaticResource CreatureButtonStyle}"
-                                            FlexLayout.Basis="19%"
-                                            Margin="1"
-                                            Command="{Binding PlayCommand}" />
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </FlexLayout>
-                        </Grid>
+                        <!-- Scrolls, because the number of sounds comes from the monsterbox and can be more than fit on the panel. -->
+                        <ScrollView>
+                            <VerticalStackLayout Spacing="6">
+                                <Button
+                                    Text="Shake"
+                                    Style="{StaticResource ShakeButtonStyle}"
+                                    HorizontalOptions="Fill"
+                                    Command="{Binding SendMonsterBoxCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Shake}">
+                                </Button>
+                                <Label
+                                    Text="FX"
+                                    Style="{StaticResource SectionHeaderStyle}" />
+                                <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
+                                <FlexLayout
+                                    Wrap="Wrap"
+                                    Direction="Row"
+                                    JustifyContent="Start"
+                                    AlignContent="Start"
+                                    BindableLayout.ItemsSource="{Binding FxSounds}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="viewmodel:SoundItem">
+                                            <Button
+                                                Text="{Binding Name}"
+                                                Style="{StaticResource FxButtonStyle}"
+                                                FlexLayout.Basis="19%"
+                                                Margin="1"
+                                                Command="{Binding PlayCommand}" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
+                                <Label
+                                    Text="CREATURES"
+                                    Style="{StaticResource SectionHeaderStyle}" />
+                                <!-- Built from the monsterbox's GET /sounds (see MonsterBoxControllerViewModel.ApplySounds) -->
+                                <FlexLayout
+                                    Wrap="Wrap"
+                                    Direction="Row"
+                                    JustifyContent="Start"
+                                    AlignContent="Start"
+                                    BindableLayout.ItemsSource="{Binding CreatureSounds}">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="viewmodel:SoundItem">
+                                            <Button
+                                                Text="{Binding Name}"
+                                                Style="{StaticResource CreatureButtonStyle}"
+                                                FlexLayout.Basis="19%"
+                                                Margin="1"
+                                                Command="{Binding PlayCommand}" />
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </FlexLayout>
+                            </VerticalStackLayout>
+                        </ScrollView>
                 </Border>
                 <!--Bottom panel: Scarecrow up/down controls-->
                 <Border
@@ -117,22 +106,21 @@
                     Grid.Row="1"
                     VerticalOptions="Fill"
                     BackgroundColor="{AppThemeBinding Light={StaticResource SpookyOrangeLight}, Dark={StaticResource SpookyOrangeDark}}" Stroke="Transparent" StrokeThickness="0" StrokeShape="RoundRectangle 5" Padding="10">
-                        <Grid RowSpacing="6"
-                              RowDefinitions="*,*">
+                        <Grid ColumnSpacing="6" ColumnDefinitions="*,*">
                             <Button
-                                Grid.Row="0"
+                                Grid.Column="0"
                                 Text="&#9650; Up"
                                 Style="{StaticResource ScarecrowButtonStyle}"
                                 HorizontalOptions="Fill"
-                                VerticalOptions="Fill"
+                                HeightRequest="76"
                                 Command="{Binding SendScarecrowCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Up}">
                             </Button>
                             <Button
-                                Grid.Row="1"
+                                Grid.Column="1"
                                 Text="&#9660; Down"
                                 Style="{StaticResource ScarecrowButtonStyle}"
                                 HorizontalOptions="Fill"
-                                VerticalOptions="Fill"
+                                HeightRequest="76"
                                 Command="{Binding SendScarecrowCommand}" CommandParameter="{x:Static viewmodel:MonsterBoxCommands.Down}">
                             </Button>
                         </Grid>

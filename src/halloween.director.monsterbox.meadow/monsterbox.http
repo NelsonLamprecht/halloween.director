@@ -2,14 +2,18 @@
 ### Edit @host below to match the device's IP (see boot log / Resolver.Log output for "WiFi connected. IP: ...")
 @host = 192.168.1.102:5417
 
-### The sounds on the card and their file numbers (from app.config.yaml's Sounds section), as JSON
+### The sounds on the card and their file numbers, as JSON: [{"number":0,"name":"Werewolf"},...]
+### (from the Sounds section of app.config.yaml, which tools\Copy-SoundsToCard.ps1 writes from a folder of sound files)
 GET http://{{host}}/sounds
 
-### Play sound file 1 (returns immediately; plays after the current track ends, replacing any already-pending sound)
-POST http://{{host}}/sound?filenumber=1
+### Play the first sound on the card, file number 0 (returns immediately; plays after the current track ends, replacing any already-pending sound)
+POST http://{{host}}/sound?filenumber=0
 
-### Play sound file 3
-POST http://{{host}}/sound?filenumber=3
+### Play another sound: use any "number" from GET /sounds above
+POST http://{{host}}/sound?filenumber=7
+
+### A missing or non-numeric filenumber is rejected with 400
+POST http://{{host}}/sound
 
 ### Shake with default configuration (25-50 iterations, 50-75ms delay)
 ### Responds when the shake finishes (200), or immediately with 409 if a shake is already running
