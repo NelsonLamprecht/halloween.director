@@ -1,13 +1,19 @@
 <Project>
   <!-- One version for every project in the solution (firmware, shared library, remote app).
-       Change VersionPrefix by hand for a release; BuildNumber is stamped on every build (UTC yyMMddHH)
-       so you can tell which build is running. Pass -p:BuildNumber=123 to override it (for example from CI). -->
+       Change VersionPrefix by hand for a release. Every build is also stamped with the time it was made, so
+       you can tell which build is running:
+         BuildStamp  - what is shown and logged: UTC yyMMdd.HHmm, for example 261017.1742
+         BuildNumber - minutes since 2025-01-01 (UTC); Android's integer versionCode, which has to keep rising
+       Pass -p:BuildNumber=123 (for example from CI) to use your own number; the stamp then shows it too. -->
   <PropertyGroup>
     <VersionPrefix>1.0.0</VersionPrefix>
-    <BuildNumber Condition="'$(BuildNumber)' == ''">$([System.DateTime]::UtcNow.ToString('yyMMddHH'))</BuildNumber>
+    <!-- an explicit BuildNumber is shown as it is -->
+    <BuildStamp Condition="'$(BuildStamp)' == '' And '$(BuildNumber)' != ''">$(BuildNumber)</BuildStamp>
+    <BuildNumber Condition="'$(BuildNumber)' == ''">$([System.Convert]::ToInt32($([System.Math]::Floor($([System.DateTime]::UtcNow.Subtract($([System.DateTime]::Parse('2025-01-01'))).TotalMinutes)))))</BuildNumber>
+    <BuildStamp Condition="'$(BuildStamp)' == ''">$([System.DateTime]::UtcNow.ToString('yyMMdd.HHmm'))</BuildStamp>
 
-    <!-- what the firmware logs at boot (see Halloween.Director.Shared.BuildInfo) -->
-    <InformationalVersion>$(VersionPrefix) (build $(BuildNumber))</InformationalVersion>
+    <!-- what the firmware logs at boot and the remote shows (see BuildInfo / AppVersion) -->
+    <InformationalVersion>$(VersionPrefix) (build $(BuildStamp))</InformationalVersion>
 
     <!-- the remote app: the version name, and Android's integer versionCode -->
     <ApplicationDisplayVersion>$(VersionPrefix)</ApplicationDisplayVersion>

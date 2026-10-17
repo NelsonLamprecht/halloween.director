@@ -121,4 +121,4 @@ dotnet build -f net10.0-android -p:AndroidSdkDirectory=/root/android-sdk -p:Java
 
 ## Versioning
 
-`src/Directory.Build.props` is the one place for the version (`VersionPrefix`) and the per-build `BuildNumber`; it feeds the firmware's `InformationalVersion` (logged at boot by `MeadowBase.ApplyStartupSettings` through `BuildInfo`) and the remote's `ApplicationDisplayVersion`/`ApplicationVersion` (shown in the page titles via `AppVersion`). Don't set versions in the individual csproj files.
+`src/Directory.Build.props` is the one place for the version (`VersionPrefix`) and the per-build `BuildStamp` (UTC `yyMMdd.HHmm`) and `BuildNumber` (minutes since 2025, the Android versionCode); it feeds the firmware's `InformationalVersion` (logged at boot by `MeadowBase.ApplyStartupSettings` through `BuildInfo`) and the remote's `ApplicationDisplayVersion`/`ApplicationVersion` (shown in the page titles via `AppVersion`, which reads the same informational version). Don't set versions in the individual csproj files.

@@ -44,9 +44,11 @@ The tablet must be on the same WiFi network as the props.
 
 ## Version and build number
 
-`src/Directory.Build.props` gives every project the same version: `VersionPrefix` (edit it by hand for a release) plus a `BuildNumber` stamped on each build (UTC `yyMMddHH`, for example `26101717`; pass `-p:BuildNumber=123` to override it).
+`src/Directory.Build.props` gives every project the same version: `VersionPrefix` (edit it by hand for a release) plus a stamp of the minute each build was made.
 
-- **Remote app:** the page headers show `v1.0.0 (build 26101717)`. The build number is also Android's `versionCode`, so each build is newer than the last. The splash screen is a static image, so the version is on the first page.
-- **Firmware:** each prop logs `App 1.0.0 (build 26101717)` at the start of boot (`ApplyStartupSettings`).
+- **Build stamp:** the UTC date and time as `yyMMdd.HHmm`, for example `261017.1742`. It's what the app shows and the firmware logs, and it's different for every build made in a different minute.
+- **Build number:** minutes since 2025-01-01 (UTC). It's Android's `versionCode`, so every build is newer than the last. Pass `-p:BuildNumber=123` to use your own number instead (the stamp then shows it).
+- **Remote app:** the page headers show `v1.0.0 (build 261017.1742)`. The splash screen is a static image, so the version is on the first page.
+- **Firmware:** each prop logs `App 1.0.0 (build 261017.1742)` at the start of boot (`ApplyStartupSettings`).
 
 If the number on the screen or in the log isn't the one you just built, the old build is still running.
