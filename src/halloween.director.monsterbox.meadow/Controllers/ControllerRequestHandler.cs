@@ -1,6 +1,5 @@
 using System;
 using System.Net;
-using System.Threading.Tasks;
 
 using Meadow;
 using Meadow.Foundation.Web.Maple;
@@ -32,10 +31,17 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
         // per request costs only the two lookups above.
         public override bool IsReusable => false;
 
+        // Maple only creates QueryString when the URL contains a '?', so it is null for a plain
+        // "POST /shake" (reading it directly throws a NullReferenceException).
+        private string Query(string name)
+        {
+            return QueryString?[name];
+        }
+
         [HttpPost("/sound")]
         public IActionResult Sound()
         {
-            if (!byte.TryParse(QueryString["filenumber"], out var fileNumber) || fileNumber > MP3Controller.MaxFileNumber)
+            if (!byte.TryParse(Query("filenumber"), out var fileNumber) || fileNumber > MP3Controller.MaxFileNumber)
             {
                 Resolver.Log.Warn($"Sound request missing or invalid 'filenumber' (0-{MP3Controller.MaxFileNumber}).");
                 return new StatusCodeResult(HttpStatusCode.BadRequest);
@@ -60,27 +66,33 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
         // Responds when the shake has finished: 200 OK when done, 409 Conflict
         // immediately if a shake is already running, 500 if the shake failed.
+        //
+        // This must be synchronous (IActionResult, not Task<IActionResult>): Maple 2.5.0 only
+        // awaits handlers whose return type is IActionResult. For an async handler it closes the
+        // response straight away with an empty 200 (so the 400/409/500 results never reach the
+        // client) and swallows any exception. Blocking here is fine: requests run on thread-pool
+        // threads and Meadow has no synchronization context to deadlock on.
         [HttpPost("/shake")]
-        public async Task<IActionResult> ShakeAsync()
+        public IActionResult Shake()
         {
             var config = new ShakeConfiguration();
 
-            if (int.TryParse(QueryString["bi"], out var beginIterations))
+            if (int.TryParse(Query("bi"), out var beginIterations))
             {
                 config.BeginIterations = beginIterations;
             }
 
-            if (int.TryParse(QueryString["ei"], out var endIterations))
+            if (int.TryParse(Query("ei"), out var endIterations))
             {
                 config.EndIterations = endIterations;
             }
 
-            if (int.TryParse(QueryString["bd"], out var beginDelay))
+            if (int.TryParse(Query("bd"), out var beginDelay))
             {
                 config.BeginDelay = beginDelay;
             }
 
-            if (int.TryParse(QueryString["ed"], out var endDelay))
+            if (int.TryParse(Query("ed"), out var endDelay))
             {
                 config.EndDelay = endDelay;
             }
@@ -98,7 +110,7 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
             _ledController.BeginActivity();
             try
             {
-                if (!await _cylindersController.TryShakeAsync(config))
+                if (!_cylindersController.TryShakeAsync(config).GetAwaiter().GetResult())
                 {
                     Resolver.Log.Warn("Shake request rejected: a shake is already running (409).");
                     return new StatusCodeResult(HttpStatusCode.Conflict);
