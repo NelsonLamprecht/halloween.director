@@ -2,7 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
-using Meadow;
 using Meadow.Hardware;
 
 using Halloween.Director.Monsterbox.Meadow.Controllers;
