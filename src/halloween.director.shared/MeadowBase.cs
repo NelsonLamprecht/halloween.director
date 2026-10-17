@@ -90,6 +90,31 @@ namespace Halloween.Director.Shared
             Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
+        // Logs the shutdown, then DisposeServices(), so the apps only list what to release.
+        public override Task OnShutdown()
+        {
+            Logger.Info($"=== Shutting down @ {BootStopwatch.Elapsed}... ===");
+
+            DisposeServices();
+
+            return base.OnShutdown();
+        }
+
+        // Override to dispose the app's controllers and services, in the order they must go
+        // (e.g. whatever drives a relay before the relay itself) using DisposeIfRegistered.
+        protected virtual void DisposeServices()
+        {
+        }
+
+        // Shutdown can be reached before a service was ever created, so check first.
+        protected void DisposeIfRegistered<T>() where T : class, IDisposable
+        {
+            if (Services.ContainsRegisteredType<T>())
+            {
+                Services.Get<T>().Dispose();
+            }
+        }
+
         public override Task OnError(Exception e)
         {
             Logger.Error($"Unhandled application error @ {BootStopwatch.Elapsed}: {e}");

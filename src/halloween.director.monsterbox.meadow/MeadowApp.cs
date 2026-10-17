@@ -86,37 +86,15 @@ namespace Halloween.Director.Monsterbox.Meadow
             return base.Run();
         }
 
-        public override Task OnShutdown()
+        protected override void DisposeServices()
         {
-            Logger.Info($"=== Shutting down @ {BootStopwatch.Elapsed}... ===");
-
-            if (Services.ContainsRegisteredType<HeartbeatService>())
-            {
-                Services.Get<HeartbeatService>().Dispose();
-            }
-
-            if (Services.ContainsRegisteredType<LedController>())
-            {
-                Services.Get<LedController>().Dispose();
-            }
-
-            if (Services.ContainsRegisteredType<MP3Controller>())
-            {
-                Services.Get<MP3Controller>().Dispose();
-            }
+            DisposeIfRegistered<HeartbeatService>();
+            DisposeIfRegistered<LedController>();
+            DisposeIfRegistered<MP3Controller>();
 
             // before RelayController, so an in-flight shake stops before its relays go away
-            if (Services.ContainsRegisteredType<CylindersController>())
-            {
-                Services.Get<CylindersController>().Dispose();
-            }
-
-            if (Services.ContainsRegisteredType<RelayController>())
-            {
-                Services.Get<RelayController>().Dispose();
-            }
-
-            return base.OnShutdown();
+            DisposeIfRegistered<CylindersController>();
+            DisposeIfRegistered<RelayController>();
         }
     }
 }

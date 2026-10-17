@@ -121,32 +121,15 @@ namespace Halloween.Director.Scarecrow.Meadow
             await base.Run();
         }
 
-        public override Task OnShutdown()
+        protected override void DisposeServices()
         {
-            Logger.Info($"=== Shutting down @ {BootStopwatch.Elapsed}... ===");
+            DisposeIfRegistered<HeartbeatService>();
 
-            if (Services.ContainsRegisteredType<HeartbeatService>())
-            {
-                Services.Get<HeartbeatService>().Dispose();
-            }
-
-            if (Services.ContainsRegisteredType<LiftController>())
-            {
-                Services.Get<LiftController>().Dispose();
-            }
-
-            // relay first, so the valve is closed before the pin is released
-            if (Services.ContainsRegisteredType<RelayController>())
-            {
-                Services.Get<RelayController>().Dispose();
-            }
-
-            if (Services.ContainsRegisteredType<LedController>())
-            {
-                Services.Get<LedController>().Dispose();
-            }
-
-            return base.OnShutdown();
+            // the lift's pending auto-lower first, then the relay (which closes the valve
+            // before its pin is released)
+            DisposeIfRegistered<LiftController>();
+            DisposeIfRegistered<RelayController>();
+            DisposeIfRegistered<LedController>();
         }
     }
 }
