@@ -12,6 +12,7 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     // <summary>
     // The commands all inverted since we are working with relays that keep the valves closed.
+    // TurnOn() opens the relay (lift up); TurnOff() closes it (lift down, the rest state).
     // </summary>
     public class RelayController : BaseController, IOnOrOffController, IDisposable
     {

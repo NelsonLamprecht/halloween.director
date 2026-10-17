@@ -14,3 +14,7 @@ App:
     # for the production build to log only the essentials.
     StartupDetails: true
     DeviceName: Scarecrow-v1
+
+    # Longest the lift stays up before it lowers itself, in seconds (0 = no limit).
+    # The default is LiftOptions.DefaultMaxUpSeconds.
+    LiftMaxUpSeconds: 30

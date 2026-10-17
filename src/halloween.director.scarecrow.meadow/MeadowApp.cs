@@ -58,6 +58,28 @@ namespace Halloween.Director.Scarecrow.Meadow
             var relayController = Services.Create<RelayController>();
             relayController.Initialize(Device.Pins.D05);
 
+            Logger.StartupSection("LiftController", () =>
+            {
+                var options = new LiftOptions();
+                if (Settings.TryGetValue("App.LiftMaxUpSeconds", out var configured))
+                {
+                    if (int.TryParse(configured, out var seconds) && seconds >= 0)
+                    {
+                        options.MaxUp = TimeSpan.FromSeconds(seconds);
+                    }
+                    else
+                    {
+                        Logger.Warn($"App.LiftMaxUpSeconds '{configured}' is not a number of seconds >= 0; using {LiftOptions.DefaultMaxUpSeconds}.");
+                    }
+                }
+
+                Services.Add(options);
+                Services.Create<LiftController>();
+                Logger.Info(options.MaxUp > TimeSpan.Zero
+                    ? $"Lift lowers itself after {options.MaxUp.TotalSeconds}s up."
+                    : "Lift has no time limit.");
+            });
+
             Logger.StartupSection("Network services", () =>
             {
                 Services.Create<HeartbeatService>();
@@ -147,6 +169,11 @@ namespace Halloween.Director.Scarecrow.Meadow
             if (Services.ContainsRegisteredType<HeartbeatService>())
             {
                 Services.Get<HeartbeatService>().Dispose();
+            }
+
+            if (Services.ContainsRegisteredType<LiftController>())
+            {
+                Services.Get<LiftController>().Dispose();
             }
 
             // relay first, so the valve is closed before the pin is released

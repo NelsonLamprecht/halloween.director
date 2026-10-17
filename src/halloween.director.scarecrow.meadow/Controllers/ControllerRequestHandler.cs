@@ -10,7 +10,7 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     public class ControllerRequestHandler : RequestHandlerBase
     {
-        private readonly RelayController _relayController;
+        private readonly LiftController _liftController;
         private readonly LedController _ledController;
 
         // Maple constructs this handler itself (outside the DI container), so resolve
@@ -18,7 +18,7 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
         // starts after MeadowApp.Initialize() has registered these controllers.
         public ControllerRequestHandler()
         {
-            _relayController = Resolver.Services.Get<RelayController>();
+            _liftController = Resolver.Services.Get<LiftController>();
             _ledController = Resolver.Services.Get<LedController>();
         }
 
@@ -30,16 +30,16 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
         [HttpPost("/up")]
         public IActionResult Up()
         {
-            return Switch("Up", _relayController.TurnOn);
+            return Switch("Up", () => _liftController.Up());
         }
 
         [HttpPost("/down")]
         public IActionResult Down()
         {
-            return Switch("Down", _relayController.TurnOff);
+            return Switch("Down", () => _liftController.Down());
         }
 
-        // 200 OK when the relay switched, 500 if it failed. An accepted command blinks
+        // 200 OK when the lift moved (or was already there), 500 if the relay failed. An accepted command blinks
         // the LED so it's visible the board got it.
         private IActionResult Switch(string name, Action action)
         {
