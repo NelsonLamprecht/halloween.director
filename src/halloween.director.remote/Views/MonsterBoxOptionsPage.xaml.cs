@@ -1,8 +1,8 @@
 using System;
 
-using halloween.director.remote.ViewModel;
+using Halloween.Director.Remote.ViewModel;
 
-namespace halloween.director.remote.Views
+namespace Halloween.Director.Remote.Views
 {
     public partial class MonsterBoxOptionsPage : ContentPage
     {

@@ -1,14 +1,14 @@
-using Meadow.Foundation.Web.Maple;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
+using Meadow.Foundation.Web.Maple;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Devices;
 
-namespace halloween.director.remote.ViewModel
+namespace Halloween.Director.Remote.ViewModel
 {
     public class MonsterBoxControllerViewModel : BaseViewModel
     {

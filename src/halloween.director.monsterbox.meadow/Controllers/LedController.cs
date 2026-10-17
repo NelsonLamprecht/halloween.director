@@ -1,15 +1,16 @@
-using halloween.director.shared.Controllers;
 using System;
 using System.Diagnostics;
-using System.Threading.Tasks;
 using System.Threading;
+using System.Threading.Tasks;
 
 using Meadow;
 using Meadow.Devices;
 using Meadow.Foundation.Leds;
 using Meadow.Logging;
 
-namespace halloween.director.monsterbox.meadow.Controllers
+using Halloween.Director.Shared.Controllers;
+
+namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
     internal class LedController : BaseController, IDisposable
     {

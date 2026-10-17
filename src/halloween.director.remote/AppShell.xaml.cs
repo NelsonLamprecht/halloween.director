@@ -1,8 +1,8 @@
 using Microsoft.Extensions.DependencyInjection;
 
-using halloween.director.remote.Views;
+using Halloween.Director.Remote.Views;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 public partial class AppShell : Shell
 {

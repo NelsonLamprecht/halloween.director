@@ -1,6 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 public partial class App : Application
 {

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <RootNamespace>halloween.director.shared</RootNamespace>
+    <RootNamespace>Halloween.Director.Shared</RootNamespace>
     <AssemblyName>halloween.director.shared</AssemblyName>
     <LangVersion>latest</LangVersion>
     <IsPackable>true</IsPackable>

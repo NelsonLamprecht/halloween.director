@@ -1,9 +1,11 @@
-﻿using Meadow;
-using halloween.director.shared.Controllers;
-using System;
+﻿using System;
 using System.Threading.Tasks;
 
-namespace halloween.director.scarecrow.meadow.Controllers
+using Meadow;
+
+using Halloween.Director.Shared.Controllers;
+
+namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     internal abstract class InitalizedBaseController : IInitalize
     {

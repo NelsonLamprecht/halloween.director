@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace halloween.director.remote.ViewModel
+namespace Halloween.Director.Remote.ViewModel
 {
     internal static class RequestUriUtil
     {

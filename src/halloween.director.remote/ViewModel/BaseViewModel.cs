@@ -8,11 +8,11 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+using Meadow.Foundation.Web.Maple;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
-using Meadow.Foundation.Web.Maple;
 
-namespace halloween.director.remote.ViewModel
+namespace Halloween.Director.Remote.ViewModel
 {
     public class BaseViewModel : INotifyPropertyChanged, IDisposable
     {

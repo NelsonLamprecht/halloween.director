@@ -2,7 +2,7 @@ using System.Threading.Tasks;
 
 using Meadow.Logging;
 
-namespace halloween.director.shared.Controllers
+namespace Halloween.Director.Shared.Controllers
 {
     public class BaseController
     {

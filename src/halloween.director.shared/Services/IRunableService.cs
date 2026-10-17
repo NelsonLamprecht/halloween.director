@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace halloween.director.shared.Services
+namespace Halloween.Director.Shared.Services
 {
     public interface IRunableService
     {

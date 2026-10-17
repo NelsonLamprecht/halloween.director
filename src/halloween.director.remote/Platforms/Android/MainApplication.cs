@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 [Application]
 public class MainApplication : MauiApplication

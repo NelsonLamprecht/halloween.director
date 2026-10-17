@@ -6,9 +6,9 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Foundation.Web.Maple.Routing;
 using Meadow.Logging;
 
-using halloween.director.scarecrow.meadow.Controllers.RelayController;
+using Halloween.Director.Scarecrow.Meadow.Controllers.RelayController;
 
-namespace halloween.director.scarecrow.meadow
+namespace Halloween.Director.Scarecrow.Meadow
 {
     public class ControllerRequestHandler : RequestHandlerBase
     {

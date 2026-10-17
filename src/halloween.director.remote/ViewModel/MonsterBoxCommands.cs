@@ -1,4 +1,4 @@
-namespace halloween.director.remote.ViewModel
+namespace Halloween.Director.Remote.ViewModel
 {
     // Centralizes the command-name strings shared between button
     // CommandParameter values in XAML and the switch statements in

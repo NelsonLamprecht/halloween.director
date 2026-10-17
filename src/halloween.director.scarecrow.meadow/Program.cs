@@ -1,7 +1,8 @@
-using Meadow;
 using System.Threading;
 
-namespace halloween.director.scarecrow.meadow
+using Meadow;
+
+namespace Halloween.Director.Scarecrow.Meadow
 {
     internal class Program
     {

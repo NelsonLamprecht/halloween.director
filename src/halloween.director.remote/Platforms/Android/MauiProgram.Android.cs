@@ -1,6 +1,6 @@
 using Microsoft.Maui.Handlers;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 public static partial class MauiProgram
 {

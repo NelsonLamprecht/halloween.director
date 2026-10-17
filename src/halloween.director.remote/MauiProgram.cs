@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 
-using halloween.director.remote.ViewModel;
-using halloween.director.remote.Views;
+using Halloween.Director.Remote.ViewModel;
+using Halloween.Director.Remote.Views;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 public static partial class MauiProgram
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace halloween.director.monsterbox.meadow.Controllers
+namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
     public class ShakeConfiguration
     {

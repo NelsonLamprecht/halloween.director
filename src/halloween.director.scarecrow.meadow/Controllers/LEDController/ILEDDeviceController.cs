@@ -1,6 +1,6 @@
 ﻿using Meadow;
 
-namespace halloween.director.scarecrow.meadow.Controllers.LEDController
+namespace Halloween.Director.Scarecrow.Meadow.Controllers.LEDController
 {
     public interface ILEDDeviceController : IOnOrOffController
     {

@@ -1,10 +1,11 @@
 ﻿using System;
-using halloween.director.shared.Services;
 using System.Threading.Tasks;
 
 using Meadow.Logging;
 
-namespace halloween.director.scarecrow.meadow.Services.HeartbeatService
+using Halloween.Director.Shared.Services;
+
+namespace Halloween.Director.Scarecrow.Meadow.Services.HeartbeatService
 {
     // right now, used to test restarts
     internal class HeartbeatService : BaseService

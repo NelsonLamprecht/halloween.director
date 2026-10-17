@@ -1,4 +1,4 @@
-namespace halloween.director.shared.Services.Watchdog
+namespace Halloween.Director.Shared.Services.Watchdog
 {
     public interface IWatchdogService: IRunableService
     {

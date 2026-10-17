@@ -1,7 +1,8 @@
-﻿using Meadow;
-using System.Threading;
+﻿using System.Threading;
 
-namespace halloween.director.monsterbox.meadow
+using Meadow;
+
+namespace Halloween.Director.Monsterbox.Meadow
 {
     internal class Program
     {

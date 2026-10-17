@@ -2,7 +2,7 @@ using Meadow;
 using Meadow.Devices;
 using Meadow.Logging;
 
-namespace halloween.director.shared
+namespace Halloween.Director.Shared
 {
     public abstract class MeadowBase: App<F7FeatherV1>
     {

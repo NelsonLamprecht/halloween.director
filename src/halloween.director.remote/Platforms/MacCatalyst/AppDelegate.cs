@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 [Register("AppDelegate")]
 public class AppDelegate : MauiUIApplicationDelegate

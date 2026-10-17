@@ -1,4 +1,3 @@
-using halloween.director.shared;
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -6,13 +5,14 @@ using System.Threading.Tasks;
 using Meadow;
 using Meadow.Hardware;
 
-using halloween.director.monsterbox.meadow.Controllers;
-using halloween.director.shared.Services.DiagnosticsService;
-using halloween.director.monsterbox.meadow.Services.MapleService;
-using halloween.director.shared.Services.NetworkService;
-using halloween.director.shared.Services.Watchdog;
+using Halloween.Director.Monsterbox.Meadow.Controllers;
+using Halloween.Director.Monsterbox.Meadow.Services.MapleService;
+using Halloween.Director.Shared;
+using Halloween.Director.Shared.Services.DiagnosticsService;
+using Halloween.Director.Shared.Services.NetworkService;
+using Halloween.Director.Shared.Services.Watchdog;
 
-namespace halloween.director.monsterbox.meadow
+namespace Halloween.Director.Monsterbox.Meadow
 {
     public class MeadowApp : MeadowBase
     {

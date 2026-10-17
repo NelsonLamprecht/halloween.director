@@ -1,12 +1,13 @@
 ﻿using System.Threading.Tasks;
 
-using halloween.director.shared.Services;
 using Meadow;
 using Meadow.Foundation.Web.Maple;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace halloween.director.scarecrow.meadow.Services.MapleService
+using Halloween.Director.Shared.Services;
+
+namespace Halloween.Director.Scarecrow.Meadow.Services.MapleService
 {
     internal class MapleService : BaseService
     {

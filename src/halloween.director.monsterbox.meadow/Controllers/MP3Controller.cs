@@ -1,4 +1,3 @@
-using halloween.director.shared.Controllers;
 using System;
 using System.Diagnostics;
 using System.Threading;
@@ -9,7 +8,9 @@ using Meadow.Devices;
 using Meadow.Foundation.Audio.Mp3;
 using Meadow.Logging;
 
-namespace halloween.director.monsterbox.meadow.Controllers
+using Halloween.Director.Shared.Controllers;
+
+namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
     internal class MP3Controller : BaseController, IDisposable
     {

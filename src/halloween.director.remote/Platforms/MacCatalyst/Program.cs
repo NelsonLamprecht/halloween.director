@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace halloween.director.remote;
+namespace Halloween.Director.Remote;
 
 public class Program
 {

@@ -1,9 +1,8 @@
-﻿using Microsoft.UI.Xaml;
-
-// To learn more about WinUI, the WinUI project structure,
+﻿// To learn more about WinUI, the WinUI project structure,
 // and more about our project templates, see: http://aka.ms/winui-project-info.
+using Microsoft.UI.Xaml;
 
-namespace halloween.director.remote.WinUI;
+namespace Halloween.Director.Remote.WinUI;
 
 /// <summary>
 /// Provides application-specific behavior to supplement the default Application class.

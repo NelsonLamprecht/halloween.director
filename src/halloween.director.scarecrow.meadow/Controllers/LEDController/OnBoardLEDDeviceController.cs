@@ -3,10 +3,10 @@ using System.Threading;
 
 using Meadow;
 using Meadow.Devices;
-using Meadow.Foundation.Leds;
 using Meadow.Foundation;
+using Meadow.Foundation.Leds;
 
-namespace halloween.director.scarecrow.meadow.Controllers.LEDController
+namespace Halloween.Director.Scarecrow.Meadow.Controllers.LEDController
 {
     public class OnBoardLEDDeviceController : ILEDDeviceController
     {
@@ -25,7 +25,7 @@ namespace halloween.director.scarecrow.meadow.Controllers.LEDController
                     redPwmPin: f7DeviceV1.Pins.OnboardLedRed,
                     greenPwmPin: f7DeviceV1.Pins.OnboardLedGreen,
                     bluePwmPin: f7DeviceV1.Pins.OnboardLedBlue,
-                    commonType: Meadow.Peripherals.Leds.CommonType.CommonAnode);
+                    commonType: global::Meadow.Peripherals.Leds.CommonType.CommonAnode);
             }
 
             rgbLed?.StartBlink(Color.White);

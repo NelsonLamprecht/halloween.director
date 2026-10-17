@@ -1,4 +1,3 @@
-using halloween.director.shared.Controllers;
 using System;
 
 using Meadow;
@@ -7,7 +6,9 @@ using Meadow.Hardware;
 using Meadow.Logging;
 using Meadow.Peripherals.Relays;
 
-namespace halloween.director.monsterbox.meadow.Controllers
+using Halloween.Director.Shared.Controllers;
+
+namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
     /// <summary>
     /// The commands all inverted since the pneumatics are keeping the values closed
