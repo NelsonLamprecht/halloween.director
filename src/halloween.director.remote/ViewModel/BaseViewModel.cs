@@ -115,7 +115,10 @@ namespace Halloween.Director.Remote.ViewModel
                     }
                 }
 
-                await client.StartScanningForAdvertisingServers();
+                using (new MulticastLockScope())
+                {
+                    await client.StartScanningForAdvertisingServers();
+                }
             }
             catch (Exception ex)
             {

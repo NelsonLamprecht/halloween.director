@@ -18,7 +18,7 @@ namespace Halloween.Director.Remote.ViewModel
     /// </summary>
     public static class SoundCatalogClient
     {
-        private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(3);
+        private static readonly TimeSpan RequestTimeout = TimeSpan.FromSeconds(10);
 
         /// <summary>Names starting with this go in the CREATURES section; everything else is FX.</summary>
         public const string CreaturePrefix = "Creature";
