@@ -78,6 +78,8 @@ namespace Halloween.Director.Shared
             Logger.StartupSection("Watchdog", () =>
             {
                 Services.Create<WatchdogService, IWatchdogService>();
+                // the green LED blinks off briefly on every pet while the board is ready
+                Services.Get<IWatchdogService>().Petted += ledController.PulseHealthy;
             });
 
             InitializeProp();

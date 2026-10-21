@@ -34,8 +34,8 @@ The Maple server listens on port `5417` and advertises itself over UDP. Requests
 | Fast orange blink | WiFi failed to connect or dropped, and is retrying (check the signal and `wifi.config.yaml`) |
 | Solid cyan | WiFi connected, server starting |
 | Fast purple blink | The server failed to start (see the log); it retries on the next WiFi connect |
-| Green | Ready |
-| White blink | Handling a command; back to green when the board can take another |
+| Short green flash every 3s, dark in between | Ready and healthy. Each flash is a watchdog pet, so if the flashes stop the app has hung (the watchdog resets the board 15s later) |
+| White blink | Handling a command; back to the green flashes when the board can take another |
 
 ## Setup
 
