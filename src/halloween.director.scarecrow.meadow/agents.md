@@ -4,7 +4,7 @@ Meadow F7 firmware for the scarecrow prop: one relay driving a scissor lift (pne
 
 ## What `MeadowApp` creates
 
-In order: `DiagnosticsService`, WiFi (external antenna, saved), `LedController`, `WatchdogService`, `RelayController` (`Device.Pins.D05`), `LiftController`, then `HeartbeatService`, `NetworkService` and `MapleService` (default options). `DisposeServices()` releases the heartbeat, then `LiftController` (cancels a pending auto-lower), then `RelayController` (closes the valve before its pin is released), then the LED.
+`MeadowBase` runs the shared boot (see the root `agents.md`); `InitializeProp()` adds `RelayController` (`Device.Pins.D05`), then `LiftController`. `DisposeServices()` releases `LiftController` (cancels a pending auto-lower), then `RelayController` (closes the valve before its pin is released).
 
 ## The lift
 

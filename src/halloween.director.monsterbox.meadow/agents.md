@@ -4,7 +4,7 @@ Meadow F7 firmware for the monsterbox prop: two relays driving pneumatic cylinde
 
 ## What `MeadowApp` creates
 
-In order: `DiagnosticsService`, WiFi (external antenna, saved), `LedController`, `RelayController` (`Device.Pins.D05` left, `D06` right), `MP3Controller`, then `WatchdogService`, `NetworkService`, `HeartbeatService`, `CylindersController` and `MapleService` (default options). `DisposeServices()` releases the heartbeat, LED, MP3, then `CylindersController` **before** `RelayController`, so an in-flight shake is cancelled and switches the relays off before they are released.
+`MeadowBase` runs the shared boot (see the root `agents.md`); `InitializeProp()` adds, in order: `RelayController` (`Device.Pins.D05` left, `D06` right), `MP3Controller`, the `SoundCatalog`, then `CylindersController`. `DisposeServices()` releases MP3, then `CylindersController` **before** `RelayController`, so an in-flight shake is cancelled and switches the relays off before they are released.
 
 ## Controllers
 

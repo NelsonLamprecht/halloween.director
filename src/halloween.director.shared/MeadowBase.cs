@@ -8,11 +8,20 @@ using Meadow.Hardware;
 using Meadow.Logging;
 
 using Halloween.Director.Shared.Controllers;
+using Halloween.Director.Shared.Services.DiagnosticsService;
+using Halloween.Director.Shared.Services.HeartbeatService;
 using Halloween.Director.Shared.Services.MapleService;
 using Halloween.Director.Shared.Services.NetworkService;
+using Halloween.Director.Shared.Services.Watchdog;
 
 namespace Halloween.Director.Shared
 {
+    /// <summary>
+    /// The boot sequence every prop shares. <see cref="Initialize"/> brings up the LED,
+    /// diagnostics, WiFi and the watchdog, calls <see cref="InitializeProp"/> for the prop's
+    /// own hardware, then creates the network services. <see cref="Run"/> starts the watchdog
+    /// and heartbeat and waits for WiFi; <see cref="OnNetworkConnected"/> starts Maple.
+    /// </summary>
     public abstract class MeadowBase: App<F7FeatherV1>
     {
         protected Logger Logger { get; } = Resolver.Log;
@@ -24,18 +33,106 @@ namespace Halloween.Director.Shared
 
         public MeadowBase() { }
 
+        /// <summary>Used if app.config.yaml is missing or doesn't have an App.DeviceName entry.</summary>
+        protected abstract string DefaultDeviceName { get; }
+
+        /// <summary>What GET /info reports as the type, such as "monsterbox".</summary>
+        protected abstract string DeviceType { get; }
+
+        /// <summary>
+        /// Creates and initializes the prop's own controllers (relays, MP3, lift...). Runs after
+        /// the LED, diagnostics, WiFi adapter and watchdog exist, and before the network
+        /// services, so anything a Maple handler resolves is registered by then.
+        /// </summary>
+        protected abstract void InitializeProp();
+
+        public override async Task Initialize()
+        {
+            Logger.Info("=== Initializing hardware... ===");
+
+            ApplyStartupSettings(DefaultDeviceName, DeviceType);
+
+            // first, so the LED shows the app has started (yellow, then red; see LedStatus)
+            var ledController = Services.Create<LedController>();
+            ledController.Initialize();
+
+            var diagnosticsService = Services.Create<DiagnosticsService>();
+            diagnosticsService.OutputMeadowOSInfo();
+            diagnosticsService.OutputDeviceInfo();
+            diagnosticsService.OutputNtpInfo();
+
+            ledController.SetStatus(LedStatus.Initializing);
+
+            var wifi = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
+            Logger.StartupSection("WiFi", () =>
+            {
+                LogWifiConfig(wifi);
+
+                // every prop runs on the external antenna; persisted so it's already in
+                // effect before AutomaticallyStartNetwork connects on every boot after the first
+                wifi.SetAntenna(AntennaType.External, true);
+                Services.Add(wifi);
+                Logger.StartupDetail("Antenna set to External; waiting for the network to connect.");
+            });
+
+            Logger.StartupSection("Watchdog", () =>
+            {
+                Services.Create<WatchdogService, IWatchdogService>();
+            });
+
+            InitializeProp();
+
+            Logger.StartupSection("Network services", () =>
+            {
+                Services.Create<HeartbeatService>();
+                Services.Create<NetworkService>();
+                Services.Add(new MapleServiceOptions());
+                Services.Create<MapleService>();
+                Logger.StartupDetail("Heartbeat, Network and Maple services created.");
+            });
+
+            TrackWifiEvents(wifi);
+            wifi.NetworkConnected += OnNetworkConnected;
+
+            Logger.Info("=== Hardware initialized. ===");
+
+            await base.Initialize();
+        }
+
+        public override async Task Run()
+        {
+            try
+            {
+                Services.Get<IWatchdogService>().Start();
+
+                await Services.Get<HeartbeatService>().Run();
+
+                // network connection is handled by Meadow OS via wifi.config.yaml and
+                // AutomaticallyStartNetwork in meadow.config.yaml; see OnNetworkConnected
+                Logger.Info($"=== Running @ {BootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
+                ShowWaitingForWifi();
+            }
+            catch (Exception ex)
+            {
+                // stays solid red: the board won't go on to WiFi and Maple
+                Services.Get<LedController>().SetColor(Color.Red);
+                Logger.Error($"Run failed @ {BootStopwatch.Elapsed}: {ex}");
+            }
+
+            await base.Run();
+        }
+
         // Logs what wifi.config.yaml and meadow.config.yaml gave the adapter.
-        protected void LogWifiConfig(IWiFiNetworkAdapter wifi)
+        private void LogWifiConfig(IWiFiNetworkAdapter wifi)
         {
             Logger.Info(
                 $"WiFi config from wifi.config.yaml -> DefaultSsid: '{wifi.DefaultSsid}', " +
                 $"AutoConnect: {wifi.AutoConnect}, AutoReconnect: {wifi.AutoReconnect}");
         }
 
-        // Logs the WiFi lifecycle events and shows them on the LED. The app subscribes to
-        // NetworkConnected itself, because that is where it starts its network services.
-        // The app must have created LedController first.
-        protected void TrackWifiEvents(IWiFiNetworkAdapter wifi)
+        // Logs the WiFi lifecycle events and shows them on the LED. NetworkConnected is
+        // handled by OnNetworkConnected, which starts the network services.
+        private void TrackWifiEvents(IWiFiNetworkAdapter wifi)
         {
             var led = Services.Get<LedController>();
 
@@ -59,22 +156,21 @@ namespace Halloween.Director.Shared
                 Logger.Error($"WiFi network error @ {BootStopwatch.Elapsed}. ErrorCode: {args.ErrorCode}");
         }
 
-        // Call from Run() once initialization is done: the LED goes from red to the slow blue
-        // "waiting for WiFi" blink, unless WiFi has already moved it on.
-        protected void ShowWaitingForWifi()
+        // Once initialization is done, the LED goes from red to the slow blue "waiting for
+        // WiFi" blink, unless WiFi has already moved it on.
+        private void ShowWaitingForWifi()
         {
             Services.Get<LedController>().SetStatus(LedStatus.Initializing, LedStatus.WaitingForWifi);
         }
 
         private bool _networkServicesStarted;
 
-        // Subscribe to this from NetworkConnected. It runs the network diagnostics, then starts
-        // the Maple server, then turns the LED to ready (cyan while starting, purple if it fails). The app must have created NetworkService,
-        // MapleService and LedController first.
+        // The NetworkConnected handler. It runs the network diagnostics, then starts the Maple
+        // server, then turns the LED to ready (cyan while starting, purple if it fails).
         //
         // async void is deliberate: this is an event handler, and awaiting MapleService.Run()
         // lets a startup failure be caught and logged instead of vanishing in an unobserved task.
-        protected async void OnNetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
+        private async void OnNetworkConnected(INetworkAdapter sender, NetworkConnectionEventArgs args)
         {
             Logger.StartupSection("WiFiConnected", () =>
                 Logger.Info($"WiFi connected @ {BootStopwatch.Elapsed}. IP: {args.IpAddress}, Gateway: {args.Gateway}, Subnet: {args.Subnet}"));
@@ -116,17 +212,20 @@ namespace Halloween.Director.Shared
             Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
-        // Logs the shutdown, then DisposeServices(), so the apps only list what to release.
+        // Logs the shutdown, stops the heartbeat, then DisposeServices() for the prop's own
+        // controllers, and the LED last.
         public override Task OnShutdown()
         {
             Logger.Info($"=== Shutting down @ {BootStopwatch.Elapsed}... ===");
 
+            DisposeIfRegistered<HeartbeatService>();
             DisposeServices();
+            DisposeIfRegistered<LedController>();
 
             return base.OnShutdown();
         }
 
-        // Override to dispose the app's controllers and services, in the order they must go
+        // Override to dispose the prop's own controllers, in the order they must go
         // (e.g. whatever drives a relay before the relay itself) using DisposeIfRegistered.
         protected virtual void DisposeServices()
         {
@@ -151,7 +250,7 @@ namespace Halloween.Director.Shared
         // startup banners and detail lines on or off, and App.DeviceName names the device (the
         // name Maple advertises), falling back to defaultDeviceName if the setting is missing. deviceType (such as
         // "monsterbox") and the version are what GET /info reports.
-        protected void ApplyStartupSettings(string defaultDeviceName, string deviceType)
+        private void ApplyStartupSettings(string defaultDeviceName, string deviceType)
         {
             var version = BuildInfo.Describe(GetType().Assembly);
             Logger.Info($"{GetType().Assembly.GetName().Name} {version}");
