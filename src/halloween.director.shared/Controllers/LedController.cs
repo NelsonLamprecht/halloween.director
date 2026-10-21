@@ -19,7 +19,8 @@ namespace Halloween.Director.Shared.Controllers
     ///   WifiRetrying     fast orange blink (connect failed or WiFi dropped)
     ///   StartingServer   solid cyan
     ///   ServerFailed     fast purple blink
-    ///   Ready            solid <see cref="ReadyColor"/> (green)
+    ///   Ready            dark, with a short <see cref="ReadyColor"/> (green) flash on every
+    ///                    watchdog pet (<see cref="PulseHealthy"/>) to show it is alive
     ///
     /// The LED is off before Initialize(), while Meadow OS itself boots: no app code runs then.
     /// </summary>
@@ -202,13 +203,48 @@ namespace Halloween.Director.Shared.Controllers
                     HardBlink(FailedColor, FastBlink, FastBlink);
                     break;
                 case LedStatus.Ready:
-                    SetColor(ReadyColor);
+                    // one flash now, then one on every watchdog pet (PulseHealthy)
+                    Led.Animate(HealthPulse);
                     break;
             }
         }
 
+        // how long the green health flash stays lit
+        private static readonly TimeSpan HealthPulseOn = TimeSpan.FromMilliseconds(150);
+
+        /// <summary>
+        /// A short green flash while ready, to show the board is alive. Called on every watchdog
+        /// pet; does nothing in any other status or during an activity blink.
+        /// </summary>
+        public void PulseHealthy()
+        {
+            lock (_activityLock)
+            {
+                if (!initialized || _status != LedStatus.Ready || _blinking)
+                {
+                    return;
+                }
+
+                Led.Animate(HealthPulse);
+            }
+        }
+
+        async Task HealthPulse(CancellationToken cancellationToken)
+        {
+            try
+            {
+                Led.WriteColor(ReadyColor);
+                await Task.Delay(HealthPulseOn, cancellationToken);
+                Led.WriteColor(Color.Black);
+            }
+            catch (OperationCanceledException)
+            {
+                // a new status or activity blink took over the LED
+            }
+        }
+
         // Blinks while at least one command is being handled, then returns to the status
-        // (ReadyColor, unless WiFi dropped meanwhile).
+        // (ready, unless WiFi dropped meanwhile).
         // Counted, because Maple handles requests in parallel: the LED only goes back to
         // ready once the last overlapping request has finished.
         public void BeginActivity()
