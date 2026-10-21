@@ -1,46 +1,38 @@
 using System;
 
 using Meadow;
-using Meadow.Foundation.Relays;
 using Meadow.Hardware;
-using Meadow.Peripherals.Relays;
 
 namespace Halloween.Director.Shared.Controllers
 {
     /// <summary>
-    /// One relay channel on a relay board, driven by a single open-drain output pin.
+    /// One relay channel on the active-low SainSmart relay board, driven by a single open-drain output pin.
     ///
-    /// Which <see cref="RelayState"/> counts as "on" depends on what the relay switches
-    /// (e.g. the pneumatics keep their valves closed), so the caller passes it in.
+    /// On pulls the pin low, which energizes the relay. Off lets the pin float, which leaves it de-energized.
     /// Starts off, and is switched off again before the port is released.
     /// </summary>
     public class RelayOutput : IOnOrOffController, IDisposable
     {
+        private const bool PinOn = false;
+        private const bool PinOff = true;
+
         private readonly IDigitalOutputPort port;
-        private readonly Relay relay;
-        private readonly RelayState onState;
-        private readonly RelayState offState;
 
-        public RelayOutput(IMeadowDevice device, IPin pin, RelayState onState)
+        public RelayOutput(IMeadowDevice device, IPin pin)
         {
-            this.onState = onState;
-            offState = onState == RelayState.Closed ? RelayState.Open : RelayState.Closed;
-
-            // true so port is closed as quickly as possible when board boots up.
+            // starts floating so the relay stays off from the moment the port is created.
             // opendrain is what seems to work with a relay board
-            port = device.CreateDigitalOutputPort(pin, true, OutputType.OpenDrain);
-            relay = new Relay(port, RelayType.NormallyOpen);
-            TurnOff();
+            port = device.CreateDigitalOutputPort(pin, PinOff, OutputType.OpenDrain);
         }
 
         public void TurnOn()
         {
-            relay.State = onState;
+            port.State = PinOn;
         }
 
         public void TurnOff()
         {
-            relay.State = offState;
+            port.State = PinOff;
         }
 
         public void Dispose()
@@ -48,7 +40,6 @@ namespace Halloween.Director.Shared.Controllers
             // leave the relay de-energized before letting go of the pin
             TurnOff();
 
-            (relay as IDisposable)?.Dispose();
             port?.Dispose();
         }
     }

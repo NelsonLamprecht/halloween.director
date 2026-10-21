@@ -8,7 +8,7 @@ In order: `DiagnosticsService`, WiFi (external antenna, saved), `LedController`,
 
 ## Controllers
 
-- **`RelayController`** owns two `RelayOutput`s, exposed as `Left` and `Right` (`IOnOrOffController`). The relay board is active-low, so `RelayState.Open` (pin pulled low) is **on** and energizes the cylinder; off lets the pin float and the relay stays de-energized. `Dispose` switches both off before releasing the pins.
+- **`RelayController`** owns two `RelayOutput`s, exposed as `Left` and `Right` (`IOnOrOffController`). `RelayOutput` (shared) handles the active-low board: on pulls the pin low and energizes the cylinder; off lets the pin float and the relay stays de-energized. `Dispose` switches both off before releasing the pins.
 - **`CylindersController`** sits above `RelayController` (constructor-injected). `TryShakeAsync` runs one shake at a time; a second call returns `false` immediately.
 - **`MP3Controller`** wraps the YX5300 on the UART. `QueueFile()` only touches lock-protected state; a single background worker is the only code that talks to the UART after `Initialize()`. Don't call `_mp3Player` from request handlers.
 

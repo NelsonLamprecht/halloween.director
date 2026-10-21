@@ -3,7 +3,6 @@ using System;
 using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
-using Meadow.Peripherals.Relays;
 
 using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
@@ -36,11 +35,8 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
             Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
-                // open is on: the board's inputs are active-low, and RelayState.Open drives
-                // the pin low (relay energized). Closed lets the pin float, which keeps the
-                // relay and solenoid off from boot until a shake.
-                left = new RelayOutput(device, leftPin, RelayState.Open);
-                right = new RelayOutput(device, rightPin, RelayState.Open);
+                left = new RelayOutput(device, leftPin);
+                right = new RelayOutput(device, rightPin);
                 initialized = true;
 
                 Logger.StartupDetail($"Left relay on {leftPin.Name}, right relay on {rightPin.Name}; both start off.");
