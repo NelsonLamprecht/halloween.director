@@ -19,8 +19,8 @@ namespace Halloween.Director.Shared.Controllers
     ///   WifiRetrying     fast orange blink (connect failed or WiFi dropped)
     ///   StartingServer   solid cyan
     ///   ServerFailed     fast purple blink
-    ///   Ready            dark, with a short <see cref="ReadyColor"/> (green) flash on every
-    ///                    watchdog pet (<see cref="PulseHealthy"/>) to show it is alive
+    ///   Ready            dark, with a short <see cref="ReadyColor"/> (green) flash each time
+    ///                    the heartbeat's health check passes (<see cref="PulseHealthy"/>)
     ///
     /// The LED is off before Initialize(), while Meadow OS itself boots: no app code runs then.
     /// </summary>
@@ -203,7 +203,7 @@ namespace Halloween.Director.Shared.Controllers
                     HardBlink(FailedColor, FastBlink, FastBlink);
                     break;
                 case LedStatus.Ready:
-                    // one flash now, then one on every watchdog pet (PulseHealthy)
+                    // one flash now, then one on every passing health check (PulseHealthy)
                     Led.Animate(HealthPulse);
                     break;
             }
@@ -213,8 +213,9 @@ namespace Halloween.Director.Shared.Controllers
         private static readonly TimeSpan HealthPulseOn = TimeSpan.FromMilliseconds(150);
 
         /// <summary>
-        /// A short green flash while ready, to show the board is alive. Called on every watchdog
-        /// pet; does nothing in any other status or during an activity blink.
+        /// A short green flash while ready, to show the board is healthy. Called by the heartbeat
+        /// each time its health check passes; does nothing in any other status or during an
+        /// activity blink.
         /// </summary>
         public void PulseHealthy()
         {

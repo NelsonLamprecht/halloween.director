@@ -1,6 +1,5 @@
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 
 using Meadow;
 using Meadow.Logging;
@@ -12,13 +11,8 @@ namespace Halloween.Director.Shared.Services.Watchdog
         /// <summary>The device resets if the watchdog isn't petted within this many seconds.</summary>
         public const int DefaultTimeoutSeconds = 15;
 
-        /// <summary>
-        /// How often the background thread pets the watchdog. Each pet also blinks the LED
-        /// (<see cref="Petted"/>), so this is short enough to see the board is alive.
-        /// </summary>
-        public const int DefaultPetIntervalSeconds = 3;
-
-        public event Action Petted;
+        /// <summary>How often the background thread pets the watchdog.</summary>
+        public const int DefaultPetIntervalSeconds = 10;
 
         private readonly IMeadowDevice device;
 
@@ -55,33 +49,10 @@ namespace Halloween.Director.Shared.Services.Watchdog
                         Thread.Sleep(TimeSpan.FromSeconds(inSeconds));
                         Logger.Debug($"Petting watchdog @ {DateTime.UtcNow}");
                         device.WatchdogReset();
-                        RaisePetted();
                     }
                 });
                 t.Start();
                 Logger.StartupDetail($"Petting the watchdog every {inSeconds}s.");
-            });
-        }
-
-        // off the pet thread, and never throwing into it: nothing a handler does may stop the petting
-        private void RaisePetted()
-        {
-            var petted = Petted;
-            if (petted == null)
-            {
-                return;
-            }
-
-            _ = Task.Run(() =>
-            {
-                try
-                {
-                    petted();
-                }
-                catch (Exception ex)
-                {
-                    Logger.Warn($"Watchdog Petted handler failed: {ex.Message}");
-                }
             });
         }
     }
