@@ -6,6 +6,12 @@ namespace Halloween.Director.Shared.Controllers
     /// </summary>
     public enum LedStatus
     {
+        /// <summary>
+        /// Solid yellow: Meadow OS has booted and handed over to the app, which is reading the
+        /// OS and device info. The first thing the app shows; the LED is off before it.
+        /// </summary>
+        Booting,
+
         /// <summary>Solid red: the app is initializing hardware.</summary>
         Initializing,
 

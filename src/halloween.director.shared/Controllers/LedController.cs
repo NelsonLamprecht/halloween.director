@@ -13,6 +13,7 @@ namespace Halloween.Director.Shared.Controllers
     /// (<see cref="LedStatus"/>, set with <see cref="SetStatus"/>), with a hard white blink
     /// while commands are being handled:
     ///
+    ///   Booting          solid yellow (the app has just started)
     ///   Initializing     solid red
     ///   WaitingForWifi   slow blue blink
     ///   WifiRetrying     fast orange blink (connect failed or WiFi dropped)
@@ -20,7 +21,7 @@ namespace Halloween.Director.Shared.Controllers
     ///   ServerFailed     fast purple blink
     ///   Ready            solid <see cref="ReadyColor"/> (green)
     ///
-    /// The LED is off before Initialize(), while Meadow OS boots.
+    /// The LED is off before Initialize(), while Meadow OS itself boots: no app code runs then.
     /// </summary>
     public class LedController : BaseController, IOnOrOffController, IDisposable
     {
@@ -48,7 +49,7 @@ namespace Halloween.Director.Shared.Controllers
                 initialized = true;
                 ShowStatus(_status);
 
-                Logger.StartupDetail($"Onboard LED available: {led.IsAvailable}. Red while initializing.");
+                Logger.StartupDetail($"Onboard LED available: {led.IsAvailable}. Yellow while booting.");
             });
 
             Logger.Info($"{GetType().Name} is initialized.");
@@ -132,7 +133,7 @@ namespace Halloween.Director.Shared.Controllers
         private static readonly Color RetryingColor = new Color(255, 64, 0);
         private static readonly Color FailedColor = new Color(160, 0, 255);
 
-        private LedStatus _status = LedStatus.Initializing;
+        private LedStatus _status = LedStatus.Booting;
 
         /// <summary>
         /// Shows <paramref name="status"/>. During an activity blink it is only recorded, and
@@ -182,6 +183,9 @@ namespace Halloween.Director.Shared.Controllers
         {
             switch (status)
             {
+                case LedStatus.Booting:
+                    SetColor(Color.Yellow);
+                    break;
                 case LedStatus.Initializing:
                     SetColor(Color.Red);
                     break;

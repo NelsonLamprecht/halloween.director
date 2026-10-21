@@ -7,6 +7,7 @@ Wilderness Labs Meadow F7 firmware for the scarecrow prop: a relay (pin D05) rai
 | LED | Meaning |
 | --- | --- |
 | Off | Meadow OS is booting; the app hasn't started yet |
+| Solid yellow | Meadow OS has booted and the app has started (reading OS and device info) |
 | Solid red | Initializing hardware |
 | Slow blue blink | Waiting for WiFi |
 | Fast orange blink | WiFi failed to connect or dropped, and is retrying (check the signal and `wifi.config.yaml`) |

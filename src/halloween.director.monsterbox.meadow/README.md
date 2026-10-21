@@ -28,6 +28,7 @@ The Maple server listens on port `5417` and advertises itself over UDP. Requests
 | LED | Meaning |
 | --- | --- |
 | Off | Meadow OS is booting; the app hasn't started yet |
+| Solid yellow | Meadow OS has booted and the app has started (reading OS and device info) |
 | Solid red | Initializing hardware |
 | Slow blue blink | Waiting for WiFi |
 | Fast orange blink | WiFi failed to connect or dropped, and is retrying (check the signal and `wifi.config.yaml`) |

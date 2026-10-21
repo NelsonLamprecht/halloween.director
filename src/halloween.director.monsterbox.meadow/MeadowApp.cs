@@ -25,7 +25,7 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             ApplyStartupSettings(DefaultDeviceName, "monsterbox");
 
-            // first, so the LED is red for the whole of initialization (see LedStatus)
+            // first, so the LED shows the app has started (yellow, then red; see LedStatus)
             var ledController = Services.Create<LedController>();
             ledController.Initialize();
 
@@ -33,6 +33,8 @@ namespace Halloween.Director.Monsterbox.Meadow
             diagnosticsService.OutputMeadowOSInfo();
             diagnosticsService.OutputDeviceInfo();
             diagnosticsService.OutputNtpInfo();
+
+            ledController.SetStatus(LedStatus.Initializing);
 
             var wifiAdapter = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 

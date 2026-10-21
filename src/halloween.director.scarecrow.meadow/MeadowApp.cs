@@ -26,7 +26,7 @@ namespace Halloween.Director.Scarecrow.Meadow
 
             ApplyStartupSettings(DefaultDeviceName, "scarecrow");
 
-            // first, so the LED is red for the whole of initialization (see LedStatus)
+            // first, so the LED shows the app has started (yellow, then red; see LedStatus)
             var ledController = Services.Create<LedController>();
             ledController.Initialize();
 
@@ -34,6 +34,8 @@ namespace Halloween.Director.Scarecrow.Meadow
             diagnosticsService.OutputMeadowOSInfo();
             diagnosticsService.OutputDeviceInfo();
             diagnosticsService.OutputNtpInfo();
+
+            ledController.SetStatus(LedStatus.Initializing);
 
             var network = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
             Logger.StartupSection("WiFi", () =>
