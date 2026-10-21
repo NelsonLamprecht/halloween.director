@@ -11,7 +11,8 @@ using Halloween.Director.Shared.Controllers;
 namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {
     /// <summary>
-    /// The commands all inverted since the pneumatics are keeping the values closed
+    /// Two relay channels on the active-low SainSmart board, one per cylinder.
+    /// On energizes the relay (pin pulled low) and fires the cylinder; off leaves it at rest.
     /// </summary>
     internal class RelayController : BaseController, IDisposable
     {
@@ -35,9 +36,11 @@ namespace Halloween.Director.Monsterbox.Meadow.Controllers
 
             Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
-                // closed is on: the pneumatics keep their valves closed
-                left = new RelayOutput(device, leftPin, RelayState.Closed);
-                right = new RelayOutput(device, rightPin, RelayState.Closed);
+                // open is on: the board's inputs are active-low, and RelayState.Open drives
+                // the pin low (relay energized). Closed lets the pin float, which keeps the
+                // relay and solenoid off from boot until a shake.
+                left = new RelayOutput(device, leftPin, RelayState.Open);
+                right = new RelayOutput(device, rightPin, RelayState.Open);
                 initialized = true;
 
                 Logger.StartupDetail($"Left relay on {leftPin.Name}, right relay on {rightPin.Name}; both start off.");
