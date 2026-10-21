@@ -3,7 +3,6 @@ using System;
 using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
-using Meadow.Peripherals.Relays;
 
 using Halloween.Director.Shared;
 using Halloween.Director.Shared.Controllers;
@@ -11,8 +10,7 @@ using Halloween.Director.Shared.Controllers;
 namespace Halloween.Director.Scarecrow.Meadow.Controllers
 {
     // <summary>
-    // The commands all inverted since we are working with relays that keep the valves closed.
-    // TurnOn() opens the relay (lift up); TurnOff() closes it (lift down, the rest state).
+    // TurnOn() energizes the relay (lift up); TurnOff() releases it (lift down, the rest state).
     // </summary>
     public class RelayController : BaseController, IOnOrOffController, IDisposable
     {
@@ -33,9 +31,8 @@ namespace Halloween.Director.Scarecrow.Meadow.Controllers
 
             Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
-                // open is on: the relays keep the valves closed. The output starts off so
-                // the valve is closed as quickly as possible when the board boots up.
-                relay = new RelayOutput(device, devicePin, RelayState.Open);
+                // the output starts off so the valve is closed as quickly as possible when the board boots up.
+                relay = new RelayOutput(device, devicePin);
                 Logger.StartupDetail($"Relay on {devicePin.Name}; starts off (valve closed).");
             });
 
