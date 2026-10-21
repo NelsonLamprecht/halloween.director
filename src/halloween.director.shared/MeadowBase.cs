@@ -32,24 +32,44 @@ namespace Halloween.Director.Shared
                 $"AutoConnect: {wifi.AutoConnect}, AutoReconnect: {wifi.AutoReconnect}");
         }
 
-        // Logs the WiFi lifecycle events. The app subscribes to NetworkConnected itself,
-        // because that is where it starts its network services.
-        protected void LogWifiEvents(IWiFiNetworkAdapter wifi)
+        // Logs the WiFi lifecycle events and shows them on the LED. The app subscribes to
+        // NetworkConnected itself, because that is where it starts its network services.
+        // The app must have created LedController first.
+        protected void TrackWifiEvents(IWiFiNetworkAdapter wifi)
         {
+            var led = Services.Get<LedController>();
+
             wifi.NetworkConnecting += (sender) =>
+            {
                 Logger.Info($"WiFi connecting @ {BootStopwatch.Elapsed}...");
+                // a retry after a failure stays orange until it actually connects
+                led.SetStatus(LedStatus.Initializing, LedStatus.WaitingForWifi);
+            };
             wifi.NetworkConnectFailed += (sender) =>
+            {
                 Logger.Warn($"WiFi connect failed @ {BootStopwatch.Elapsed}.");
+                led.SetStatus(LedStatus.WifiRetrying);
+            };
             wifi.NetworkDisconnected += (sender, args) =>
+            {
                 Logger.Warn($"WiFi disconnected @ {BootStopwatch.Elapsed}. Reason: {args.Reason}");
+                led.SetStatus(LedStatus.WifiRetrying);
+            };
             wifi.NetworkError += (sender, args) =>
                 Logger.Error($"WiFi network error @ {BootStopwatch.Elapsed}. ErrorCode: {args.ErrorCode}");
+        }
+
+        // Call from Run() once initialization is done: the LED goes from red to the slow blue
+        // "waiting for WiFi" blink, unless WiFi has already moved it on.
+        protected void ShowWaitingForWifi()
+        {
+            Services.Get<LedController>().SetStatus(LedStatus.Initializing, LedStatus.WaitingForWifi);
         }
 
         private bool _networkServicesStarted;
 
         // Subscribe to this from NetworkConnected. It runs the network diagnostics, then starts
-        // the Maple server, then turns the LED to ready. The app must have created NetworkService,
+        // the Maple server, then turns the LED to ready (cyan while starting, purple if it fails). The app must have created NetworkService,
         // MapleService and LedController first.
         //
         // async void is deliberate: this is an event handler, and awaiting MapleService.Run()
@@ -64,11 +84,16 @@ namespace Halloween.Director.Shared
             // AutomaticallyReconnect can raise this again after a drop. The Maple server is
             // bound to a specific IP, so leave it alone if the address is unchanged and
             // rebuild it if DHCP handed out a new one.
+            var led = Services.Get<LedController>();
             var mapleService = Services.Get<MapleService>();
             if (_networkServicesStarted && args.IpAddress.Equals(mapleService.BoundAddress))
             {
+                // reconnected after a drop; the server is still running
+                led.SetStatus(LedStatus.Ready);
                 return;
             }
+
+            led.SetStatus(LedStatus.StartingServer);
 
             try
             {
@@ -81,11 +106,12 @@ namespace Halloween.Director.Shared
             {
                 // the next NetworkConnected event retries
                 Logger.Error($"MapleService failed to start: {ex}");
+                led.SetStatus(LedStatus.ServerFailed);
                 return;
             }
             _networkServicesStarted = true;
 
-            Services.Get<LedController>().SetColor(LedController.ReadyColor);
+            led.SetStatus(LedStatus.Ready);
 
             Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }

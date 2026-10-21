@@ -9,8 +9,18 @@ using Meadow.Logging;
 namespace Halloween.Director.Shared.Controllers
 {
     /// <summary>
-    /// Status LED on the F7's onboard RGB LED: red until the app is up, then
-    /// <see cref="ReadyColor"/>, with a hard white blink while commands are being handled.
+    /// Status LED on the F7's onboard RGB LED. It shows the boot and network stage
+    /// (<see cref="LedStatus"/>, set with <see cref="SetStatus"/>), with a hard white blink
+    /// while commands are being handled:
+    ///
+    ///   Initializing     solid red
+    ///   WaitingForWifi   slow blue blink
+    ///   WifiRetrying     fast orange blink (connect failed or WiFi dropped)
+    ///   StartingServer   solid cyan
+    ///   ServerFailed     fast purple blink
+    ///   Ready            solid <see cref="ReadyColor"/> (green)
+    ///
+    /// The LED is off before Initialize(), while Meadow OS boots.
     /// </summary>
     public class LedController : BaseController, IOnOrOffController, IDisposable
     {
@@ -35,11 +45,10 @@ namespace Halloween.Director.Shared.Controllers
             Logger.StartupSection($"{GetType().Name}.Initialize", () =>
             {
                 led = new OnboardRgbLed(Logger, device);
-                led.SetColor(Color.Red);
-
                 initialized = true;
+                ShowStatus(_status);
 
-                Logger.StartupDetail($"Onboard LED available: {led.IsAvailable}. Red until the app is ready.");
+                Logger.StartupDetail($"Onboard LED available: {led.IsAvailable}. Red while initializing.");
             });
 
             Logger.Info($"{GetType().Name} is initialized.");
@@ -83,19 +92,25 @@ namespace Halloween.Director.Shared.Controllers
         {
             // a hard on/off blink in a fixed color: much easier to notice than a fade
             Logger.StartupDetail("LED: blinking for activity.");
-            Led.Animate(BlinkLoop);
+            HardBlink(ActivityColor, BlinkOn, BlinkOff);
         }
 
-        async Task BlinkLoop(CancellationToken cancellationToken)
+        // a hard on/off blink (StartBlink fades)
+        private void HardBlink(Color color, TimeSpan on, TimeSpan off)
+        {
+            Led.Animate(cancellationToken => BlinkLoop(color, on, off, cancellationToken));
+        }
+
+        async Task BlinkLoop(Color color, TimeSpan on, TimeSpan off, CancellationToken cancellationToken)
         {
             try
             {
                 while (!cancellationToken.IsCancellationRequested)
                 {
-                    Led.WriteColor(ActivityColor);
-                    await Task.Delay(BlinkOn, cancellationToken);
+                    Led.WriteColor(color);
+                    await Task.Delay(on, cancellationToken);
                     Led.WriteColor(Color.Black);
-                    await Task.Delay(BlinkOff, cancellationToken);
+                    await Task.Delay(off, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
@@ -110,7 +125,86 @@ namespace Halloween.Director.Shared.Controllers
         private static readonly TimeSpan BlinkOn = TimeSpan.FromMilliseconds(120);
         private static readonly TimeSpan BlinkOff = TimeSpan.FromMilliseconds(120);
 
-        // Blinks while at least one command is being handled, then returns to ReadyColor.
+        // Status blink tuning: slow while waiting, fast when something needs attention.
+        private static readonly TimeSpan SlowBlink = TimeSpan.FromMilliseconds(500);
+        private static readonly TimeSpan FastBlink = TimeSpan.FromMilliseconds(150);
+
+        private static readonly Color RetryingColor = new Color(255, 64, 0);
+        private static readonly Color FailedColor = new Color(160, 0, 255);
+
+        private LedStatus _status = LedStatus.Initializing;
+
+        /// <summary>
+        /// Shows <paramref name="status"/>. During an activity blink it is only recorded, and
+        /// shown once the blink ends.
+        /// </summary>
+        public void SetStatus(LedStatus status)
+        {
+            lock (_activityLock)
+            {
+                SetStatusLocked(status);
+            }
+        }
+
+        /// <summary>
+        /// Shows <paramref name="status"/> only if the LED is still at <paramref name="expected"/>,
+        /// so a late "waiting" can't overwrite a stage that has already moved on.
+        /// </summary>
+        public void SetStatus(LedStatus expected, LedStatus status)
+        {
+            lock (_activityLock)
+            {
+                if (_status == expected)
+                {
+                    SetStatusLocked(status);
+                }
+            }
+        }
+
+        // call with _activityLock held
+        private void SetStatusLocked(LedStatus status)
+        {
+            if (status == _status)
+            {
+                return;
+            }
+
+            _status = status;
+            Logger.StartupDetail($"LED: {status}.");
+
+            if (initialized && !_blinking)
+            {
+                ShowStatus(status);
+            }
+        }
+
+        private void ShowStatus(LedStatus status)
+        {
+            switch (status)
+            {
+                case LedStatus.Initializing:
+                    SetColor(Color.Red);
+                    break;
+                case LedStatus.WaitingForWifi:
+                    HardBlink(Color.Blue, SlowBlink, SlowBlink);
+                    break;
+                case LedStatus.WifiRetrying:
+                    HardBlink(RetryingColor, FastBlink, FastBlink);
+                    break;
+                case LedStatus.StartingServer:
+                    SetColor(Color.Cyan);
+                    break;
+                case LedStatus.ServerFailed:
+                    HardBlink(FailedColor, FastBlink, FastBlink);
+                    break;
+                case LedStatus.Ready:
+                    SetColor(ReadyColor);
+                    break;
+            }
+        }
+
+        // Blinks while at least one command is being handled, then returns to the status
+        // (ReadyColor, unless WiFi dropped meanwhile).
         // Counted, because Maple handles requests in parallel: the LED only goes back to
         // ready once the last overlapping request has finished.
         public void BeginActivity()
@@ -184,8 +278,8 @@ namespace Halloween.Director.Shared.Controllers
         private void ReturnToReady()
         {
             _blinking = false;
-            Logger.StartupDetail("LED: back to ready.");
-            SetColor(ReadyColor);
+            Logger.StartupDetail($"LED: activity done, back to {_status}.");
+            ShowStatus(_status);
         }
 
         // Color shown when the board is idle and ready to accept a command
