@@ -20,7 +20,8 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
     /// Every <see cref="DefaultCheckIntervalSeconds"/> seconds it also checks that WiFi is
     /// connected with an IP address and the Maple server is running on it, and flashes the
     /// LED green when it is (<see cref="LedController.PulseHealthy"/>). If the flashes stop,
-    /// one of those failed or the app has hung.
+    /// one of those failed or the app has hung. GET /info reports the same check and
+    /// uptime (<see cref="CheckHealth"/>, <see cref="Uptime"/>).
     /// </summary>
     public class HeartbeatService : BaseService, IDisposable
     {
@@ -46,6 +47,9 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
         public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(DefaultIntervalSeconds);
 
         public TimeSpan CheckInterval { get; set; } = TimeSpan.FromSeconds(DefaultCheckIntervalSeconds);
+
+        /// <summary>Time since the service was created, early in MeadowBase.Initialize().</summary>
+        public TimeSpan Uptime => uptime.Elapsed;
 
         /// <summary>
         /// For testing Lifecycle.RestartOnAppFailure only: throws from the heartbeat task after
@@ -125,8 +129,8 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
             }
         }
 
-        // null when healthy, otherwise what is wrong
-        private string CheckHealth()
+        /// <summary>Null when healthy, otherwise what is wrong. Cheap, so GET /info runs it on each request.</summary>
+        public string CheckHealth()
         {
             if (!networkAdapter.IsConnected)
             {

@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace Halloween.Director.Remote.ViewModel
 {
-    /// <summary>What a prop reports on GET /info.</summary>
-    public readonly record struct DeviceInfo(string Name, string Type, string Version);
+    /// <summary>What a prop reports on GET /info. Ip, UptimeSeconds and Health are null from older firmware.</summary>
+    public readonly record struct DeviceInfo(string Name, string Type, string Version, string? Ip = null, long? UptimeSeconds = null, string? Health = null);
 
     /// <summary>Asks a prop who it is (GET /info, served by the shared firmware library).</summary>
     public static class DeviceInfoClient
@@ -29,7 +29,7 @@ namespace Halloween.Director.Remote.ViewModel
             }
         }
 
-        /// <summary>Parses {"name":"Monsterbox-v1","type":"monsterbox","version":"..."}; null without a name.</summary>
+        /// <summary>Parses {"name":"Monsterbox-v1","type":"monsterbox","version":"...","ip":"...","uptimeSeconds":3725,"health":"healthy"}; null without a name.</summary>
         public static DeviceInfo? Parse(string json)
         {
             using var document = JsonDocument.Parse(json);
@@ -44,7 +44,10 @@ namespace Halloween.Director.Remote.ViewModel
             return new DeviceInfo(
                 name.GetString()!,
                 root.TryGetProperty("type", out var type) && type.ValueKind == JsonValueKind.String ? type.GetString()! : "unknown",
-                root.TryGetProperty("version", out var version) && version.ValueKind == JsonValueKind.String ? version.GetString()! : string.Empty);
+                root.TryGetProperty("version", out var version) && version.ValueKind == JsonValueKind.String ? version.GetString()! : string.Empty,
+                root.TryGetProperty("ip", out var ip) && ip.ValueKind == JsonValueKind.String ? ip.GetString() : null,
+                root.TryGetProperty("uptimeSeconds", out var uptime) && uptime.ValueKind == JsonValueKind.Number && uptime.TryGetInt64(out var seconds) ? seconds : null,
+                root.TryGetProperty("health", out var health) && health.ValueKind == JsonValueKind.String ? health.GetString() : null);
         }
     }
 }
