@@ -25,10 +25,16 @@ namespace Halloween.Director.Monsterbox.Meadow
 
             ApplyStartupSettings(DefaultDeviceName, "monsterbox");
 
+            // first, so the LED shows the app has started (yellow, then red; see LedStatus)
+            var ledController = Services.Create<LedController>();
+            ledController.Initialize();
+
             var diagnosticsService = Services.Create<DiagnosticsService>();
             diagnosticsService.OutputMeadowOSInfo();
             diagnosticsService.OutputDeviceInfo();
             diagnosticsService.OutputNtpInfo();
+
+            ledController.SetStatus(LedStatus.Initializing);
 
             var wifiAdapter = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
 
@@ -44,9 +50,6 @@ namespace Halloween.Director.Monsterbox.Meadow
             });
 
             // each controller logs its own section from Initialize()
-            var ledController = Services.Create<LedController>();
-            ledController.Initialize();
-
             var relayController = Services.Create<RelayController>();
             relayController.Initialize(Device.Pins.D05, Device.Pins.D06);
 
@@ -71,7 +74,7 @@ namespace Halloween.Director.Monsterbox.Meadow
                 Logger.StartupDetail("Watchdog, Network, Heartbeat, Cylinders and Maple services created.");
             });
 
-            LogWifiEvents(wifiAdapter);
+            TrackWifiEvents(wifiAdapter);
             wifiAdapter.NetworkConnected += OnNetworkConnected;
 
             Logger.Info("=== Hardware initialized. ===");
@@ -88,6 +91,7 @@ namespace Halloween.Director.Monsterbox.Meadow
             // network connection is handled by Meadow OS via wifi.config.yaml and
             // AutomaticallyStartNetwork in meadow.config.yaml; see OnNetworkConnected
             Logger.Info($"=== Running @ {BootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
+            ShowWaitingForWifi();
             return base.Run();
         }
 

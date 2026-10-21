@@ -16,7 +16,7 @@ Namespaces are `Halloween.Director.*` (project and folder names stay lowercase).
 `MeadowBase : App<F7FeatherV1>` (shared) gives each app `Logger`, `Services` (the `Resolver.Services` collection), `BootStopwatch` and these helpers, so apps don't repeat them:
 
 - `ApplyStartupSettings(defaultDeviceName)` reads `App.StartupDetails` and `App.DeviceName` from `app.config.yaml`.
-- `LogWifiConfig` / `LogWifiEvents` log the WiFi config and the connecting/failed/disconnected/error events.
+- `LogWifiConfig` / `TrackWifiEvents` log the WiFi config and the connecting/failed/disconnected/error events; `TrackWifiEvents` also moves the LED to waiting or retrying (create `LedController` first). `ShowWaitingForWifi()` is called from `Run()` to switch the LED from red to waiting.
 - `OnNetworkConnected` is the `NetworkConnected` handler (see below).
 - `OnShutdown` logs and calls `DisposeServices()`; apps override that and list what to release with `DisposeIfRegistered<T>()`.
 - `OnError` logs unhandled errors.
@@ -25,7 +25,7 @@ Each `MeadowApp` runs a fixed lifecycle:
 
 1. **`Initialize()`**: apply settings, create diagnostics, set up WiFi, then `Services.Create<T>()` every controller/service and call `Initialize(...)` on the ones that own hardware (two-phase construction is deliberate: initialization order is explicit here, not hidden in constructors).
 2. **`Run()`**: start the watchdog (`IWatchdogService.Start()`) and the heartbeat, then wait for the network.
-3. **`OnNetworkConnected`** (shared): anything needing an IP is deferred to here. It runs the network diagnostics, starts `MapleService` (or re-binds it if DHCP changed the IP, using `BoundAddress`), sets the LED to ready and logs startup complete. It is `async void` on purpose, with a try/catch that logs a failed start; `_networkServicesStarted` is only set after a successful start, so the next event retries.
+3. **`OnNetworkConnected`** (shared): anything needing an IP is deferred to here. It runs the network diagnostics, starts `MapleService` (or re-binds it if DHCP changed the IP, using `BoundAddress`), sets the LED (`StartingServer`, then `Ready` or `ServerFailed`) and logs startup complete. A reconnect with the same IP only sets the LED back to `Ready`. It is `async void` on purpose, with a try/catch that logs a failed start; `_networkServicesStarted` is only set after a successful start, so the next event retries.
 
 WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.AutomaticallyStartNetwork`/`AutomaticallyReconnect`) plus a gitignored `wifi.config.yaml` (copy `wifi.config.yaml.template`) connect it.
 
@@ -39,7 +39,7 @@ WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.Automatically
 
 ## Shared pieces
 
-- **`OnboardRgbLed` / `LedController`**: the onboard LED is common anode (PWM inverted). Red until the Maple server is up, then `ReadyColor` (green). Accepted commands call `BeginActivity()`/`EndActivity()` (counted, because requests run in parallel): a hard white blink (`BlinkOn`/`BlinkOff`) for at least `MinActivityBlink`, then back to ready. `SignalActivity()` is begin + end for instant commands.
+- **`OnboardRgbLed` / `LedController`**: the onboard LED is common anode (PWM inverted). It shows a `LedStatus` boot stage set with `SetStatus` (yellow booting, red initializing, blue blink waiting for WiFi, orange blink retrying, cyan starting the server, purple blink server failed, green `ReadyColor`); the two-argument `SetStatus(expected, status)` only changes it from `expected`. Apps create it first in `Initialize()` so it lights as soon as the app starts, and set `Initializing` after the diagnostics. Accepted commands call `BeginActivity()`/`EndActivity()` (counted, because requests run in parallel): a hard white blink (`BlinkOn`/`BlinkOff`) for at least `MinActivityBlink`, then back to the current status (a status set during the blink is shown after it). `SignalActivity()` is begin + end for instant commands.
 - **`RelayOutput`**: one relay on the active-low relay board, driven by an open-drain pin: on pulls the pin low (relay energized), off lets it float. The pin starts floating, so the relay is off as fast as possible at boot; open-drain is required when the F7 is powered from the relay board. `Dispose()` turns it off before releasing the pin.
 - **`WatchdogService`**: `Start()` arms it (`DefaultTimeoutSeconds` 15) and starts an independent thread that pets it every `DefaultPetIntervalSeconds` (10), so a slow request handler can't trip it.
 - **`HeartbeatService`**: logs `<time> <ip> (up d.hh:mm:ss)` every `DefaultIntervalSeconds` (30), like the Meadow.Core.Samples `Config_Files` heartbeat. `TestRestartAfterBeats` throws on purpose to test restarts; never set it on a prop.

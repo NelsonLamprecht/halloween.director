@@ -26,10 +26,16 @@ namespace Halloween.Director.Scarecrow.Meadow
 
             ApplyStartupSettings(DefaultDeviceName, "scarecrow");
 
+            // first, so the LED shows the app has started (yellow, then red; see LedStatus)
+            var ledController = Services.Create<LedController>();
+            ledController.Initialize();
+
             var diagnosticsService = Services.Create<DiagnosticsService>();
             diagnosticsService.OutputMeadowOSInfo();
             diagnosticsService.OutputDeviceInfo();
             diagnosticsService.OutputNtpInfo();
+
+            ledController.SetStatus(LedStatus.Initializing);
 
             var network = Device.NetworkAdapters.Primary<IWiFiNetworkAdapter>();
             Logger.StartupSection("WiFi", () =>
@@ -42,10 +48,6 @@ namespace Halloween.Director.Scarecrow.Meadow
                 Services.Add(network);
                 Logger.StartupDetail("Antenna set to External; waiting for the network to connect.");
             });
-
-            // red until the Maple server is up, then LedController.ReadyColor
-            var ledController = Services.Create<LedController>();
-            ledController.Initialize();
 
             Logger.StartupSection("Services", () =>
             {
@@ -87,7 +89,7 @@ namespace Halloween.Director.Scarecrow.Meadow
                 Logger.StartupDetail("Heartbeat, Network and Maple services created.");
             });
 
-            LogWifiEvents(network);
+            TrackWifiEvents(network);
             network.NetworkConnected += OnNetworkConnected;
 
             Logger.Info("=== Hardware initialized. ===");
@@ -109,6 +111,7 @@ namespace Halloween.Director.Scarecrow.Meadow
                 // network connection is handled by Meadow OS via wifi.config.yaml and
                 // AutomaticallyStartNetwork in meadow.config.yaml; see OnNetworkConnected
                 Logger.Info($"=== Running @ {BootStopwatch.Elapsed}. Waiting for WiFi connection... ===");
+                ShowWaitingForWifi();
             }
 
             catch (Exception ex)
