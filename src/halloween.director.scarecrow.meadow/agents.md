@@ -8,7 +8,7 @@ In order: `DiagnosticsService`, WiFi (external antenna, saved), `LedController`,
 
 ## The lift
 
-- **Relay wiring**: relay **closed = lift down** (the rest state: where it starts at boot, where `Down()` puts it and where the auto-lower puts it); relay **open = lift up**. `RelayController` is built on a shared `RelayOutput` with `RelayState.Open` meaning "on", so `TurnOn()` raises and `TurnOff()` lowers.
+- **Relay wiring**: relay **off = lift down** (the rest state: where it starts at boot, where `Down()` puts it and where the auto-lower puts it); relay **on = lift up**. `RelayController` is built on the shared `RelayOutput`, so `TurnOn()` raises and `TurnOff()` lowers.
 - **`LiftController`** wraps the relay with `Up()` / `Down()`. A repeated command is a no-op (returns `false`). After `Up()`, the lift lowers itself after `LiftOptions.MaxUp`: the default is the constant `LiftOptions.DefaultMaxUpSeconds` (30), overridden by `App.LiftMaxUpSeconds` in `app.config.yaml` (0 = no limit). A second `Up()` does not extend the timer; `Down()` cancels it.
 
 ## HTTP endpoints
