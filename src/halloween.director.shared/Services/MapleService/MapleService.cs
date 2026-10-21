@@ -32,6 +32,8 @@ namespace Halloween.Director.Shared.Services.MapleService
         // the address the running server is bound to, or null if it isn't running
         public IPAddress BoundAddress { get; private set; }
 
+        public bool IsRunning => BoundAddress != null;
+
         // Starts the server on the adapter's current IP. Calling it again stops the
         // existing server first, so it can be used to re-bind after the IP changes.
         public override Task Run()

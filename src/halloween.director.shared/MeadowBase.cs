@@ -78,19 +78,18 @@ namespace Halloween.Director.Shared
             Logger.StartupSection("Watchdog", () =>
             {
                 Services.Create<WatchdogService, IWatchdogService>();
-                // the green LED blinks off briefly on every pet while the board is ready
-                Services.Get<IWatchdogService>().Petted += ledController.PulseHealthy;
             });
 
             InitializeProp();
 
             Logger.StartupSection("Network services", () =>
             {
-                Services.Create<HeartbeatService>();
                 Services.Create<NetworkService>();
                 Services.Add(new MapleServiceOptions());
                 Services.Create<MapleService>();
-                Logger.StartupDetail("Heartbeat, Network and Maple services created.");
+                // after MapleService: its health check looks at the server
+                Services.Create<HeartbeatService>();
+                Logger.StartupDetail("Network, Maple and Heartbeat services created.");
             });
 
             TrackWifiEvents(wifi);
