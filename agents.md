@@ -13,18 +13,16 @@ Namespaces are `Halloween.Director.*` (project and folder names stay lowercase).
 
 ## Composition root: `MeadowApp` + `MeadowBase`
 
-`MeadowBase : App<F7FeatherV1>` (shared) gives each app `Logger`, `Services` (the `Resolver.Services` collection), `BootStopwatch` and these helpers, so apps don't repeat them:
+`MeadowBase : App<F7FeatherV1>` (shared) owns the whole boot sequence and gives each app `Logger`, `Services` (the `Resolver.Services` collection) and `BootStopwatch`. A `MeadowApp` only supplies what is specific to its prop:
 
-- `ApplyStartupSettings(defaultDeviceName)` reads `App.StartupDetails` and `App.DeviceName` from `app.config.yaml`.
-- `LogWifiConfig` / `TrackWifiEvents` log the WiFi config and the connecting/failed/disconnected/error events; `TrackWifiEvents` also moves the LED to waiting or retrying (create `LedController` first). `ShowWaitingForWifi()` is called from `Run()` to switch the LED from red to waiting.
-- `OnNetworkConnected` is the `NetworkConnected` handler (see below).
-- `OnShutdown` logs and calls `DisposeServices()`; apps override that and list what to release with `DisposeIfRegistered<T>()`.
-- `OnError` logs unhandled errors.
+- `DefaultDeviceName` (used when `app.config.yaml` has no `App.DeviceName`) and `DeviceType` (what `GET /info` reports, such as `monsterbox`).
+- `InitializeProp()`: `Services.Create<T>()` the prop's own controllers and call `Initialize(...)` on the ones that own hardware (two-phase construction is deliberate: initialization order is explicit there, not hidden in constructors).
+- `DisposeServices()`: release the prop's own controllers with `DisposeIfRegistered<T>()`, in the order they must go. The base stops the heartbeat before it and disposes the LED after it.
 
-Each `MeadowApp` runs a fixed lifecycle:
+The lifecycle, all in `MeadowBase`:
 
-1. **`Initialize()`**: apply settings, create diagnostics, set up WiFi, then `Services.Create<T>()` every controller/service and call `Initialize(...)` on the ones that own hardware (two-phase construction is deliberate: initialization order is explicit here, not hidden in constructors).
-2. **`Run()`**: start the watchdog (`IWatchdogService.Start()`) and the heartbeat, then wait for the network.
+1. **`Initialize()`**: `ApplyStartupSettings` (reads `App.StartupDetails` and `App.DeviceName`), `LedController` (yellow), diagnostics (OS, device, NTP), LED red, WiFi (external antenna, saved), `WatchdogService`, then the app's `InitializeProp()`, then `HeartbeatService`, `NetworkService` and `MapleService` (default options), then `TrackWifiEvents` (logs connecting/failed/disconnected/error and moves the LED to waiting or retrying) and the `OnNetworkConnected` subscription.
+2. **`Run()`**: start the watchdog (`IWatchdogService.Start()`) and the heartbeat, then switch the LED to waiting for WiFi. A failure here is logged and leaves the LED solid red.
 3. **`OnNetworkConnected`** (shared): anything needing an IP is deferred to here. It runs the network diagnostics, starts `MapleService` (or re-binds it if DHCP changed the IP, using `BoundAddress`), sets the LED (`StartingServer`, then `Ready` or `ServerFailed`) and logs startup complete. A reconnect with the same IP only sets the LED back to `Ready`. It is `async void` on purpose, with a try/catch that logs a failed start; `_networkServicesStarted` is only set after a successful start, so the next event retries.
 
 WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.AutomaticallyStartNetwork`/`AutomaticallyReconnect`) plus a gitignored `wifi.config.yaml` (copy `wifi.config.yaml.template`) connect it.
@@ -35,11 +33,11 @@ WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.Automatically
 - `IOnOrOffController` (`TurnOn`/`TurnOff`) is the contract for every switchable output (relays, LED). "On" means active, whatever the electrical polarity.
 - `Services.Create<T>()` builds `T` and resolves its constructor parameters from already-registered instances; `Create<TImpl, TInterface>()` registers under an interface; `Add(instance)` registers something we didn't build (the WiFi adapter, options objects); `Get<T>()` retrieves; `ContainsRegisteredType<T>()` guards shutdown paths. Resolution is purely by registered instance type, so **register a dependency before anything that needs it**.
 - **One sanctioned exception**: `ControllerRequestHandler : RequestHandlerBase` is created by Maple outside the container, so it resolves its controllers from `Resolver.Services` in its constructor. Don't "fix" that.
-- Named onboard pins (`OnboardLedRed/Green/Blue`) only exist on `F7FeatherV1`, so `OnboardRgbLed` casts internally and every method no-ops on other devices. Elsewhere prefer passing generic `IPin`s from `MeadowApp.Initialize()` (which has the typed `Device`) into `Initialize(IPin ...)`.
+- Named onboard pins (`OnboardLedRed/Green/Blue`) only exist on `F7FeatherV1`, so `OnboardRgbLed` casts internally and every method no-ops on other devices. Elsewhere prefer passing generic `IPin`s from `MeadowApp.InitializeProp()` (which has the typed `Device`) into `Initialize(IPin ...)`.
 
 ## Shared pieces
 
-- **`OnboardRgbLed` / `LedController`**: the onboard LED is common anode (PWM inverted). It shows a `LedStatus` boot stage set with `SetStatus` (yellow booting, red initializing, blue blink waiting for WiFi, orange blink retrying, cyan starting the server, purple blink server failed, green `ReadyColor`); the two-argument `SetStatus(expected, status)` only changes it from `expected`. Apps create it first in `Initialize()` so it lights as soon as the app starts, and set `Initializing` after the diagnostics. Accepted commands call `BeginActivity()`/`EndActivity()` (counted, because requests run in parallel): a hard white blink (`BlinkOn`/`BlinkOff`) for at least `MinActivityBlink`, then back to the current status (a status set during the blink is shown after it). `SignalActivity()` is begin + end for instant commands.
+- **`OnboardRgbLed` / `LedController`**: the onboard LED is common anode (PWM inverted). It shows a `LedStatus` boot stage set with `SetStatus` (yellow booting, red initializing, blue blink waiting for WiFi, orange blink retrying, cyan starting the server, purple blink server failed, green `ReadyColor`); the two-argument `SetStatus(expected, status)` only changes it from `expected`. `MeadowBase.Initialize()` creates it first so it lights as soon as the app starts, and sets `Initializing` after the diagnostics. Accepted commands call `BeginActivity()`/`EndActivity()` (counted, because requests run in parallel): a hard white blink (`BlinkOn`/`BlinkOff`) for at least `MinActivityBlink`, then back to the current status (a status set during the blink is shown after it). `SignalActivity()` is begin + end for instant commands.
 - **`RelayOutput`**: one relay on the active-low relay board, driven by an open-drain pin: on pulls the pin low (relay energized), off lets it float. The pin starts floating, so the relay is off as fast as possible at boot; open-drain is required when the F7 is powered from the relay board. `Dispose()` turns it off before releasing the pin.
 - **`WatchdogService`**: `Start()` arms it (`DefaultTimeoutSeconds` 15) and starts an independent thread that pets it every `DefaultPetIntervalSeconds` (10), so a slow request handler can't trip it.
 - **`HeartbeatService`**: logs `<time> <ip> (up d.hh:mm:ss)` every `DefaultIntervalSeconds` (30), like the Meadow.Core.Samples `Config_Files` heartbeat. `TestRestartAfterBeats` throws on purpose to test restarts; never set it on a prop.
@@ -100,7 +98,7 @@ public IActionResult Thing()                      // 1. synchronous IActionResul
 ## Adding a controller or service
 
 1. Subclass `BaseController` or `BaseService`; the constructor takes `Logger` (pass to `base(logger)`) plus whatever else it needs.
-2. If it owns hardware, give it a separate `Initialize(...)` and call it from `MeadowApp.Initialize()` after `Services.Create<T>()`. Wrap the work in `Logger.StartupSection`.
+2. If it owns hardware, give it a separate `Initialize(...)` and call it from `MeadowApp.InitializeProp()` (or `MeadowBase.Initialize()` if every prop has it) after `Services.Create<T>()`. Wrap the work in `Logger.StartupSection`.
 3. Register it in dependency order.
 4. If it owns hardware or threads, implement `IDisposable` and add `DisposeIfRegistered<T>()` to the app's `DisposeServices()` (before anything it depends on).
 5. If it can be shared by both props, put it in `halloween.director.shared`.
@@ -130,4 +128,4 @@ Two ways, both on the remote's Options tab:
 - **Broadcast scan:** each prop advertises `<DeviceName>::<ip>` by UDP to 255.255.255.255:17756 every 2 seconds (Maple's own advertisement); the remote listens for 5 seconds. It runs when the tab opens. Some tablets (a Lenovo on ZUI) drop broadcast packets.
 - **Subnet scan:** the remote tries a TCP connection to port 5417 on every address of its own /24 subnet, then asks each one that answers for `GET /info`. No broadcast involved.
 
-`GET /info` is served by every prop from the shared library (`InfoRequestHandler`; Maple picks the handler up because it scans all loaded assemblies): `{"name":"Monsterbox-v1","type":"monsterbox","version":"1.0.0 (build 261017.1742 a3f9c1)"}`. The type is the second argument of `MeadowBase.ApplyStartupSettings`; a new prop passes its own. Don't add per-app copies of this route.
+`GET /info` is served by every prop from the shared library (`InfoRequestHandler`; Maple picks the handler up because it scans all loaded assemblies): `{"name":"Monsterbox-v1","type":"monsterbox","version":"1.0.0 (build 261017.1742 a3f9c1)"}`. The type is the app's `DeviceType` override; a new prop sets its own. Don't add per-app copies of this route.
