@@ -4,7 +4,7 @@ Monorepo for the Halloween props. Open `src/halloween.director.sln`. Project-spe
 
 | Project | What it is |
 | --- | --- |
-| `halloween.director.shared` | netstandard2.1 library used by both firmware projects: `MeadowBase`, base controller/service, LED, relay, watchdog, heartbeat, diagnostics, network and Maple services, `LoggerExtensions`. |
+| `halloween.director.shared` | net10.0 library used by both firmware projects: `MeadowBase`, base controller/service, LED, relay, watchdog, heartbeat, diagnostics, network and Maple services, `LoggerExtensions`. |
 | `halloween.director.monsterbox.meadow` | Meadow F7 firmware: two relays (cylinder shake) and an MP3 player. See its `agents.md`. |
 | `halloween.director.scarecrow.meadow` | Meadow F7 firmware: one relay driving a scissor lift. See its `agents.md`. |
 | `halloween.director.remote` | .NET MAUI app that controls the props over HTTP. Its sound buttons come from the monsterbox's `GET /sounds` (`SoundCatalogClient`), with a built-in fallback list. Not a Meadow project (needs the .NET 10 SDK and MAUI workload). |
