@@ -4,8 +4,8 @@ using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-using Halloween.Director.Shared;
-using Halloween.Director.Shared.Controllers;
+using FieldKit.Meadow;
+using FieldKit.Meadow.Controllers;
 
 namespace Halloween.Director.Monsterbox.Meadow.Controllers
 {

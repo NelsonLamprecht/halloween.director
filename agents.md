@@ -2,28 +2,29 @@
 
 Monorepo for the Halloween props. Open `src/halloween.director.sln`. Project-specific details are in each project's own `agents.md`; this file covers what the Meadow firmware projects share.
 
+The app base, LED, relay, watchdog, heartbeat, diagnostics, network and Maple services come from the **FieldKit.Meadow** NuGet package ([NelsonLamprecht/fieldkit](https://github.com/NelsonLamprecht/fieldkit)); its `AGENTS.md` is the reference for those types. Change them there, release a new package version, then bump `FieldKit.Meadow` in `src/Directory.Packages.props`. Nothing Halloween-specific belongs in the package.
+
 | Project | What it is |
 | --- | --- |
-| `halloween.director.shared` | net10.0 library used by both firmware projects: `MeadowBase`, base controller/service, LED, relay, watchdog, heartbeat, diagnostics, network and Maple services, `LoggerExtensions`. |
 | `halloween.director.monsterbox.meadow` | Meadow F7 firmware: two relays (cylinder shake) and an MP3 player. See its `agents.md`. |
 | `halloween.director.scarecrow.meadow` | Meadow F7 firmware: one relay driving a scissor lift. See its `agents.md`. |
 | `halloween.director.remote` | .NET MAUI app that controls the props over HTTP. Its sound buttons come from the monsterbox's `GET /sounds` (`SoundCatalogClient`), with a built-in fallback list. Not a Meadow project (needs the .NET 10 SDK and MAUI workload). |
 
-Namespaces are `Halloween.Director.*` (project and folder names stay lowercase). Both firmware projects are `OutputType` `Library` with `AssemblyName` `App` and **no `Program.cs`**: Meadow OS finds the `App` subclass itself.
+Namespaces are `Halloween.Director.*` (project and folder names stay lowercase); the package's types are in `FieldKit.Meadow`, `FieldKit.Meadow.Controllers` and `FieldKit.Meadow.Services`. Both firmware projects are `OutputType` `Library` with `AssemblyName` `App` and **no `Program.cs`**: Meadow OS finds the `App` subclass itself.
 
 ## Composition root: `MeadowApp` + `MeadowBase`
 
-`MeadowBase : App<F7FeatherV1>` (shared) owns the whole boot sequence and gives each app `Logger`, `Services` (the `Resolver.Services` collection) and `BootStopwatch`. A `MeadowApp` only supplies what is specific to its prop:
+`MeadowBase : App<F7FeatherV1>` (FieldKit.Meadow) owns the whole boot sequence and gives each app `Logger`, `Services` (the `Resolver.Services` collection) and `BootStopwatch`. A `MeadowApp` only supplies what is specific to its prop:
 
 - `DefaultDeviceName` (used when `app.config.yaml` has no `App.DeviceName`) and `DeviceType` (what `GET /info` reports, such as `monsterbox`).
-- `InitializeProp()`: `Services.Create<T>()` the prop's own controllers and call `Initialize(...)` on the ones that own hardware (two-phase construction is deliberate: initialization order is explicit there, not hidden in constructors).
+- `InitializeDevice()`: `Services.Create<T>()` the prop's own controllers and call `Initialize(...)` on the ones that own hardware (two-phase construction is deliberate: initialization order is explicit there, not hidden in constructors).
 - `DisposeServices()`: release the prop's own controllers with `DisposeIfRegistered<T>()`, in the order they must go. The base stops the heartbeat before it and disposes the LED after it.
 
 The lifecycle, all in `MeadowBase`:
 
-1. **`Initialize()`**: `ApplyStartupSettings` (reads `App.StartupDetails` and `App.DeviceName`), `LedController` (yellow), diagnostics (OS, device, NTP), LED red, WiFi (external antenna, saved), `WatchdogService`, then the app's `InitializeProp()`, then `NetworkService`, `MapleService` (default options) and `HeartbeatService` (after Maple, which its health check reads), then `TrackWifiEvents` (logs connecting/failed/disconnected/error and moves the LED to waiting or retrying) and the `OnNetworkConnected` subscription.
+1. **`Initialize()`**: `ApplyStartupSettings` (reads `App.StartupDetails` and `App.DeviceName`), `LedController` (yellow), diagnostics (OS, device, NTP), LED red, WiFi (external antenna, saved), `WatchdogService`, then the app's `InitializeDevice()`, then `NetworkService`, `MapleService` (default options) and `HeartbeatService` (after Maple, which its health check reads), then `TrackWifiEvents` (logs connecting/failed/disconnected/error and moves the LED to waiting or retrying) and the `OnNetworkConnected` subscription.
 2. **`Run()`**: start the watchdog (`IWatchdogService.Start()`) and the heartbeat, then switch the LED to waiting for WiFi. A failure here is logged and leaves the LED solid red.
-3. **`OnNetworkConnected`** (shared): anything needing an IP is deferred to here. It runs the network diagnostics, starts `MapleService` (or re-binds it if DHCP changed the IP, using `BoundAddress`), sets the LED (`StartingServer`, then `Ready` or `ServerFailed`) and logs startup complete. A reconnect with the same IP only sets the LED back to `Ready`. It is `async void` on purpose, with a try/catch that logs a failed start; `_networkServicesStarted` is only set after a successful start, so the next event retries.
+3. **`OnNetworkConnected`** (FieldKit.Meadow): anything needing an IP is deferred to here. It runs the network diagnostics, starts `MapleService` (or re-binds it if DHCP changed the IP, using `BoundAddress`), sets the LED (`StartingServer`, then `Ready` or `ServerFailed`) and logs startup complete. A reconnect with the same IP only sets the LED back to `Ready`. It is `async void` on purpose, with a try/catch that logs a failed start; `_networkServicesStarted` is only set after a successful start, so the next event retries.
 
 WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.AutomaticallyStartNetwork`/`AutomaticallyReconnect`) plus a gitignored `wifi.config.yaml` (copy `wifi.config.yaml.template`) connect it.
 
@@ -33,9 +34,9 @@ WiFi itself is not hand-rolled: `meadow.config.yaml` (`Coprocessor.Automatically
 - `IOnOrOffController` (`TurnOn`/`TurnOff`) is the contract for every switchable output (relays, LED). "On" means active, whatever the electrical polarity.
 - `Services.Create<T>()` builds `T` and resolves its constructor parameters from already-registered instances; `Create<TImpl, TInterface>()` registers under an interface; `Add(instance)` registers something we didn't build (the WiFi adapter, options objects); `Get<T>()` retrieves; `ContainsRegisteredType<T>()` guards shutdown paths. Resolution is purely by registered instance type, so **register a dependency before anything that needs it**.
 - **One sanctioned exception**: `ControllerRequestHandler : RequestHandlerBase` is created by Maple outside the container, so it resolves its controllers from `Resolver.Services` in its constructor. Don't "fix" that.
-- Named onboard pins (`OnboardLedRed/Green/Blue`) only exist on `F7FeatherV1`, so `OnboardRgbLed` casts internally and every method no-ops on other devices. Elsewhere prefer passing generic `IPin`s from `MeadowApp.InitializeProp()` (which has the typed `Device`) into `Initialize(IPin ...)`.
+- Named onboard pins (`OnboardLedRed/Green/Blue`) only exist on `F7FeatherV1`, so `OnboardRgbLed` casts internally and every method no-ops on other devices. Elsewhere prefer passing generic `IPin`s from `MeadowApp.InitializeDevice()` (which has the typed `Device`) into `Initialize(IPin ...)`.
 
-## Shared pieces
+## FieldKit.Meadow pieces
 
 - **`OnboardRgbLed` / `LedController`**: the onboard LED is common anode (PWM inverted). It shows a `LedStatus` boot stage set with `SetStatus` (yellow booting, red initializing, blue blink waiting for WiFi, orange blink retrying, cyan starting the server, purple blink server failed, and ready: dark with a short `ReadyColor` green flash each time the heartbeat health check passes, via `PulseHealthy()`); the two-argument `SetStatus(expected, status)` only changes it from `expected`. `MeadowBase.Initialize()` creates it first so it lights as soon as the app starts, and sets `Initializing` after the diagnostics. Accepted commands call `BeginActivity()`/`EndActivity()` (counted, because requests run in parallel): a hard white blink (`BlinkOn`/`BlinkOff`) for at least `MinActivityBlink`, then back to the current status (a status set during the blink is shown after it). `SignalActivity()` is begin + end for instant commands.
 - **`RelayOutput`**: one relay on the active-low relay board, driven by an open-drain pin: on pulls the pin low (relay energized), off lets it float. The pin starts floating, so the relay is off as fast as possible at boot; open-drain is required when the F7 is powered from the relay board. `Dispose()` turns it off before releasing the pin.
@@ -92,16 +93,16 @@ public IActionResult Thing()                      // 1. synchronous IActionResul
 
 - `app.config.yaml` (per app): `Lifecycle` (`RestartOnAppFailure`, `AppFailureRestartDelaySeconds`; note Meadow 2.5 reads `RestartOnAppFailure`, not `ResetOnAppFailure`), `Logging`, and an `App:` block (`DeviceName`, `StartupDetails`, plus project-specific keys). Read with `Settings["App.Key"]`.
 - `meadow.config.yaml`: the two projects use identical files (auto start/reconnect network, NTP, DNS).
-- `app.build.yaml`: `Deploy: NoLink: [ halloween.director.shared ]`. Meadow trims dependency assemblies on deploy and would strip constructors that are only reached by reflection (`Services.Create<T>()`). **Any new assembly that holds DI-created types must be added here.**
-- Meadow package versions live in `src/Directory.Packages.props` (`MeadowVersion`). The MAUI app opts out with its own `Directory.Packages.props`.
+- `app.build.yaml`: `Deploy: NoLink: [ FieldKit.Meadow ]`. Meadow trims dependency assemblies on deploy and would strip constructors that are only reached by reflection (`Services.Create<T>()`). **Any new assembly that holds DI-created types must be added here.**
+- Package versions live in `src/Directory.Packages.props`: `MeadowVersion` for the Meadow packages and the `FieldKit.Meadow` version. Keep `MeadowVersion` the same as the Meadow version FieldKit.Meadow depends on. The MAUI app opts out with its own `Directory.Packages.props`.
 
 ## Adding a controller or service
 
 1. Subclass `BaseController` or `BaseService`; the constructor takes `Logger` (pass to `base(logger)`) plus whatever else it needs.
-2. If it owns hardware, give it a separate `Initialize(...)` and call it from `MeadowApp.InitializeProp()` (or `MeadowBase.Initialize()` if every prop has it) after `Services.Create<T>()`. Wrap the work in `Logger.StartupSection`.
+2. If it owns hardware, give it a separate `Initialize(...)` and call it from `MeadowApp.InitializeDevice()` (or `MeadowBase.Initialize()` if every prop has it) after `Services.Create<T>()`. Wrap the work in `Logger.StartupSection`.
 3. Register it in dependency order.
 4. If it owns hardware or threads, implement `IDisposable` and add `DisposeIfRegistered<T>()` to the app's `DisposeServices()` (before anything it depends on).
-5. If it can be shared by both props, put it in `halloween.director.shared`.
+5. If it is general purpose (not Halloween-specific), put it in FieldKit.Meadow instead and release a new package version.
 6. Keep chaos/testing code out of builds that control hardware.
 
 ## Building the remote in a Linux / cloud session
@@ -128,4 +129,4 @@ Two ways, both on the remote's Options tab:
 - **Broadcast scan:** each prop advertises `<DeviceName>::<ip>` by UDP to 255.255.255.255:17756 every 2 seconds (Maple's own advertisement); the remote listens for 5 seconds. It runs when the tab opens. Some tablets (a Lenovo on ZUI) drop broadcast packets.
 - **Subnet scan:** the remote tries a TCP connection to port 5417 on every address of its own /24 subnet, then asks each one that answers for `GET /info`. No broadcast involved.
 
-`GET /info` is served by every prop from the shared library (`InfoRequestHandler`; Maple picks the handler up because it scans all loaded assemblies): `{"name":"Monsterbox-v1","type":"monsterbox","version":"1.0.0 (build 261017.1742 a3f9c1)"}`. The type is the app's `DeviceType` override; a new prop sets its own. Don't add per-app copies of this route.
+`GET /info` is served by every prop from FieldKit.Meadow (`InfoRequestHandler`; Maple picks the handler up because it scans all loaded assemblies): `{"name":"Monsterbox-v1","type":"monsterbox","version":"1.0.0 (build 261017.1742 a3f9c1)"}`. The type is the app's `DeviceType` override; a new prop sets its own. Don't add per-app copies of this route.

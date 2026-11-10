@@ -4,11 +4,11 @@ Meadow F7 firmware for the scarecrow prop: one relay driving a scissor lift (pne
 
 ## What `MeadowApp` creates
 
-`MeadowBase` runs the shared boot (see the root `agents.md`); `InitializeProp()` adds `RelayController` (`Device.Pins.D05`), then `LiftController`. `DisposeServices()` releases `LiftController` (cancels a pending auto-lower), then `RelayController` (closes the valve before its pin is released).
+`MeadowBase` (FieldKit.Meadow) runs the boot (see the root `agents.md`); `InitializeDevice()` adds `RelayController` (`Device.Pins.D05`), then `LiftController`. `DisposeServices()` releases `LiftController` (cancels a pending auto-lower), then `RelayController` (closes the valve before its pin is released).
 
 ## The lift
 
-- **Relay wiring**: relay **off = lift down** (the rest state: where it starts at boot, where `Down()` puts it and where the auto-lower puts it); relay **on = lift up**. `RelayController` is built on the shared `RelayOutput`, so `TurnOn()` raises and `TurnOff()` lowers.
+- **Relay wiring**: relay **off = lift down** (the rest state: where it starts at boot, where `Down()` puts it and where the auto-lower puts it); relay **on = lift up**. `RelayController` is built on FieldKit.Meadow's `RelayOutput`, so `TurnOn()` raises and `TurnOff()` lowers.
 - **`LiftController`** wraps the relay with `Up()` / `Down()`. A repeated command is a no-op (returns `false`). After `Up()`, the lift lowers itself after `LiftOptions.MaxUp`: the default is the constant `LiftOptions.DefaultMaxUpSeconds` (30), overridden by `App.LiftMaxUpSeconds` in `app.config.yaml` (0 = no limit). A second `Up()` does not extend the timer; `Down()` cancels it.
 
 ## HTTP endpoints
