@@ -3,7 +3,7 @@
        upgrade them all. (The MAUI remote app opts out; see halloween.director.remote\Directory.Packages.props.) -->
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <MeadowVersion>2.5.0</MeadowVersion>
+    <MeadowVersion>3.0.2-beta</MeadowVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Meadow.F7" Version="$(MeadowVersion)" />
