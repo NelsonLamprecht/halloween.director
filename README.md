@@ -12,6 +12,21 @@ The firmware is built on the [FieldKit.Meadow](https://github.com/NelsonLamprech
 
 See `agents.md` for the shared architecture and patterns, and each project's `agents.md` for its specifics.
 
+## Building
+
+The firmware uses the FieldKit.Meadow package from GitHub Packages (`NuGet.Config` maps `FieldKit.*` to it; everything else comes from nuget.org). GitHub Packages needs a sign-in even to download, so on each machine, once:
+
+1. Create a classic personal access token at [github.com/settings/tokens](https://github.com/settings/tokens) with only the `read:packages` scope.
+2. Add it to your user-level NuGet config under the source name `fieldkit` (the name must match `NuGet.Config`):
+
+   ```powershell
+   dotnet nuget add source https://nuget.pkg.github.com/NelsonLamprecht/index.json --name fieldkit --username <your GitHub username> --password <token>
+   ```
+
+   On macOS and Linux, add `--store-password-in-clear-text`; Windows encrypts it.
+
+Then build as usual (Visual Studio or `dotnet build src/halloween.director.sln`).
+
 ## Installing the remote on an Android tablet
 
 The remote's Android application id is `com.nlamprecht.halloween.director.remote`; installing again updates the app in place.

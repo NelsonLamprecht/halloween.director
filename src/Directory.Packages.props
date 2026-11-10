@@ -6,7 +6,7 @@
     <MeadowVersion>3.0.2-beta</MeadowVersion>
   </PropertyGroup>
   <ItemGroup>
-    <!-- the shared Meadow app base, LED, relay, watchdog, heartbeat and Maple services (github.com/NelsonLamprecht/fieldkit) -->
+    <!-- the shared Meadow app base, LED, relay, watchdog, heartbeat and Maple services, from GitHub Packages (see NuGet.Config) -->
     <PackageVersion Include="FieldKit.Meadow" Version="0.1.0-beta" />
     <PackageVersion Include="Meadow.F7" Version="$(MeadowVersion)" />
     <PackageVersion Include="Meadow.Foundation" Version="$(MeadowVersion)" />
