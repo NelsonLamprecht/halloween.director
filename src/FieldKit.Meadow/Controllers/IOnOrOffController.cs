@@ -1,4 +1,4 @@
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
     /// Anything that is switched on and off: a relay, an LED, ... "On" means active

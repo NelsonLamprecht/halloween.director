@@ -1,7 +1,7 @@
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Services.NetworkService
+namespace FieldKit.Meadow.Services.NetworkService
 {
     public class NetworkService: BaseService
     {

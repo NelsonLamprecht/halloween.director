@@ -4,7 +4,7 @@ Props and controllers for the Halloween display. Open `src/halloween.director.sl
 
 | Project | What it is |
 | --- | --- |
-| `halloween.director.shared` | net10.0 class library: `MeadowBase`, base controller/service, watchdog, network and diagnostics services. Referenced by the Meadow firmware projects; its DLL is copied into each app's output (and it is packable as a NuGet package). |
+| `FieldKit.Meadow` | Reusable net10.0 library, packaged for NuGet: `MeadowBase` (the boot sequence), status LED, relay, watchdog, heartbeat, diagnostics, network and Maple services. Nothing Halloween-specific; see its [README](src/FieldKit.Meadow/README.md). The firmware projects reference it as a project. |
 | `halloween.director.monsterbox.meadow` | Meadow F7 firmware for the monsterbox prop. |
 | `halloween.director.scarecrow.meadow` | Meadow F7 firmware for the scarecrow prop. |
 | `halloween.director.remote` | .NET MAUI mobile remote that controls the props over HTTP (needs the .NET 10 SDK and the MAUI workload). |

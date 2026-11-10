@@ -25,7 +25,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "halloween.director.scarecro
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "halloween.director.remote", "halloween.director.remote\halloween.director.remote.csproj", "{03E23DE7-6AD0-487A-9B6D-4A79C81F4F9F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "halloween.director.shared", "halloween.director.shared\halloween.director.shared.csproj", "{3B4EB894-8693-4C71-B8C8-B5FCD2BE6E17}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FieldKit.Meadow", "FieldKit.Meadow\FieldKit.Meadow.csproj", "{3B4EB894-8693-4C71-B8C8-B5FCD2BE6E17}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -4,7 +4,7 @@ Meadow F7 firmware for the scarecrow prop: one relay driving a scissor lift (pne
 
 ## What `MeadowApp` creates
 
-`MeadowBase` runs the shared boot (see the root `agents.md`); `InitializeProp()` adds `RelayController` (`Device.Pins.D05`), then `LiftController`. `DisposeServices()` releases `LiftController` (cancels a pending auto-lower), then `RelayController` (closes the valve before its pin is released).
+`MeadowBase` runs the shared boot (see the root `agents.md`); `InitializeDevice()` adds `RelayController` (`Device.Pins.D05`), then `LiftController`. `DisposeServices()` releases `LiftController` (cancels a pending auto-lower), then `RelayController` (closes the valve before its pin is released).
 
 ## The lift
 

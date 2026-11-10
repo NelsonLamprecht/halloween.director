@@ -1,5 +1,5 @@
 using Halloween.Director.Monsterbox.Meadow.Controllers;
-using Halloween.Director.Shared;
+using FieldKit.Meadow;
 
 namespace Halloween.Director.Monsterbox.Meadow
 {
@@ -11,7 +11,7 @@ namespace Halloween.Director.Monsterbox.Meadow
 
         // MeadowBase.Initialize() runs the shared boot sequence and calls this for the
         // monsterbox's own hardware
-        protected override void InitializeProp()
+        protected override void InitializeDevice()
         {
             // each controller logs its own section from Initialize()
             var relayController = Services.Create<RelayController>();

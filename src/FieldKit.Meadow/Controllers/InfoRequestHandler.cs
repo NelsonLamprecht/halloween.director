@@ -2,10 +2,10 @@ using Meadow;
 using Meadow.Foundation.Web.Maple;
 using Meadow.Foundation.Web.Maple.Routing;
 
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
-    /// GET /info on every prop: its name, kind and version as JSON. Maple finds request handlers by
+    /// GET /info on every device: its name, kind and version as JSON. Maple finds request handlers by
     /// scanning the loaded assemblies, so this one is picked up in each app just by referencing the
     /// shared library.
     /// </summary>

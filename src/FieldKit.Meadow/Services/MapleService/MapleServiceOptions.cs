@@ -1,10 +1,10 @@
 using Meadow.Foundation.Web.Maple;
 
-namespace Halloween.Director.Shared.Services.MapleService
+namespace FieldKit.Meadow.Services.MapleService
 {
     /// <summary>
-    /// Per-app settings for <see cref="MapleService"/>. Every prop listens on Maple's
-    /// default port; props run on separate devices (separate IPs), so they don't clash.
+    /// Per-app settings for <see cref="MapleService"/>. Every device listens on Maple's
+    /// default port; devices run on separate boards (separate IPs), so they don't clash.
     /// </summary>
     public class MapleServiceOptions
     {

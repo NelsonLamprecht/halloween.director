@@ -7,18 +7,18 @@ using Meadow.Devices;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-using Halloween.Director.Shared.Controllers;
-using Halloween.Director.Shared.Services.DiagnosticsService;
-using Halloween.Director.Shared.Services.HeartbeatService;
-using Halloween.Director.Shared.Services.MapleService;
-using Halloween.Director.Shared.Services.NetworkService;
-using Halloween.Director.Shared.Services.Watchdog;
+using FieldKit.Meadow.Controllers;
+using FieldKit.Meadow.Services.DiagnosticsService;
+using FieldKit.Meadow.Services.HeartbeatService;
+using FieldKit.Meadow.Services.MapleService;
+using FieldKit.Meadow.Services.NetworkService;
+using FieldKit.Meadow.Services.Watchdog;
 
-namespace Halloween.Director.Shared
+namespace FieldKit.Meadow
 {
     /// <summary>
-    /// The boot sequence every prop shares. <see cref="Initialize"/> brings up the LED,
-    /// diagnostics, WiFi and the watchdog, calls <see cref="InitializeProp"/> for the prop's
+    /// The boot sequence every device app shares. <see cref="Initialize"/> brings up the LED,
+    /// diagnostics, WiFi and the watchdog, calls <see cref="InitializeDevice"/> for the app's
     /// own hardware, then creates the network services. <see cref="Run"/> starts the watchdog
     /// and heartbeat and waits for WiFi; <see cref="OnNetworkConnected"/> starts Maple.
     /// </summary>
@@ -36,15 +36,15 @@ namespace Halloween.Director.Shared
         /// <summary>Used if app.config.yaml is missing or doesn't have an App.DeviceName entry.</summary>
         protected abstract string DefaultDeviceName { get; }
 
-        /// <summary>What GET /info reports as the type, such as "monsterbox".</summary>
+        /// <summary>What GET /info reports as the type, such as "garage-door".</summary>
         protected abstract string DeviceType { get; }
 
         /// <summary>
-        /// Creates and initializes the prop's own controllers (relays, MP3, lift...). Runs after
+        /// Creates and initializes the app's own controllers (relays, sensors, displays...). Runs after
         /// the LED, diagnostics, WiFi adapter and watchdog exist, and before the network
         /// services, so anything a Maple handler resolves is registered by then.
         /// </summary>
-        protected abstract void InitializeProp();
+        protected abstract void InitializeDevice();
 
         public override async Task Initialize()
         {
@@ -68,7 +68,7 @@ namespace Halloween.Director.Shared
             {
                 LogWifiConfig(wifi);
 
-                // every prop runs on the external antenna; persisted so it's already in
+                // every device runs on the external antenna; persisted so it's already in
                 // effect before AutomaticallyStartNetwork connects on every boot after the first
                 wifi.SetAntenna(AntennaType.External, true);
                 Services.Add(wifi);
@@ -80,7 +80,7 @@ namespace Halloween.Director.Shared
                 Services.Create<WatchdogService, IWatchdogService>();
             });
 
-            InitializeProp();
+            InitializeDevice();
 
             Logger.StartupSection("Network services", () =>
             {
@@ -213,7 +213,7 @@ namespace Halloween.Director.Shared
             Logger.Info($"=== Startup complete @ {BootStopwatch.Elapsed}. ===");
         }
 
-        // Logs the shutdown, stops the heartbeat, then DisposeServices() for the prop's own
+        // Logs the shutdown, stops the heartbeat, then DisposeServices() for the app's own
         // controllers, and the LED last.
         public override Task OnShutdown()
         {
@@ -226,7 +226,7 @@ namespace Halloween.Director.Shared
             return base.OnShutdown();
         }
 
-        // Override to dispose the prop's own controllers, in the order they must go
+        // Override to dispose the app's own controllers, in the order they must go
         // (e.g. whatever drives a relay before the relay itself) using DisposeIfRegistered.
         protected virtual void DisposeServices()
         {
@@ -250,7 +250,7 @@ namespace Halloween.Director.Shared
         // Applies app.config.yaml's App settings: App.StartupDetails (default true) turns the
         // startup banners and detail lines on or off, and App.DeviceName names the device (the
         // name Maple advertises), falling back to defaultDeviceName if the setting is missing. deviceType (such as
-        // "monsterbox") and the version are what GET /info reports.
+        // "garage-door") and the version are what GET /info reports.
         private void ApplyStartupSettings(string defaultDeviceName, string deviceType)
         {
             var version = BuildInfo.Describe(GetType().Assembly);

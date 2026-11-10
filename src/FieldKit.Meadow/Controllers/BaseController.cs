@@ -2,11 +2,11 @@ using System.Threading.Tasks;
 
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Services
+namespace FieldKit.Meadow.Controllers
 {
-    public class BaseService: IRunableService
+    public class BaseController
     {
-        public BaseService(Logger logger)
+        public BaseController(Logger logger)
         {
             Logger = logger;
         }

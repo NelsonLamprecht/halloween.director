@@ -2,7 +2,7 @@ using Meadow;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Services.DiagnosticsService
+namespace FieldKit.Meadow.Services.DiagnosticsService
 {
     public class DiagnosticsService : BaseService
     {

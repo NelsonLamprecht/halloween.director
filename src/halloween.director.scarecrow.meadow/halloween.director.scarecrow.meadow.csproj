@@ -29,6 +29,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\halloween.director.shared\halloween.director.shared.csproj" />
+    <ProjectReference Include="..\FieldKit.Meadow\FieldKit.Meadow.csproj" />
   </ItemGroup>
 </Project>

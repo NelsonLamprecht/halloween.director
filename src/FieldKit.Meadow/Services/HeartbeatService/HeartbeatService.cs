@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-using Halloween.Director.Shared.Controllers;
+using FieldKit.Meadow.Controllers;
 
-namespace Halloween.Director.Shared.Services.HeartbeatService
+namespace FieldKit.Meadow.Services.HeartbeatService
 {
     /// <summary>
     /// Follows the Meadow.Core.Samples "Config_Files" heartbeat: a background loop that logs
@@ -37,10 +37,10 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
             this.ledController = ledController;
         }
 
-        /// <summary>How often the heartbeat is logged, for every prop. Change it here.</summary>
+        /// <summary>How often the heartbeat is logged, for every device. Change it here.</summary>
         public const int DefaultIntervalSeconds = 30;
 
-        /// <summary>How often the health check runs and the LED flashes, for every prop.</summary>
+        /// <summary>How often the health check runs and the LED flashes, for every device.</summary>
         public const int DefaultCheckIntervalSeconds = 3;
 
         public TimeSpan Interval { get; set; } = TimeSpan.FromSeconds(DefaultIntervalSeconds);
@@ -49,7 +49,7 @@ namespace Halloween.Director.Shared.Services.HeartbeatService
 
         /// <summary>
         /// For testing Lifecycle.RestartOnAppFailure only: throws from the heartbeat task after
-        /// this many beats, as the sample does ("Testing restart..."). Leave null on a prop.
+        /// this many beats, as the sample does ("Testing restart..."). Leave null on a real device.
         /// </summary>
         public int? TestRestartAfterBeats { get; set; }
 

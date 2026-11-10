@@ -7,7 +7,7 @@ using Meadow.Foundation.Web.Maple;
 using Meadow.Hardware;
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Services.MapleService
+namespace FieldKit.Meadow.Services.MapleService
 {
     /// <summary>
     /// Runs the Maple HTTP server on the network adapter's current IP and advertises it.

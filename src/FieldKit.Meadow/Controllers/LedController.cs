@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using Meadow;
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
     /// Status LED on the F7's onboard RGB LED. It shows the boot and network stage
-    /// (<see cref="LedStatus"/>, set with <see cref="SetStatus"/>), with a hard white blink
+    /// (<see cref="LedStatus"/>, set with <see cref="SetStatus(LedStatus)"/>), with a hard white blink
     /// while commands are being handled:
     ///
     ///   Booting          solid yellow (the app has just started)

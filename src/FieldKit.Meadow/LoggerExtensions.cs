@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared
+namespace FieldKit.Meadow
 {
     /// <summary>
     /// Optional startup detail: titled banners and extra lines describing what each startup

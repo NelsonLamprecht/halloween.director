@@ -1,14 +1,14 @@
 using System.Text;
 
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
-    /// What a prop says about itself on GET /info (see <see cref="InfoRequestHandler"/>). The remote asks this
-    /// to find props on the network without relying on the UDP advertisement.
+    /// What a device says about itself on GET /info (see <see cref="InfoRequestHandler"/>). The remote asks this
+    /// to find devices on the network without relying on the UDP advertisement.
     /// </summary>
     public static class DeviceInfo
     {
-        /// <summary>The kind of prop, such as "monsterbox" or "scarecrow"; set by MeadowBase at startup.</summary>
+        /// <summary>The kind of device, such as "garage-door" or "weather-station"; set by MeadowBase at startup.</summary>
         public static string Type { get; internal set; } = "unknown";
 
         /// <summary>The build's version string (see <see cref="BuildInfo"/>); set by MeadowBase at startup.</summary>

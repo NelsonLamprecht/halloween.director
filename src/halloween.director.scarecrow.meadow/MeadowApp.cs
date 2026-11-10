@@ -1,7 +1,7 @@
 using System;
 
 using Halloween.Director.Scarecrow.Meadow.Controllers;
-using Halloween.Director.Shared;
+using FieldKit.Meadow;
 
 namespace Halloween.Director.Scarecrow.Meadow
 {
@@ -13,7 +13,7 @@ namespace Halloween.Director.Scarecrow.Meadow
 
         // MeadowBase.Initialize() runs the shared boot sequence and calls this for the
         // scarecrow's own hardware
-        protected override void InitializeProp()
+        protected override void InitializeDevice()
         {
             // the controller logs its own section from Initialize()
             var relayController = Services.Create<RelayController>();

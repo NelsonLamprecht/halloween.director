@@ -8,7 +8,7 @@ using Meadow.Foundation.Leds;
 using Meadow.Logging;
 using Meadow.Peripherals.Leds;
 
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
     /// The F7 Feather's onboard RGB LED. It is a common anode LED (pin low = lit), so the PWM

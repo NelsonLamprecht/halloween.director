@@ -1,4 +1,4 @@
-namespace Halloween.Director.Shared.Services.Watchdog
+namespace FieldKit.Meadow.Services.Watchdog
 {
     public interface IWatchdogService: IRunableService
     {

@@ -4,7 +4,7 @@ using System.Threading;
 using Meadow;
 using Meadow.Logging;
 
-namespace Halloween.Director.Shared.Services.Watchdog
+namespace FieldKit.Meadow.Services.Watchdog
 {
     public class WatchdogService : BaseService, IWatchdogService
     {

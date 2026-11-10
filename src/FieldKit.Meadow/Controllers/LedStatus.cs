@@ -1,4 +1,4 @@
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
     /// Boot and network stages shown on the onboard LED. See <see cref="LedController"/>

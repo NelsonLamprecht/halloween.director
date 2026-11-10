@@ -3,7 +3,7 @@ using System;
 using Meadow;
 using Meadow.Hardware;
 
-namespace Halloween.Director.Shared.Controllers
+namespace FieldKit.Meadow.Controllers
 {
     /// <summary>
     /// One relay channel on the active-low SainSmart relay board, driven by a single open-drain output pin.
