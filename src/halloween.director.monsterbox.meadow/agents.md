@@ -4,11 +4,11 @@ Meadow F7 firmware for the monsterbox prop: two relays driving pneumatic cylinde
 
 ## What `MeadowApp` creates
 
-`MeadowBase` runs the shared boot (see the root `agents.md`); `InitializeProp()` adds, in order: `RelayController` (`Device.Pins.D05` left, `D06` right), `MP3Controller`, the `SoundCatalog`, then `CylindersController`. `DisposeServices()` releases MP3, then `CylindersController` **before** `RelayController`, so an in-flight shake is cancelled and switches the relays off before they are released.
+`MeadowBase` (FieldKit.Meadow) runs the boot (see the root `agents.md`); `InitializeDevice()` adds, in order: `RelayController` (`Device.Pins.D05` left, `D06` right), `MP3Controller`, the `SoundCatalog`, then `CylindersController`. `DisposeServices()` releases MP3, then `CylindersController` **before** `RelayController`, so an in-flight shake is cancelled and switches the relays off before they are released.
 
 ## Controllers
 
-- **`RelayController`** owns two `RelayOutput`s, exposed as `Left` and `Right` (`IOnOrOffController`). `RelayOutput` (shared) handles the active-low board: on pulls the pin low and energizes the cylinder; off lets the pin float and the relay stays de-energized. `Dispose` switches both off before releasing the pins.
+- **`RelayController`** owns two `RelayOutput`s, exposed as `Left` and `Right` (`IOnOrOffController`). `RelayOutput` (FieldKit.Meadow) handles the active-low board: on pulls the pin low and energizes the cylinder; off lets the pin float and the relay stays de-energized. `Dispose` switches both off before releasing the pins.
 - **`CylindersController`** sits above `RelayController` (constructor-injected). `TryShakeAsync` runs one shake at a time; a second call returns `false` immediately.
 - **`MP3Controller`** wraps the YX5300 on the UART. `QueueFile()` only touches lock-protected state; a single background worker is the only code that talks to the UART after `Initialize()`. Don't call `_mp3Player` from request handlers.
 

@@ -1,5 +1,5 @@
 <Project>
-  <!-- One version for every project in the solution (firmware, shared library, remote app).
+  <!-- One version for every project in the solution (firmware and remote app).
        Change VersionPrefix by hand for a release. Every build is also stamped with the time it was made, so
        you can tell which build is running:
          BuildStamp  - what is shown and logged: UTC yyMMdd.HHmm, for example 261017.1742
